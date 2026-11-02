@@ -154,7 +154,10 @@ echo ""
 
 install_system_deps() {
     if is_arch; then
-        local deps=(pyside6 mpv python-dbus cava yt-dlp)
+        local deps=(pyside6 mpv python-dbus cava)
+        if ! command -v yt-dlp &>/dev/null && [ ! -x "$BIN_DIR/yt-dlp" ]; then
+            deps+=(yt-dlp)
+        fi
         local missing=()
         for p in "${deps[@]}"; do
             pacman -Q "$p" &>/dev/null || missing+=("$p")
