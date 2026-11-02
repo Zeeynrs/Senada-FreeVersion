@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Senada
+GenericName=Music Player
+Comment=Pemutar musik Spotify gratis & tanpa iklan untuk Linux
+Exec=@BIN@
+Icon=senada
+Terminal=false
+Categories=Audio;Music;Player;AudioVideo;
+Keywords=spotify;music;musik;lagu;senada;
+StartupWMClass=senada
