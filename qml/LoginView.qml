@@ -2,11 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-// First-run login view: supports sp_dc cookie (free accounts) and Client ID (developer app).
 Item {
     id: root
-
-    property string mode: "cookie" // "cookie" | "oauth"
 
     Flickable {
         anchors.fill: parent
@@ -17,7 +14,7 @@ Item {
         Rectangle {
             id: card
             anchors.centerIn: parent
-            width: Math.min(620, parent.width - 48)
+            width: Math.min(580, parent.width - 48)
             height: col.implicitHeight + 64
             radius: 28
             color: Theme.surface
@@ -27,7 +24,7 @@ Item {
                 id: col
                 anchors.fill: parent
                 anchors.margins: 32
-                spacing: 14
+                spacing: 16
 
                 RowLayout {
                     spacing: 16
@@ -48,140 +45,49 @@ Item {
                     }
                 }
 
-                // Mode switch
-                RowLayout {
+                Label {
                     Layout.fillWidth: true
-                    Layout.topMargin: 6
-                    spacing: 8
-
-                    NButton {
-                        text: "Login via Cookie sp_dc (Gratis)"
-                        primary: root.mode === "cookie"
-                        onClicked: root.mode = "cookie"
-                    }
-                    NButton {
-                        text: "Developer Client ID"
-                        primary: root.mode === "oauth"
-                        onClicked: root.mode = "oauth"
-                    }
+                    wrapMode: Text.WordWrap
+                    color: Theme.text
+                    font.pixelSize: 14
+                    text: "Masuk dengan akun Spotify Anda. Musik diputar secara lokal melalui backend MPV tanpa iklan dan tanpa syarat Spotify Premium."
                 }
 
-                // --- COOKIE LOGIN MODE ---
-                ColumnLayout {
-                    visible: root.mode === "cookie"
+                Rectangle {
                     Layout.fillWidth: true
-                    spacing: 12
-
-                    Label {
-                        Layout.fillWidth: true
-                        wrapMode: Text.WordWrap
-                        color: Theme.text
-                        font.pixelSize: 14
-                        text: "<b>Metode Direkomendasikan:</b> Tidak memerlukan akun Spotify Premium dan tidak perlu membuat Developer App."
-                        textFormat: Text.StyledText
-                    }
-
-                    Repeater {
-                        model: [
-                            "Buka <b>open.spotify.com</b> di browser dan login dengan akun Spotify-mu.",
-                            "Tekan <b>F12</b> (Inspect Element) > pilih tab <b>Application</b> (Chrome) atau <b>Storage</b> (Firefox).",
-                            "Di menu kiri, buka <b>Cookies</b> > klik <b>https://open.spotify.com</b>.",
-                            "Cari cookie bernama <b>sp_dc</b>, salin isinya lalu tempel di bawah ini:"
-                        ]
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 12
-                            Rectangle {
-                                Layout.alignment: Qt.AlignTop
-                                implicitWidth: 24; implicitHeight: 24; radius: 12
-                                color: Theme.alpha(Theme.accent, 0.18)
-                                Label { anchors.centerIn: parent; text: index + 1; color: Theme.accent; font.weight: Font.Bold; font.pixelSize: 12 }
-                            }
-                            Label {
-                                Layout.fillWidth: true
-                                text: modelData
-                                textFormat: Text.StyledText
-                                wrapMode: Text.WordWrap
-                                font.pixelSize: 13
-                            }
-                        }
-                    }
-
+                    implicitHeight: 48
+                    radius: 14
+                    color: Theme.bg
                     RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 8
-                        NButton { text: "Buka Spotify Web"; onClicked: session.openUrl("https://open.spotify.com") }
-                        Item { Layout.fillWidth: true }
-                    }
-
-                    NTextField {
-                        id: cookieField
-                        Layout.fillWidth: true
-                        Layout.topMargin: 4
-                        placeholderText: "Tempel cookie sp_dc di sini (panjang ~150-250 karakter)..."
-                        font.family: Theme.mono
-                        onAccepted: session.loginWithCookie(text)
-                    }
-
-                    NButton {
-                        Layout.fillWidth: true
-                        primary: true
-                        enabled: !session.busy && cookieField.text.trim().length > 10
-                        text: session.busy ? "Memverifikasi akun Spotify…" : "Masuk dengan Cookie"
-                        onClicked: session.loginWithCookie(cookieField.text)
+                        anchors.fill: parent
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 6
+                        Label {
+                            Layout.fillWidth: true
+                            text: "Redirect URI: " + session.redirectUri
+                            font.family: Theme.mono
+                            font.pixelSize: 12
+                            color: Theme.accent
+                        }
+                        NButton { text: "Salin"; onClicked: session.copy(session.redirectUri) }
                     }
                 }
 
-                // --- DEVELOPER OAUTH MODE ---
-                ColumnLayout {
-                    visible: root.mode === "oauth"
+                NTextField {
+                    id: clientField
                     Layout.fillWidth: true
-                    spacing: 12
+                    placeholderText: "Client ID Spotify"
+                    text: session.clientId || "e37ebd248fee46b8b99f79be6cec7ee6"
+                    font.family: Theme.mono
+                    onAccepted: session.login(text.trim())
+                }
 
-                    Label {
-                        Layout.fillWidth: true
-                        wrapMode: Text.WordWrap
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        text: "Gunakan metode ini jika Anda memiliki Spotify Developer App yang terdaftar."
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 48
-                        radius: 14
-                        color: Theme.bg
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 16
-                            anchors.rightMargin: 6
-                            Label {
-                                Layout.fillWidth: true
-                                text: session.redirectUri
-                                font.family: Theme.mono
-                                font.pixelSize: 13
-                                color: Theme.accent
-                            }
-                            NButton { text: "Salin"; onClicked: session.copy(session.redirectUri) }
-                        }
-                    }
-
-                    NTextField {
-                        id: clientField
-                        Layout.fillWidth: true
-                        placeholderText: "Client ID (32 karakter)"
-                        text: session.clientId
-                        font.family: Theme.mono
-                        onAccepted: session.login(text)
-                    }
-
-                    NButton {
-                        Layout.fillWidth: true
-                        primary: true
-                        enabled: !session.busy
-                        text: session.busy ? "Menunggu browser…" : "Masuk dengan Client ID"
-                        onClicked: session.login(clientField.text)
-                    }
+                NButton {
+                    Layout.fillWidth: true
+                    primary: true
+                    enabled: !session.busy && clientField.text.trim().length > 0
+                    text: session.busy ? "Menunggu otorisasi di browser…" : "Masuk dengan Spotify"
+                    onClicked: session.login(clientField.text.trim())
                 }
 
                 Label {

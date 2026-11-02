@@ -8,7 +8,7 @@ ApplicationWindow {
     minimumWidth: 900
     minimumHeight: 600
     visible: true
-    title: player.state.hasTrack ? player.state.name + " • " + player.state.artists : "Nada"
+    title: player.state.hasTrack ? player.state.name + " • " + player.state.artists : "Senada"
     color: Theme.bg
 
     palette {

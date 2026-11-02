@@ -15,7 +15,7 @@ REDIRECT_PORT = 8898
 REDIRECT_URI = f"http://127.0.0.1:{REDIRECT_PORT}/login"
 
 DEFAULTS = {
-    "client_id": "",
+    "client_id": "e37ebd248fee46b8b99f79be6cec7ee6",
     "device_name": "Senada",
     "visualizer": True,
     "visualizer_style": "bars",
