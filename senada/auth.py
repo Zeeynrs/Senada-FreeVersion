@@ -127,6 +127,39 @@ def begin_login(client_id: str):
     return url, wait
 
 
+def get_token_from_sp_dc(sp_dc: str) -> dict:
+    """Retrieve a Spotify Web Player access token using the sp_dc session cookie.
+    Does NOT require a Spotify Developer Application or Spotify Premium subscription.
+    """
+    sp_dc = sp_dc.strip()
+    if not sp_dc:
+        raise AuthError("Cookie sp_dc tidak boleh kosong.")
+
+    url = "https://open.spotify.com/get_access_token?reason=transport&productType=web_player"
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Cookie": f"sp_dc={sp_dc}",
+        "App-Platform": "WebPlayer",
+        "Referer": "https://open.spotify.com/",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if not data.get("accessToken") or data.get("isAnonymous"):
+                raise AuthError("Cookie sp_dc tidak valid atau sesi login di browser sudah berakhir.")
+            exp_ms = data.get("accessTokenExpirationTimestampMs") or ((time.time() + 3600) * 1000)
+            return {
+                "access_token": data["accessToken"],
+                "expires_at": (exp_ms / 1000.0) - 60,
+                "sp_dc": sp_dc,
+                "client_id": data.get("clientId", "sp_dc_client"),
+            }
+    except urllib.error.HTTPError as e:
+        raise AuthError(f"Gagal memverifikasi cookie sp_dc ({e.code}). Pastikan nilainya benar.") from e
+    except Exception as e:
+        raise AuthError(f"Tidak dapat menghubungi Spotify: {e}") from e
+
+
 class TokenStore:
     """Holds the access token and refreshes it when it expires. Thread-safe."""
 
@@ -147,7 +180,7 @@ class TokenStore:
 
     @property
     def has_tokens(self) -> bool:
-        return bool(self._data.get("refresh_token") and self._data.get("client_id"))
+        return bool(self._data.get("access_token") and (self._data.get("refresh_token") or self._data.get("sp_dc")))
 
     def save(self, client_id: str, token: dict) -> None:
         with self._lock:
@@ -159,6 +192,16 @@ class TokenStore:
             }
             write_private(TOKENS_FILE, self._data)
 
+    def save_cookie(self, token_info: dict) -> None:
+        with self._lock:
+            self._data = {
+                "client_id": token_info.get("client_id", "sp_dc_client"),
+                "access_token": token_info["access_token"],
+                "sp_dc": token_info["sp_dc"],
+                "expires_at": token_info.get("expires_at", time.time() + 3500),
+            }
+            write_private(TOKENS_FILE, self._data)
+
     def clear(self) -> None:
         with self._lock:
             self._data = {}
@@ -166,19 +209,24 @@ class TokenStore:
 
     def access_token(self, force_refresh: bool = False) -> str:
         with self._lock:
-            if not self._data.get("refresh_token"):
+            if not self.has_tokens:
                 raise AuthError("Belum login")
             if force_refresh or time.time() >= self._data.get("expires_at", 0):
-                client_id = self._data["client_id"]
-                token = _post_token({
-                    "grant_type": "refresh_token",
-                    "refresh_token": self._data["refresh_token"],
-                    "client_id": client_id,
-                })
-                self._data.update({
-                    "access_token": token["access_token"],
-                    "refresh_token": token.get("refresh_token") or self._data["refresh_token"],
-                    "expires_at": time.time() + token.get("expires_in", 3600) - 60,
-                })
-                write_private(TOKENS_FILE, self._data)
+                if self._data.get("sp_dc"):
+                    info = get_token_from_sp_dc(self._data["sp_dc"])
+                    self._data.update(info)
+                    write_private(TOKENS_FILE, self._data)
+                elif self._data.get("refresh_token"):
+                    client_id = self._data["client_id"]
+                    token = _post_token({
+                        "grant_type": "refresh_token",
+                        "refresh_token": self._data["refresh_token"],
+                        "client_id": client_id,
+                    })
+                    self._data.update({
+                        "access_token": token["access_token"],
+                        "refresh_token": token.get("refresh_token") or self._data["refresh_token"],
+                        "expires_at": time.time() + token.get("expires_in", 3600) - 60,
+                    })
+                    write_private(TOKENS_FILE, self._data)
             return self._data["access_token"]

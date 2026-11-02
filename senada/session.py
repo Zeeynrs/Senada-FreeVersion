@@ -64,6 +64,24 @@ class Session(QObject):
 
         self.worker.run(wait, ok, lambda e: self._set(False, f"Gagal masuk: {e}"))
 
+    @Slot(str)
+    def loginWithCookie(self, sp_dc):
+        sp_dc = sp_dc.strip()
+        if not sp_dc:
+            self._set(False, "Cookie sp_dc tidak boleh kosong.")
+            return
+        self._set(True, "Memverifikasi akun Spotify…")
+
+        def call():
+            return auth.get_token_from_sp_dc(sp_dc)
+
+        def ok(token_info):
+            self.tokens.save_cookie(token_info)
+            self._set(False, "")
+            self.loggedIn.emit()
+
+        self.worker.run(call, ok, lambda e: self._set(False, f"{e}"))
+
     @Slot()
     def logout(self):
         self.tokens.clear()

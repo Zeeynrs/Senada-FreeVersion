@@ -26,19 +26,22 @@ Pemutar musik Spotify gratis & tanpa iklan untuk desktop Linux (Wayland/Hyprland
 
 ---
 
-## Kebutuhan & Persiapan
+## Kebutuhan & Cara Login
 
-1. **Akun Spotify Biasa / Free** (tidak perlu Premium).
-2. **Spotify Developer Client ID** (gratis, sekali buat):
-   - Masuk ke [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) dengan akun Spotify-mu.
-   - Klik **Create app**.
-   - Isi **App name** dan **Description** bebas (contoh: `Senada Player`).
-   - Pada kolom **Redirect URIs**, masukkan:  
-     `http://127.0.0.1:8898/login`
-   - Pada pilihan **Which API/SDKs are you planning to use?**, centang **Web API**.
-   - Centang persetujuan Terms of Service, lalu klik **Save**.
-   - Masuk ke menu **User Management**, tambahkan alamat email akun Spotify-mu.
-   - Masuk ke menu **Settings** (tab Basic Information), salin **Client ID** (Client Secret **tidak** diperlukan).
+Senada mendukung **login via Cookie `sp_dc`** sehingga Anda **TIDAK PERLU** membuat Developer App di Spotify Developer Dashboard dan **TIDAK MEMERLUKAN** Spotify Premium.
+
+### Metode 1: Login dengan Cookie `sp_dc` (Paling Mudah & 100% Bebas Blokir)
+1. Buka [open.spotify.com](https://open.spotify.com) di browser dan login dengan akun Spotify gratis Anda.
+2. Buka Developer Tools browser (tekan **F12** atau klik kanan > **Inspect**).
+3. Masuk ke tab **Application** (Chrome/Brave/Edge) atau **Storage** (Firefox).
+4. Di bilah samping, buka **Cookies** > klik `https://open.spotify.com`.
+5. Salin isi cookie bernama **`sp_dc`**.
+6. Buka Senada, pilih **Login via Cookie sp_dc**, lalu tempel dan klik **Masuk**.
+
+*(Sesi cookie ini berlaku hingga 1 tahun dan otomatis diperbarui oleh Senada).*
+
+### Metode 2: Spotify Developer Client ID (Opsional)
+Jika Anda memiliki akun Spotify Premium atau aplikasi developer yang sudah disetujui, Anda tetap bisa memilih tab **Developer Client ID** pada layar masuk Senada.
 
 ---
 
