@@ -43,7 +43,15 @@ def read_json(path: Path) -> dict:
 
 class Settings:
     def __init__(self):
-        self._data = {**DEFAULTS, **read_json(SETTINGS_FILE)}
+        saved = read_json(SETTINGS_FILE)
+        # Jika client_id masih kosong di Senada, coba ambil dari konfigurasi Nada
+        if not saved.get("client_id"):
+            nada_settings = SETTINGS_FILE.parent.parent / "nada" / "settings.json"
+            if nada_settings.exists():
+                nada_cfg = read_json(nada_settings)
+                if nada_cfg.get("client_id"):
+                    saved["client_id"] = nada_cfg["client_id"]
+        self._data = {**DEFAULTS, **saved}
 
     def __getitem__(self, key):
         return self._data.get(key, DEFAULTS.get(key))

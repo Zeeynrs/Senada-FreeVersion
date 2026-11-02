@@ -133,6 +133,17 @@ class TokenStore:
     def __init__(self):
         self._lock = threading.Lock()
         self._data = read_json(TOKENS_FILE)
+        # Migrasi otomatis dari Nada jika Senada belum memiliki token aktif
+        if not self.has_tokens:
+            nada_tokens = TOKENS_FILE.parent.parent / "nada" / "tokens.json"
+            if nada_tokens.exists():
+                try:
+                    imported = read_json(nada_tokens)
+                    if imported.get("refresh_token") and imported.get("client_id"):
+                        self._data = imported
+                        write_private(TOKENS_FILE, self._data)
+                except Exception:
+                    pass
 
     @property
     def has_tokens(self) -> bool:
