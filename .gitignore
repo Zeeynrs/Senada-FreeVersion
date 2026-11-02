@@ -5,3 +5,7 @@ __pycache__/
 .cache/
 *.sock
 *.tmp
+src/
+pkg/
+*.pkg.tar*
+Senada-FreeVersion/
