@@ -89,15 +89,21 @@ class SpotifyApi:
 
 
 def _error_message(status: int, raw: bytes) -> str:
+    msg = ""
     try:
-        err = json.loads(raw).get("error", {})
+        data = json.loads(raw)
+        err = data.get("error", {})
         msg = err.get("message") if isinstance(err, dict) else str(err)
     except (ValueError, AttributeError):
-        msg = ""
+        msg = raw.decode("utf-8", errors="ignore").strip()
+
+    if "user may not be registered" in msg.lower():
+        return "Email akun Spotify Anda belum ditambahkan di menu 'User Management' pada Spotify Developer Dashboard."
+
     known = {
-        403: "Spotify menolak permintaan ini (perlu Premium, atau dibatasi API)",
-        404: "Tidak ada perangkat aktif / item tidak ditemukan",
-        502: "Perangkat tidak merespons. Coba lagi, atau pilih perangkat lain di menu Perangkat.",
+        403: "Spotify menolak permintaan ini (HTTP 403: cek User Management di Developer Dashboard)",
+        404: "Item tidak ditemukan (HTTP 404)",
+        502: "Perangkat tidak merespons. Coba lagi sebentar lagi.",
         503: "Spotify sedang sibuk, coba lagi sebentar lagi.",
     }
     if status in (502, 503):

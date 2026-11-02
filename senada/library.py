@@ -13,10 +13,11 @@ class Library(QObject):
     loaded = Signal(str, "QVariantMap")  # page key, data
     searchFinished = Signal(str, "QVariantMap")  # query, results
 
-    def __init__(self, api: sp.SpotifyApi, worker, parent=None):
+    def __init__(self, api: sp.SpotifyApi, worker, player=None, parent=None):
         super().__init__(parent)
         self.api = api
         self.worker = worker
+        self.player = player
         self._me = {}
         self._playlists = []
         self._home = {}
@@ -79,6 +80,8 @@ class Library(QObject):
 
     def _set_home(self, home):
         self._home = home
+        if self.player:
+            self.player.cache_tracks(home.get("topTracks", []))
         self.homeChanged.emit()
 
     # ---- pages ------------------------------------------------------------
@@ -91,9 +94,17 @@ class Library(QObject):
             "album": self._fetch_album,
             "artist": self._fetch_artist,
             "liked": lambda _: self._fetch_liked(),
-        }[kind]
+        }.get(kind)
+        if not fetch:
+            return
+
+        def on_done(data):
+            if self.player and isinstance(data, dict):
+                self.player.cache_tracks(data.get("tracks", []))
+            self.loaded.emit(key, data)
+
         self.worker.run(lambda: fetch(item_id),
-                        lambda data: self.loaded.emit(key, data),
+                        on_done,
                         lambda e: self.loaded.emit(key, {"error": str(e)}))
 
     def _fetch_playlist(self, pid):
@@ -165,5 +176,10 @@ class Library(QObject):
                 "playlists": [sp.playlist(p) for p in pick("playlists")],
             }
 
-        self.worker.run(fetch, lambda r: self.searchFinished.emit(query, r),
+        def on_done(r):
+            if self.player and isinstance(r, dict):
+                self.player.cache_tracks(r.get("tracks", []))
+            self.searchFinished.emit(query, r)
+
+        self.worker.run(fetch, on_done,
                         lambda e: self.searchFinished.emit(query, {"error": str(e)}))

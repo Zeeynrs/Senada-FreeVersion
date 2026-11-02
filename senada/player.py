@@ -334,6 +334,11 @@ class Player(QObject):
             self._accent = color
             self.accentChanged.emit()
 
+    def cache_tracks(self, tracks: list):
+        for t in tracks or []:
+            if isinstance(t, dict) and t.get("uri"):
+                self._track_cache[t["uri"]] = t
+
     @Slot("QVariantList", int)
     def playUris(self, uris, index=0):
         uris = [u for u in uris if u]
@@ -341,27 +346,33 @@ class Player(QObject):
             return
 
         def fetch_tracks():
-            # If tracks are already cached
-            missing_ids = []
             result_tracks = []
+            target_uri = uris[index] if 0 <= index < len(uris) else uris[0]
+
+            # Ensure target track is resolved first
+            if target_uri not in self._track_cache:
+                tid = target_uri.split(":")[-1]
+                res = self.api.get(f"/tracks/{tid}")
+                t = sp.track(res)
+                if t:
+                    self._track_cache[t["uri"]] = t
+
+            # Resolve remaining tracks individually if needed
             for u in uris:
                 if u in self._track_cache:
                     result_tracks.append(self._track_cache[u])
                 else:
                     tid = u.split(":")[-1]
-                    missing_ids.append(tid)
-
-            if missing_ids:
-                # Fetch in chunks of 50
-                for i in range(0, len(missing_ids), 50):
-                    chunk = missing_ids[i:i + 50]
-                    res = self.api.get("/tracks", ids=",".join(chunk))
-                    for item in (res or {}).get("tracks") or []:
-                        t = sp.track(item)
+                    try:
+                        res = self.api.get(f"/tracks/{tid}")
+                        t = sp.track(res)
                         if t:
                             self._track_cache[t["uri"]] = t
+                            result_tracks.append(t)
+                    except Exception:
+                        pass
 
-            return [self._track_cache.get(u) for u in uris if self._track_cache.get(u)]
+            return result_tracks
 
         def on_done(tracks):
             if not tracks:
@@ -381,15 +392,22 @@ class Player(QObject):
             kind, item_id = parts[1], parts[2]
             tracks = []
             if kind == "playlist":
-                items = self.api.paged(f"/playlists/{item_id}/tracks", max_items=500, limit=50)
-                tracks = [t for t in (sp.wrapped_track(x) for x in items) if t]
+                items = self.api.paged(f"/playlists/{item_id}/items", limit=50, additional_types="track")
+                tracks = [t for t in map(sp.wrapped_track, items) if t]
             elif kind == "album":
                 alb = self.api.get(f"/albums/{item_id}") or {}
-                items = self.api.paged(f"/albums/{item_id}/tracks", max_items=200, limit=50)
+                items = list((alb.get("tracks") or {}).get("items") or [])
+                nxt = (alb.get("tracks") or {}).get("next")
+                while nxt:
+                    page = self.api.get(nxt) or {}
+                    items.extend(page.get("items") or [])
+                    nxt = page.get("next")
                 tracks = [t for t in (sp.track(x, album=alb) for x in items) if t]
             elif kind == "artist":
-                res = self.api.get(f"/artists/{item_id}/top-tracks") or {}
-                tracks = [t for t in (sp.track(x) for x in res.get("tracks", [])) if t]
+                a = sp.artist(self.api.get(f"/artists/{item_id}") or {})
+                if a.get("name"):
+                    res = self.api.get("/search", q=f'artist:"{a["name"]}"', type="track", limit=10) or {}
+                    tracks = [t for t in map(sp.track, (res.get("tracks") or {}).get("items") or []) if t]
             for t in tracks:
                 self._track_cache[t["uri"]] = t
             return tracks
@@ -421,15 +439,22 @@ class Player(QObject):
             kind, item_id = parts[1], parts[2]
             tracks = []
             if kind == "playlist":
-                items = self.api.paged(f"/playlists/{item_id}/tracks", max_items=500, limit=50)
-                tracks = [t for t in (sp.wrapped_track(x) for x in items) if t]
+                items = self.api.paged(f"/playlists/{item_id}/items", limit=50, additional_types="track")
+                tracks = [t for t in map(sp.wrapped_track, items) if t]
             elif kind == "album":
                 alb = self.api.get(f"/albums/{item_id}") or {}
-                items = self.api.paged(f"/albums/{item_id}/tracks", max_items=200, limit=50)
+                items = list((alb.get("tracks") or {}).get("items") or [])
+                nxt = (alb.get("tracks") or {}).get("next")
+                while nxt:
+                    page = self.api.get(nxt) or {}
+                    items.extend(page.get("items") or [])
+                    nxt = page.get("next")
                 tracks = [t for t in (sp.track(x, album=alb) for x in items) if t]
             elif kind == "artist":
-                res = self.api.get(f"/artists/{item_id}/top-tracks") or {}
-                tracks = [t for t in (sp.track(x) for x in res.get("tracks", [])) if t]
+                a = sp.artist(self.api.get(f"/artists/{item_id}") or {})
+                if a.get("name"):
+                    res = self.api.get("/search", q=f'artist:"{a["name"]}"', type="track", limit=10) or {}
+                    tracks = [t for t in map(sp.track, (res.get("tracks") or {}).get("items") or []) if t]
             for t in tracks:
                 self._track_cache[t["uri"]] = t
             random.shuffle(tracks)
