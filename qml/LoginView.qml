@@ -2,11 +2,11 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-// First-run login view: supports sp_dc cookie (free accounts) and Client ID (developer app).
+// First-run login view: supports Guest Mode (no login), Developer Client ID, and sp_dc cookie.
 Item {
     id: root
 
-    property string mode: "cookie" // "cookie" | "oauth"
+    property string mode: "guest" // "guest" | "oauth" | "cookie"
 
     Flickable {
         anchors.fill: parent
@@ -17,7 +17,7 @@ Item {
         Rectangle {
             id: card
             anchors.centerIn: parent
-            width: Math.min(620, parent.width - 48)
+            width: Math.min(640, parent.width - 48)
             height: col.implicitHeight + 64
             radius: 28
             color: Theme.surface
@@ -41,7 +41,7 @@ Item {
                         spacing: 2
                         Label { text: "Selamat datang di Senada"; font.pixelSize: 26; font.weight: Font.Black }
                         Label {
-                            text: "Pemutar Spotify gratis & bebas iklan untuk Linux desktop"
+                            text: "Pemutar musik bebas iklan & tanpa syarat Spotify Premium"
                             color: Theme.dim
                             font.pixelSize: 13
                         }
@@ -55,20 +55,70 @@ Item {
                     spacing: 8
 
                     NButton {
-                        text: "Login via Cookie sp_dc (Gratis)"
-                        primary: root.mode === "cookie"
-                        onClicked: root.mode = "cookie"
+                        text: "✨ Mode Tamu (Tanpa Login)"
+                        primary: root.mode === "guest"
+                        onClicked: root.mode = "guest"
                     }
                     NButton {
                         text: "Developer Client ID"
                         primary: root.mode === "oauth"
                         onClicked: root.mode = "oauth"
                     }
+                    NButton {
+                        text: "Cookie sp_dc"
+                        primary: root.mode === "cookie"
+                        onClicked: root.mode = "cookie"
+                    }
                 }
 
-                // --- COOKIE LOGIN MODE ---
+                // --- GUEST MODE (NO LOGIN REQUIRED) ---
                 ColumnLayout {
-                    visible: root.mode === "cookie"
+                    visible: root.mode === "guest"
+                    Layout.fillWidth: true
+                    spacing: 12
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: guestInfoCol.implicitHeight + 24
+                        radius: 16
+                        color: Theme.alpha(Theme.accent, 0.08)
+                        border.color: Theme.alpha(Theme.accent, 0.22)
+                        border.width: 1
+
+                        ColumnLayout {
+                            id: guestInfoCol
+                            anchors.fill: parent
+                            anchors.margins: 16
+                            spacing: 8
+
+                            Label {
+                                text: "Masuk Langsung Tanpa Akun & Tanpa Ribet"
+                                font.pixelSize: 15
+                                font.weight: Font.Bold
+                                color: Theme.accent
+                            }
+                            Label {
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
+                                text: "• Bebas dari syarat Spotify Premium & tidak perlu membuat Developer App.\n• Langsung cari & putar jutaan lagu via pencarian YouTube Music / MPV.\n• Bisa memutar tautan lagu & playlist publik Spotify.\n• (Opsional: Anda bisa menghubungkan akun Spotify kapan saja nanti di menu Pengaturan)."
+                                font.pixelSize: 13
+                                color: Theme.text
+                            }
+                        }
+                    }
+
+                    NButton {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 4
+                        primary: true
+                        text: "Mulai Mendengarkan Sekarang (Mode Tamu)"
+                        onClicked: session.enterGuestMode()
+                    }
+                }
+
+                // --- DEVELOPER OAUTH MODE ---
+                ColumnLayout {
+                    visible: root.mode === "oauth"
                     Layout.fillWidth: true
                     spacing: 12
 
@@ -77,16 +127,16 @@ Item {
                         wrapMode: Text.WordWrap
                         color: Theme.text
                         font.pixelSize: 14
-                        text: "<b>Metode Bebas Premium:</b> Tidak memerlukan Spotify Premium dan tidak perlu membuat Developer App."
+                        text: "<b>Metode Resmi & Permanen:</b> Hubungkan akun Spotify Anda agar lagu yang disukai (*Liked Songs*) & playlist pribadi tersinkronisasi."
                         textFormat: Text.StyledText
                     }
 
                     Repeater {
                         model: [
-                            "Buka <b>open.spotify.com</b> di browser dan login dengan akun Spotify biasa (gratis).",
-                            "Tekan <b>F12</b> (Inspect Element) > pilih tab <b>Application</b> (Chrome/Edge/Brave) atau <b>Storage</b> (Firefox).",
-                            "Di menu kiri, buka <b>Cookies</b> > klik <b>https://open.spotify.com</b>.",
-                            "Cari cookie bernama <b>sp_dc</b>, salin isinya lalu tempel di bawah ini:"
+                            "Buka <b>developer.spotify.com/dashboard</b> lalu klik <b>Create app</b>.",
+                            "Isi <b>Redirect URI</b> dengan alamat di bawah ini, centang <b>Web API</b>, lalu simpan.",
+                            "⚠️ <b>PENTING (Khusus Akun Free):</b> Buka menu <b>User Management</b> di dashboard app Anda, masukkan <b>alamat email akun Spotify Anda</b> agar tidak ditolak Spotify.",
+                            "Salin <b>Client ID</b> (32 karakter) lalu tempel di kolom bawah:"
                         ]
                         RowLayout {
                             Layout.fillWidth: true
@@ -107,48 +157,9 @@ Item {
                         }
                     }
 
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 8
-                        NButton { text: "Buka Spotify Web"; onClicked: session.openUrl("https://open.spotify.com") }
-                        Item { Layout.fillWidth: true }
-                    }
-
-                    NTextField {
-                        id: cookieField
-                        Layout.fillWidth: true
-                        Layout.topMargin: 4
-                        placeholderText: "Tempel nilai cookie sp_dc di sini (panjang ~150-250 karakter)..."
-                        font.family: Theme.mono
-                        onAccepted: session.loginWithCookie(text)
-                    }
-
-                    NButton {
-                        Layout.fillWidth: true
-                        primary: true
-                        enabled: !session.busy && cookieField.text.trim().length > 10
-                        text: session.busy ? "Memverifikasi akun Spotify…" : "Masuk dengan Cookie"
-                        onClicked: session.loginWithCookie(cookieField.text)
-                    }
-                }
-
-                // --- DEVELOPER OAUTH MODE ---
-                ColumnLayout {
-                    visible: root.mode === "oauth"
-                    Layout.fillWidth: true
-                    spacing: 12
-
-                    Label {
-                        Layout.fillWidth: true
-                        wrapMode: Text.WordWrap
-                        color: Theme.dim
-                        font.pixelSize: 13
-                        text: "Gunakan metode ini jika Anda memiliki Spotify Developer App atau akun Spotify terdaftar di Dashboard."
-                    }
-
                     Rectangle {
                         Layout.fillWidth: true
-                        implicitHeight: 48
+                        implicitHeight: 46
                         radius: 14
                         color: Theme.bg
                         RowLayout {
@@ -181,6 +192,72 @@ Item {
                         enabled: !session.busy && clientField.text.trim().length > 0
                         text: session.busy ? "Menunggu otorisasi di browser…" : "Masuk dengan Client ID"
                         onClicked: session.login(clientField.text.trim())
+                    }
+                }
+
+                // --- COOKIE LOGIN MODE ---
+                ColumnLayout {
+                    visible: root.mode === "cookie"
+                    Layout.fillWidth: true
+                    spacing: 12
+
+                    Label {
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                        color: Theme.text
+                        font.pixelSize: 14
+                        text: "<b>Metode Cookie Sesi:</b> Menggunakan cookie login dari web player Spotify."
+                        textFormat: Text.StyledText
+                    }
+
+                    Repeater {
+                        model: [
+                            "Buka <b>open.spotify.com</b> di browser dan login dengan akun Spotify Anda.",
+                            "Tekan <b>F12</b> (Inspect Element) > buka tab <b>Application</b> (Chrome) atau <b>Storage</b> (Firefox).",
+                            "Di menu kiri, buka <b>Cookies</b> > klik <b>https://open.spotify.com</b>.",
+                            "Cari cookie bernama <b>sp_dc</b>, salin nilainya lalu tempel di bawah:"
+                        ]
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 12
+                            Rectangle {
+                                Layout.alignment: Qt.AlignTop
+                                implicitWidth: 24; implicitHeight: 24; radius: 12
+                                color: Theme.alpha(Theme.accent, 0.18)
+                                Label { anchors.centerIn: parent; text: index + 1; color: Theme.accent; font.weight: Font.Bold; font.pixelSize: 12 }
+                            }
+                            Label {
+                                Layout.fillWidth: true
+                                text: modelData
+                                textFormat: Text.StyledText
+                                wrapMode: Text.WordWrap
+                                font.pixelSize: 13
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+                        NButton { text: "Buka Spotify Web"; onClicked: session.openUrl("https://open.spotify.com") }
+                        Item { Layout.fillWidth: true }
+                    }
+
+                    NTextField {
+                        id: cookieField
+                        Layout.fillWidth: true
+                        Layout.topMargin: 4
+                        placeholderText: "Tempel nilai cookie sp_dc di sini..."
+                        font.family: Theme.mono
+                        onAccepted: session.loginWithCookie(text)
+                    }
+
+                    NButton {
+                        Layout.fillWidth: true
+                        primary: true
+                        enabled: !session.busy && cookieField.text.trim().length > 10
+                        text: session.busy ? "Memverifikasi akun Spotify…" : "Masuk dengan Cookie"
+                        onClicked: session.loginWithCookie(cookieField.text)
                     }
                 }
 

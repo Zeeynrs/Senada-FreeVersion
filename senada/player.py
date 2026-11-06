@@ -310,12 +310,13 @@ class Player(QObject):
         if not uri:
             return
 
-        # Check library contains
-        self.worker.run(
-            lambda: self.api.get("/me/library/contains", uris=uri),
-            lambda res: self._patch_liked(bool(res and res[0])) if self._state.get("uri") == uri else None,
-            lambda e: None
-        )
+        # Check library contains if logged in
+        if self.api.tokens.has_tokens:
+            self.worker.run(
+                lambda: self.api.get("/me/library/contains", uris=uri),
+                lambda res: self._patch_liked(bool(res and res[0])) if self._state.get("uri") == uri else None,
+                lambda e: None
+            )
 
         art = track.get("imageSmall")
         if art:
@@ -350,18 +351,21 @@ class Player(QObject):
             target_uri = uris[index] if 0 <= index < len(uris) else uris[0]
 
             # Ensure target track is resolved first
-            if target_uri not in self._track_cache:
+            if target_uri not in self._track_cache and self.api.tokens.has_tokens:
                 tid = target_uri.split(":")[-1]
-                res = self.api.get(f"/tracks/{tid}")
-                t = sp.track(res)
-                if t:
-                    self._track_cache[t["uri"]] = t
+                try:
+                    res = self.api.get(f"/tracks/{tid}")
+                    t = sp.track(res)
+                    if t:
+                        self._track_cache[t["uri"]] = t
+                except Exception:
+                    pass
 
             # Resolve remaining tracks individually if needed
             for u in uris:
                 if u in self._track_cache:
                     result_tracks.append(self._track_cache[u])
-                else:
+                elif self.api.tokens.has_tokens:
                     tid = u.split(":")[-1]
                     try:
                         res = self.api.get(f"/tracks/{tid}")
@@ -392,8 +396,18 @@ class Player(QObject):
             kind, item_id = parts[1], parts[2]
             tracks = []
             if kind == "playlist":
-                items = self.api.paged(f"/playlists/{item_id}/items", limit=50, additional_types="track")
-                tracks = [t for t in map(sp.wrapped_track, items) if t]
+                if not self.api.tokens.has_tokens:
+                    from .library import fetch_public_playlist_embed
+                    pl = fetch_public_playlist_embed(item_id)
+                    tracks = pl.get("tracks", []) if pl else []
+                else:
+                    try:
+                        items = self.api.paged(f"/playlists/{item_id}/items", limit=50, additional_types="track")
+                        tracks = [t for t in map(sp.wrapped_track, items) if t]
+                    except Exception:
+                        from .library import fetch_public_playlist_embed
+                        pl = fetch_public_playlist_embed(item_id)
+                        tracks = pl.get("tracks", []) if pl else []
             elif kind == "album":
                 alb = self.api.get(f"/albums/{item_id}") or {}
                 items = list((alb.get("tracks") or {}).get("items") or [])
@@ -439,8 +453,18 @@ class Player(QObject):
             kind, item_id = parts[1], parts[2]
             tracks = []
             if kind == "playlist":
-                items = self.api.paged(f"/playlists/{item_id}/items", limit=50, additional_types="track")
-                tracks = [t for t in map(sp.wrapped_track, items) if t]
+                if not self.api.tokens.has_tokens:
+                    from .library import fetch_public_playlist_embed
+                    pl = fetch_public_playlist_embed(item_id)
+                    tracks = pl.get("tracks", []) if pl else []
+                else:
+                    try:
+                        items = self.api.paged(f"/playlists/{item_id}/items", limit=50, additional_types="track")
+                        tracks = [t for t in map(sp.wrapped_track, items) if t]
+                    except Exception:
+                        from .library import fetch_public_playlist_embed
+                        pl = fetch_public_playlist_embed(item_id)
+                        tracks = pl.get("tracks", []) if pl else []
             elif kind == "album":
                 alb = self.api.get(f"/albums/{item_id}") or {}
                 items = list((alb.get("tracks") or {}).get("items") or [])

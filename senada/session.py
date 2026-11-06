@@ -20,11 +20,16 @@ class Session(QObject):
         self.worker = worker
         self._busy = False
         self._message = ""
+        self._is_guest = False
         worker.error.connect(self.toast)
 
     @Property(bool, notify=changed)
     def authenticated(self):
-        return self.tokens.has_tokens
+        return self.tokens.has_tokens or self._is_guest
+
+    @Property(bool, notify=changed)
+    def isGuest(self):
+        return self._is_guest
 
     @Property(bool, notify=changed)
     def busy(self):
@@ -83,7 +88,14 @@ class Session(QObject):
         self.worker.run(call, ok, lambda e: self._set(False, f"{e}"))
 
     @Slot()
+    def enterGuestMode(self):
+        self._is_guest = True
+        self._set(False, "")
+        self.loggedIn.emit()
+
+    @Slot()
     def logout(self):
+        self._is_guest = False
         self.tokens.clear()
         self._set(False, "")
         self.loggedOut.emit()

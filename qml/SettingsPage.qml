@@ -69,8 +69,8 @@ Item {
                         source: library.me.image || ""
                         fallbackIcon: "speaker"
                     }
-                    Label { Layout.fillWidth: true; text: library.me.name || "…"; font.pixelSize: 16; font.weight: Font.DemiBold }
-                    NButton { text: "Keluar"; onClicked: session.logout() }
+                    Label { Layout.fillWidth: true; text: session.isGuest ? "Mode Tamu (Tanpa Akun)" : (library.me.name || "…"); font.pixelSize: 16; font.weight: Font.DemiBold }
+                    NButton { text: session.isGuest ? "Hubungkan Akun" : "Keluar"; onClicked: session.logout() }
                 }
             }
 

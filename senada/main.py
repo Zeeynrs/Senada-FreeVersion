@@ -58,7 +58,7 @@ def main():
     audio_engine = AudioEngine()
     resolver = AudioResolver()
     player = Player(api, worker, audio_engine, resolver, settings)
-    library = Library(api, worker, player)
+    library = Library(api, worker, player, resolver)
     lyrics = Lyrics(player, worker)
     visualizer = Visualizer()
     updater = Updater(worker)
