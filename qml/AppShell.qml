@@ -30,6 +30,95 @@ Item {
     Connections {
         target: Nav
         function onOpen(kind, itemId) { shell.navigate(kind, itemId) }
+        function onPlaylistDialog(mode, playlistId, currentName, tracks) {
+            playlistDialog.mode = mode
+            playlistDialog.playlistId = playlistId
+            playlistDialog.tracks = tracks || []
+            nameField.text = mode === "create" ? "" : currentName
+            playlistDialog.currentName = currentName
+            playlistDialog.open()
+        }
+    }
+
+    Connections {
+        target: library
+        function onPlaylistCreated(pid) { shell.navigate("playlist", pid) }
+    }
+
+    // create / rename / delete an own playlist
+    Popup {
+        id: playlistDialog
+        property string mode: "create"
+        property string playlistId
+        property string currentName
+        property var tracks: []
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        width: Math.min(420, shell.width - 48)
+        modal: true
+        focus: true
+        padding: 24
+        onOpened: if (mode !== "delete") nameField.forceActiveFocus()
+
+        function accept() {
+            if (mode === "delete") {
+                library.deletePlaylist(playlistId)
+                const cur = stack.currentItem ? stack.currentItem.pageKey : ""
+                if (cur === "playlist:" + playlistId) stack.pop()
+            } else if (nameField.text.trim().length > 0) {
+                if (mode === "create") {
+                    const pid = library.createPlaylist(nameField.text.trim(), tracks)
+                    if (tracks.length === 0) shell.navigate("playlist", pid)
+                } else {
+                    library.renamePlaylist(playlistId, nameField.text.trim())
+                }
+            } else {
+                return
+            }
+            close()
+        }
+
+        background: Rectangle {
+            radius: 22
+            color: Theme.surface2
+            border.color: Theme.alpha(Theme.text, 0.08)
+        }
+        Overlay.modal: Rectangle { color: Qt.rgba(0, 0, 0, 0.45) }
+
+        contentItem: ColumnLayout {
+            spacing: 16
+            Label {
+                text: playlistDialog.mode === "create" ? "Playlist baru"
+                    : playlistDialog.mode === "rename" ? "Ganti nama playlist" : "Hapus playlist?"
+                font.pixelSize: 20
+                font.weight: Font.Bold
+            }
+            Label {
+                visible: playlistDialog.mode === "delete"
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                color: Theme.dim
+                text: "“" + playlistDialog.currentName + "” akan dihapus dari perangkat ini. Lagu-lagunya tetap ada di YouTube Music."
+            }
+            NTextField {
+                id: nameField
+                visible: playlistDialog.mode !== "delete"
+                Layout.fillWidth: true
+                placeholderText: "Nama playlist"
+                onAccepted: playlistDialog.accept()
+            }
+            RowLayout {
+                Layout.alignment: Qt.AlignRight
+                spacing: 8
+                NButton { text: "Batal"; onClicked: playlistDialog.close() }
+                NButton {
+                    primary: true
+                    text: playlistDialog.mode === "create" ? "Buat" : playlistDialog.mode === "rename" ? "Simpan" : "Hapus"
+                    enabled: playlistDialog.mode === "delete" || nameField.text.trim().length > 0
+                    onClicked: playlistDialog.accept()
+                }
+            }
+        }
     }
 
     ColumnLayout {

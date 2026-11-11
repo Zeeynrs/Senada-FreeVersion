@@ -60,17 +60,42 @@ Item {
             Label { text: "Pengaturan"; font.pixelSize: 36; font.weight: Font.Black }
 
             Section {
-                title: "Akun Spotify"
-                RowLayout {
-                    spacing: 14
-                    Cover {
-                        Layout.preferredWidth: 48; Layout.preferredHeight: 48
-                        round: true
-                        source: library.me.image || ""
-                        fallbackIcon: "speaker"
+                title: "Profil & Library"
+                Label {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    color: Theme.dim
+                    font.pixelSize: 13
+                    text: "Senada tidak butuh akun. Musik diambil dari YouTube Music; lagu disukai, playlist, dan riwayat disimpan di perangkat ini (" + session.libraryPath + ")."
+                }
+                SettingRow {
+                    label: "Nama tampilan"
+                    hint: "Dipakai untuk sapaan di Beranda."
+                    NTextField {
+                        Layout.preferredWidth: 220
+                        text: session.displayName
+                        onEditingFinished: session.displayName = text
                     }
-                    Label { Layout.fillWidth: true; text: session.isGuest ? "Mode Tamu (Tanpa Akun)" : (library.me.name || "…"); font.pixelSize: 16; font.weight: Font.DemiBold }
-                    NButton { text: session.isGuest ? "Hubungkan Akun" : "Keluar"; onClicked: session.logout() }
+                }
+                SettingRow {
+                    label: "Impor dari Spotify"
+                    hint: "Tempel link playlist atau album publik Spotify. Tanpa login; maks. ±100 lagu per playlist."
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    NTextField {
+                        id: importField
+                        Layout.fillWidth: true
+                        placeholderText: "https://open.spotify.com/playlist/…"
+                        onAccepted: if (text.trim()) { library.importSpotify(text.trim()); text = "" }
+                    }
+                    NButton {
+                        text: "Impor"
+                        iconName: "download"
+                        enabled: importField.text.trim().length > 0
+                        onClicked: { library.importSpotify(importField.text.trim()); importField.text = "" }
+                    }
                 }
             }
 

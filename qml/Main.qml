@@ -38,12 +38,8 @@ ApplicationWindow {
 
     onActiveChanged: player.setFastPolling(active)
 
-    Loader {
-        anchors.fill: parent
-        sourceComponent: session.authenticated ? appUi : loginUi
-    }
-    Component { id: loginUi; LoginView {} }
-    Component { id: appUi; AppShell {} }
+    // no account needed: the app opens straight into the library
+    AppShell { anchors.fill: parent }
 
     Connections {
         target: session

@@ -88,7 +88,7 @@ Popup {
             wrapMode: Text.WordWrap
             color: Theme.dim
             font.pixelSize: 13
-            text: "Belum ada perangkat. Tunggu perangkat lokal siap, atau buka Spotify di HP."
+            text: "Belum ada perangkat. Tunggu perangkat lokal (MPV) siap."
         }
 
         Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.alpha(Theme.text, 0.08); Layout.topMargin: 4 }

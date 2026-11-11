@@ -8,9 +8,12 @@ Item {
     property int number: 0
     property bool showCover: true
     property bool showAlbum: true
+    property bool removable: false  // shows "Hapus dari playlist ini" (own playlists)
+    readonly property bool isYouTube: (track.uri || "").indexOf("yt:track:") === 0
     readonly property bool current: track.uri !== undefined && player.state.uri === track.uri
     readonly property bool playing: current && player.state.isPlaying
     signal play()
+    signal remove()
 
     width: ListView.view ? ListView.view.width : (parent ? parent.width : 400)
     height: 58
@@ -115,7 +118,7 @@ Item {
         Label {
             Layout.preferredWidth: 44
             horizontalAlignment: Text.AlignRight
-            text: Theme.fmt(row.track.durationMs)
+            text: row.track.durationMs ? Theme.fmt(row.track.durationMs) : ""
             color: Theme.dim
             font.pixelSize: 13
             font.features: { "tnum": 1 }
@@ -125,10 +128,39 @@ Item {
     NMenu {
         id: menu
         MenuItem { text: "Putar"; onTriggered: row.play() }
+        MenuItem { text: "Putar radio dari lagu ini"; onTriggered: player.playRadio(row.track.uri) }
         MenuItem { text: "Tambah ke antrean"; onTriggered: player.addToQueue(row.track.uri) }
-        MenuItem { text: "Simpan ke Lagu Disukai"; onTriggered: player.setLiked(row.track.uri, true) }
+        MenuItem {
+            text: (library.likedRevision, library.isLiked(row.track.uri || "")) ? "Hapus dari Lagu Disukai" : "Simpan ke Lagu Disukai"
+            onTriggered: player.setLiked(row.track.uri, !library.isLiked(row.track.uri))
+        }
+        NMenu {
+            id: addMenu
+            title: "Tambah ke playlist"
+            MenuItem { text: "+ Playlist baru…"; onTriggered: Nav.newPlaylist([row.track]) }
+            MenuSeparator {}
+            Instantiator {
+                model: library.ownPlaylists
+                delegate: MenuItem {
+                    text: modelData.name
+                    onTriggered: library.addToPlaylist(modelData.id, [row.track])
+                }
+                onObjectAdded: (index, object) => addMenu.insertItem(index + 2, object)
+                onObjectRemoved: (index, object) => addMenu.removeItem(object)
+            }
+        }
+        MenuItem {
+            visible: row.removable
+            height: visible ? implicitHeight : 0
+            text: "Hapus dari playlist ini"
+            onTriggered: row.remove()
+        }
         MenuItem { text: "Buka album"; enabled: !!row.track.albumId; onTriggered: Nav.go("album", row.track.albumId) }
         MenuItem { text: "Buka artis"; enabled: !!row.track.artistId; onTriggered: Nav.go("artist", row.track.artistId) }
-        MenuItem { text: "Salin link lagu"; onTriggered: session.copy("https://open.spotify.com/track/" + row.track.id) }
+        MenuItem {
+            text: "Salin link lagu"
+            onTriggered: session.copy(row.isYouTube ? "https://music.youtube.com/watch?v=" + row.track.id
+                                                    : "https://open.spotify.com/track/" + row.track.id)
+        }
     }
 }

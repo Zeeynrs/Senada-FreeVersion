@@ -16,8 +16,10 @@ Column {
     spacing: 8
 
     Item {
+        // no header row when there is neither a title nor a "show all" link
         width: parent.width
-        height: 36
+        height: g.title !== "" || g.items.length > g.columns * g.rows ? 36 : 0
+        visible: height > 0
         Label {
             text: g.title
             font.pixelSize: 22

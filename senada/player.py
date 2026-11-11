@@ -8,7 +8,7 @@ import urllib.request
 from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
 from PySide6.QtGui import QImage
 
-from . import api as sp
+from . import ytmusic
 from .engine import AudioEngine
 from .resolver import AudioResolver
 
@@ -56,10 +56,12 @@ class Player(QObject):
     accentChanged = Signal()
     trackChanged = Signal()
     likedChanged = Signal(str, bool)
+    historyChanged = Signal()
 
-    def __init__(self, api: sp.SpotifyApi, worker, engine: AudioEngine, resolver: AudioResolver, settings, parent=None):
+    def __init__(self, worker, engine: AudioEngine, resolver: AudioResolver, settings, store, catalog, parent=None):
         super().__init__(parent)
-        self.api = api
+        self.store = store
+        self.catalog = catalog
         self.worker = worker
         self.engine = engine
         self.resolver = resolver
@@ -84,6 +86,7 @@ class Player(QObject):
         self._queue = []
         self._queue_index = -1
         self._track_cache = {}  # uri -> track_dict
+        self._play_token = 0  # bumps on every track change; stale stream lookups are dropped
         self._devices = [{
             "id": "local",
             "name": "Senada (Lokal)",
@@ -270,18 +273,20 @@ class Player(QObject):
         self._queue_index = index
         track = self._queue[index]
         self._position = 0
+        self._play_token += 1
+        token = self._play_token
         self._state = {
             **self._state,
             **track,
             "hasTrack": True,
             "isPlaying": True,
+            "liked": self.store.is_liked(track.get("uri", "")),
         }
         self.stateChanged.emit()
         self.positionChanged.emit()
         self.trackChanged.emit()
         self.queueChanged.emit()
 
-        # Update accent and check liked
         self._on_track_changed(track)
 
         # Resolve stream URL and play
@@ -294,6 +299,8 @@ class Player(QObject):
             )
 
         def on_resolved(stream_url):
+            if token != self._play_token:
+                return  # the user already moved on to another track
             if stream_url:
                 self.engine.play(stream_url)
             else:
@@ -301,22 +308,16 @@ class Player(QObject):
                 self.next()
 
         def on_fail(e):
-            self.worker.error.emit(f"Gagal memutar audio: {e}")
+            if token == self._play_token:
+                self.worker.error.emit(f"Gagal memutar audio: {e}")
 
         self.worker.run(do_resolve, on_resolved, on_fail)
 
     def _on_track_changed(self, track: dict):
-        uri = track.get("uri")
-        if not uri:
+        if not track.get("uri"):
             return
-
-        # Check library contains if logged in
-        if self.api.tokens.has_tokens:
-            self.worker.run(
-                lambda: self.api.get("/me/library/contains", uris=uri),
-                lambda res: self._patch_liked(bool(res and res[0])) if self._state.get("uri") == uri else None,
-                lambda e: None
-            )
+        self.store.add_history(track)
+        self.historyChanged.emit()
 
         art = track.get("imageSmall")
         if art:
@@ -325,10 +326,6 @@ class Player(QObject):
                 lambda data: self._set_accent(accent_from_image(data)),
                 lambda e: None
             )
-
-    def _patch_liked(self, liked: bool):
-        self._state["liked"] = liked
-        self.stateChanged.emit()
 
     def _set_accent(self, color):
         if color != self._accent:
@@ -340,104 +337,60 @@ class Player(QObject):
             if isinstance(t, dict) and t.get("uri"):
                 self._track_cache[t["uri"]] = t
 
+    def _lookup(self, uri: str) -> dict | None:
+        """Track metadata for a URI: from what the pages showed, else from YouTube Music."""
+        t = self._track_cache.get(uri)
+        if t is None and uri.startswith("yt:track:"):
+            t = ytmusic.track(uri.split(":", 2)[2])
+            if t:
+                self._track_cache[uri] = t
+        return t
+
+    def _start_queue(self, tracks: list, index: int = 0, context_uri: str = ""):
+        if not tracks:
+            self.worker.error.emit("Tidak ada lagu yang bisa diputar")
+            return
+        self._queue = list(tracks)
+        self._state["contextUri"] = context_uri
+        self._play_index(min(max(0, index), len(self._queue) - 1))
+
     @Slot("QVariantList", int)
     def playUris(self, uris, index=0):
         uris = [u for u in uris if u]
         if not uris:
             return
+        target = uris[index] if 0 <= index < len(uris) else uris[0]
 
         def fetch_tracks():
-            result_tracks = []
-            target_uri = uris[index] if 0 <= index < len(uris) else uris[0]
-
-            # Ensure target track is resolved first
-            if target_uri not in self._track_cache and self.api.tokens.has_tokens:
-                tid = target_uri.split(":")[-1]
-                try:
-                    res = self.api.get(f"/tracks/{tid}")
-                    t = sp.track(res)
-                    if t:
-                        self._track_cache[t["uri"]] = t
-                except Exception:
-                    pass
-
-            # Resolve remaining tracks individually if needed
+            tracks = []
             for u in uris:
-                if u in self._track_cache:
-                    result_tracks.append(self._track_cache[u])
-                elif self.api.tokens.has_tokens:
-                    tid = u.split(":")[-1]
-                    try:
-                        res = self.api.get(f"/tracks/{tid}")
-                        t = sp.track(res)
-                        if t:
-                            self._track_cache[t["uri"]] = t
-                            result_tracks.append(t)
-                    except Exception:
-                        pass
-
-            return result_tracks
+                try:
+                    t = self._lookup(u)
+                except ytmusic.YTMusicError:
+                    t = None
+                if t:
+                    tracks.append(t)
+            return tracks
 
         def on_done(tracks):
-            if not tracks:
-                return
-            self._queue = tracks
-            target_index = min(max(0, index), len(tracks) - 1)
-            self._play_index(target_index)
+            idx = next((i for i, t in enumerate(tracks) if t.get("uri") == target), 0)
+            self._start_queue(tracks, idx)
 
         self.worker.run(fetch_tracks, on_done, lambda e: self.worker.error.emit(str(e)))
 
     @Slot(str, str)
     def playContext(self, context_uri, offset_uri=""):
         def fetch_context():
-            parts = context_uri.split(":")
-            if len(parts) < 3:
-                return []
-            kind, item_id = parts[1], parts[2]
-            tracks = []
-            if kind == "playlist":
-                if not self.api.tokens.has_tokens:
-                    from .library import fetch_public_playlist_embed
-                    pl = fetch_public_playlist_embed(item_id)
-                    tracks = pl.get("tracks", []) if pl else []
-                else:
-                    try:
-                        items = self.api.paged(f"/playlists/{item_id}/items", limit=50, additional_types="track")
-                        tracks = [t for t in map(sp.wrapped_track, items) if t]
-                    except Exception:
-                        from .library import fetch_public_playlist_embed
-                        pl = fetch_public_playlist_embed(item_id)
-                        tracks = pl.get("tracks", []) if pl else []
-            elif kind == "album":
-                alb = self.api.get(f"/albums/{item_id}") or {}
-                items = list((alb.get("tracks") or {}).get("items") or [])
-                nxt = (alb.get("tracks") or {}).get("next")
-                while nxt:
-                    page = self.api.get(nxt) or {}
-                    items.extend(page.get("items") or [])
-                    nxt = page.get("next")
-                tracks = [t for t in (sp.track(x, album=alb) for x in items) if t]
-            elif kind == "artist":
-                a = sp.artist(self.api.get(f"/artists/{item_id}") or {})
-                if a.get("name"):
-                    res = self.api.get("/search", q=f'artist:"{a["name"]}"', type="track", limit=10) or {}
-                    tracks = [t for t in map(sp.track, (res.get("tracks") or {}).get("items") or []) if t]
-            for t in tracks:
-                self._track_cache[t["uri"]] = t
+            tracks = self.catalog.tracks_for(context_uri)
+            self.cache_tracks(tracks)
             return tracks
 
         def on_done(tracks):
-            if not tracks:
-                return
-            self._queue = tracks
-            self._state["contextUri"] = context_uri
-            idx = 0
-            if offset_uri:
-                for i, t in enumerate(tracks):
-                    if t.get("uri") == offset_uri:
-                        idx = i
-                        break
-            self._play_index(idx)
+            idx = next((i for i, t in enumerate(tracks) if offset_uri and t.get("uri") == offset_uri), 0)
+            if self._state.get("shuffle") and tracks and not offset_uri:
+                tracks = list(tracks)
+                random.shuffle(tracks)
+            self._start_queue(tracks, idx, context_uri)
 
         self.worker.run(fetch_context, on_done, lambda e: self.worker.error.emit(str(e)))
 
@@ -447,71 +400,44 @@ class Player(QObject):
         self.stateChanged.emit()
 
         def fetch_and_shuffle():
-            parts = context_uri.split(":")
-            if len(parts) < 3:
-                return []
-            kind, item_id = parts[1], parts[2]
-            tracks = []
-            if kind == "playlist":
-                if not self.api.tokens.has_tokens:
-                    from .library import fetch_public_playlist_embed
-                    pl = fetch_public_playlist_embed(item_id)
-                    tracks = pl.get("tracks", []) if pl else []
-                else:
-                    try:
-                        items = self.api.paged(f"/playlists/{item_id}/items", limit=50, additional_types="track")
-                        tracks = [t for t in map(sp.wrapped_track, items) if t]
-                    except Exception:
-                        from .library import fetch_public_playlist_embed
-                        pl = fetch_public_playlist_embed(item_id)
-                        tracks = pl.get("tracks", []) if pl else []
-            elif kind == "album":
-                alb = self.api.get(f"/albums/{item_id}") or {}
-                items = list((alb.get("tracks") or {}).get("items") or [])
-                nxt = (alb.get("tracks") or {}).get("next")
-                while nxt:
-                    page = self.api.get(nxt) or {}
-                    items.extend(page.get("items") or [])
-                    nxt = page.get("next")
-                tracks = [t for t in (sp.track(x, album=alb) for x in items) if t]
-            elif kind == "artist":
-                a = sp.artist(self.api.get(f"/artists/{item_id}") or {})
-                if a.get("name"):
-                    res = self.api.get("/search", q=f'artist:"{a["name"]}"', type="track", limit=10) or {}
-                    tracks = [t for t in map(sp.track, (res.get("tracks") or {}).get("items") or []) if t]
-            for t in tracks:
-                self._track_cache[t["uri"]] = t
+            tracks = list(self.catalog.tracks_for(context_uri))
+            self.cache_tracks(tracks)
             random.shuffle(tracks)
             return tracks
 
-        def on_done(tracks):
-            if not tracks:
-                return
-            self._queue = tracks
-            self._state["contextUri"] = context_uri
-            self._play_index(0)
+        self.worker.run(fetch_and_shuffle, lambda tracks: self._start_queue(tracks, 0, context_uri),
+                        lambda e: self.worker.error.emit(str(e)))
 
-        self.worker.run(fetch_and_shuffle, on_done, lambda e: self.worker.error.emit(str(e)))
+    @Slot(str)
+    def playRadio(self, uri):
+        """Play a track followed by YouTube Music's radio for it."""
+        if not uri.startswith("yt:track:"):
+            seed = self._track_cache.get(uri)
+            if not seed:
+                return
+
+            def find_seed():
+                hits = ytmusic.search(f"{seed.get('artists', '')} {seed.get('name', '')}").get("tracks") or []
+                return ytmusic.up_next(hits[0]["id"]) if hits else []
+            fetch = find_seed
+        else:
+            fetch = lambda: ytmusic.up_next(uri.split(":", 2)[2])
+
+        def on_done(tracks):
+            self.cache_tracks(tracks)
+            self._start_queue(tracks, 0, "")
+
+        self.worker.run(fetch, on_done, lambda e: self.worker.error.emit(str(e)))
 
     @Slot(str)
     def addToQueue(self, uri):
-        def fetch_one():
-            if uri in self._track_cache:
-                return self._track_cache[uri]
-            tid = uri.split(":")[-1]
-            res = self.api.get(f"/tracks/{tid}")
-            t = sp.track(res)
-            if t:
-                self._track_cache[uri] = t
-            return t
-
         def on_done(t):
             if t:
                 self._queue.append(t)
                 self.queueChanged.emit()
                 self.worker.error.emit("Ditambahkan ke antrean")
 
-        self.worker.run(fetch_one, on_done, lambda e: None)
+        self.worker.run(lambda: self._lookup(uri), on_done, lambda e: self.worker.error.emit(str(e)))
 
     @Slot()
     def toggleLike(self):
@@ -521,14 +447,19 @@ class Player(QObject):
 
     @Slot(str, bool)
     def setLiked(self, uri, liked):
+        track = self._track_cache.get(uri)
+        if track is None and uri == self._state.get("uri"):
+            track = {k: self._state.get(k) for k in ("uri", "id", "name", "artists", "artistId", "album",
+                                                      "albumId", "imageSmall", "image", "imageLarge",
+                                                      "durationMs", "explicit")}
+        if not track:
+            return
         if uri == self._state.get("uri"):
             self._state["liked"] = liked
             self.stateChanged.emit()
-        self.worker.run(
-            lambda: self.api.request("PUT" if liked else "DELETE", "/me/library", {"uris": uri}),
-            lambda _: self.likedChanged.emit(uri, liked),
-            lambda e: None
-        )
+        if self.store.set_liked(track, liked):
+            self.likedChanged.emit(uri, liked)
+            self.worker.error.emit("Disimpan ke Lagu yang Disukai" if liked else "Dihapus dari Lagu yang Disukai")
 
     # ---- devices & queue --------------------------------------------------
 

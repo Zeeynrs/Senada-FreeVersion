@@ -35,12 +35,15 @@ Item {
                 loading: page.loading
                 round: true
                 fallbackIcon: "speaker"
-                onPlayAll: player.playContext(page.info.uri, "")
-                onShuffleAll: player.shufflePlay(page.info.uri)
+                canSave: !page.info.error
+                saved: (library.savedRevision, library.isSaved("artist", page.itemId))
+                onPlayAll: player.playContext(page.info.playUri || page.info.uri, "")
+                onShuffleAll: player.shufflePlay(page.info.playUri || page.info.uri)
+                onSaveToggled: library.toggleSaved(page.info)
             }
             Label {
                 visible: (page.info.tracks || []).length > 0
-                text: "Populer"
+                text: "Lagu teratas"
                 font.pixelSize: 22
                 font.weight: Font.Bold
                 leftPadding: 32
@@ -55,17 +58,27 @@ Item {
             onPlay: player.playUris((page.info.tracks || []).map(x => x.uri), index)
         }
 
-        footer: Item {
+        footer: Column {
             width: list.width
-            height: grid.height + 40
+            topPadding: 24
+            bottomPadding: 16
+            spacing: 24
             CardGrid {
-                id: grid
                 x: 20
-                y: 24
                 width: parent.width - 40
                 title: "Diskografi"
                 items: page.info.albums || []
                 rows: 2
+            }
+            Repeater {
+                model: page.info.sections || []
+                CardGrid {
+                    x: 20
+                    width: list.width - 40
+                    title: modelData.title
+                    items: modelData.cards || []
+                    rows: 1
+                }
             }
         }
     }

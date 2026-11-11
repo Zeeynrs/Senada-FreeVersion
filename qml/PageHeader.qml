@@ -9,8 +9,17 @@ Item {
     property bool loading: false
     property bool round: false
     property string fallbackIcon: "note"
+    // library actions
+    property bool canSave: false     // catalog album/playlist/artist: heart = keep in the sidebar
+    property bool saved: false
+    property bool canImport: false   // public Spotify page: copy into an own playlist
+    property bool isLocal: false     // own playlist: rename / delete
     signal playAll()
     signal shuffleAll()
+    signal saveToggled()
+    signal importRequested()
+    signal renameRequested()
+    signal deleteRequested()
 
     implicitHeight: row.implicitHeight + 72
 
@@ -91,6 +100,34 @@ Item {
                     tip: "Putar acak"
                     enabled: !h.loading
                     onClicked: h.shuffleAll()
+                }
+                IconButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: h.canSave && !h.loading
+                    iconName: h.saved ? "heart" : "heart-outline"
+                    size: 24
+                    tint: h.saved ? Theme.accent : Theme.dim
+                    tip: h.saved ? "Hapus dari Library" : "Simpan ke Library"
+                    onClicked: h.saveToggled()
+                }
+                NButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: h.canImport && !h.loading
+                    text: "Impor ke Library"
+                    iconName: "download"
+                    onClicked: h.importRequested()
+                }
+                NButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: h.isLocal && !h.loading
+                    text: "Ganti nama"
+                    onClicked: h.renameRequested()
+                }
+                NButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: h.isLocal && !h.loading
+                    text: "Hapus"
+                    onClicked: h.deleteRequested()
                 }
                 BusyIndicator {
                     anchors.verticalCenter: parent.verticalCenter

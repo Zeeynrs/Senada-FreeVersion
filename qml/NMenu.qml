@@ -15,7 +15,6 @@ Menu {
         implicitHeight: 38
         contentItem: Label {
             text: mi.text
-            leftPadding: 10
             font.pixelSize: 14
             verticalAlignment: Text.AlignVCenter
         }

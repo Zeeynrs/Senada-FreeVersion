@@ -18,6 +18,15 @@ LOOP_TO_MPRIS = {"off": "None", "context": "Playlist", "track": "Track"}
 LOOP_FROM_MPRIS = {v: k for k, v in LOOP_TO_MPRIS.items()}
 
 
+def track_link(state) -> str:
+    uri = state.get("uri", "") or ""
+    if uri.startswith("yt:track:"):
+        return "https://music.youtube.com/watch?v=" + uri.split(":", 2)[2]
+    if uri.startswith("spotify:track:"):
+        return "https://open.spotify.com/track/" + uri.split(":", 2)[2]
+    return ""
+
+
 class Mpris(dbus.service.Object):
     def __init__(self, player, raise_window, quit_app):
         DBusGMainLoop(set_as_default=True)
@@ -44,7 +53,7 @@ class Mpris(dbus.service.Object):
             "xesam:title": s.get("name", ""),
             "xesam:artist": dbus.Array([a.strip() for a in s.get("artists", "").split(",") if a.strip()], signature="s"),
             "xesam:album": s.get("album", ""),
-            "xesam:url": "https://open.spotify.com/track/" + s.get("id", ""),
+            "xesam:url": track_link(s),
         }
         if s.get("imageLarge"):
             md["mpris:artUrl"] = s["imageLarge"]
@@ -79,7 +88,7 @@ class Mpris(dbus.service.Object):
             "HasTrackList": dbus.Boolean(False),
             "Identity": "Senada",
             "DesktopEntry": "senada",
-            "SupportedUriSchemes": dbus.Array(["spotify"], signature="s"),
+            "SupportedUriSchemes": dbus.Array(["yt", "spotify", "senada"], signature="s"),
             "SupportedMimeTypes": dbus.Array([], signature="s"),
         }
 
@@ -179,9 +188,9 @@ class Mpris(dbus.service.Object):
 
     @dbus.service.method(PLAYER_IFACE, in_signature="s")
     def OpenUri(self, uri):
-        if uri.startswith("spotify:track:"):
+        if uri.startswith(("yt:track:", "spotify:track:")):
             self.player.playUris([uri], 0)
-        elif uri.startswith("spotify:"):
+        elif uri.startswith("senada:"):
             self.player.playContext(uri, "")
 
     @dbus.service.signal(PLAYER_IFACE, signature="x")

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installer multi-distro untuk Senada Music Player (Spotify Gratis & Bebas Iklan)
+# Installer multi-distro untuk Senada Music Player (gratis, bebas iklan, tanpa akun)
 # Dapat dijalankan langsung (./install.sh) atau via curl:
 #   curl -fsSL https://raw.githubusercontent.com/Zeeynrs/Senada-FreeVersion/main/install.sh | bash
 set -euo pipefail
@@ -143,7 +143,7 @@ fi
 
 # Banner
 echo -e "${BOLD}============================================================${RESET}"
-echo -e "${BOLD}  Senada Music Player — Spotify Bebas Iklan & Tanpa Langganan${RESET}"
+echo -e "${BOLD}  Senada Music Player — Bebas Iklan & Tanpa Akun${RESET}"
 echo -e "${BOLD}============================================================${RESET}"
 if is_arch; then
     ok "Distro terdeteksi: ${BOLD}${DISTRO_NAME}${RESET} ${GREEN}(Direkomendasikan)${RESET}"

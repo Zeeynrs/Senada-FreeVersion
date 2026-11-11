@@ -6,6 +6,7 @@ Item {
     id: page
     readonly property string pageKey: "home"
     readonly property var home: library.home
+    readonly property var sections: home.sections || []
 
     Flickable {
         id: flick
@@ -35,13 +36,12 @@ Item {
                 IconButton { iconName: "refresh"; tip: "Muat ulang"; onClicked: library.refreshAll() }
             }
 
-            // quick tiles: the first playlists, Spotify-home style
+            // quick tiles: liked songs and the first library entries
             GridLayout {
                 width: parent.width
                 columns: width > 900 ? 4 : 2
                 columnSpacing: 10
                 rowSpacing: 10
-                visible: library.playlists.length > 0
                 Repeater {
                     model: [{ kind: "liked", id: "", name: "Lagu yang Disukai", imageSmall: "" }].concat(library.playlists.slice(0, 7))
                     AbstractButton {
@@ -62,8 +62,9 @@ Item {
                                 Layout.preferredWidth: 64
                                 Layout.preferredHeight: 64
                                 radius: 14
-                                source: modelData.imageSmall
-                                fallbackIcon: modelData.kind === "liked" ? "heart" : "note"
+                                round: modelData.kind === "artist"
+                                source: modelData.imageSmall || ""
+                                fallbackIcon: modelData.kind === "liked" ? "heart" : modelData.kind === "artist" ? "speaker" : "note"
                             }
                             Label {
                                 Layout.fillWidth: true
@@ -77,32 +78,99 @@ Item {
                 }
             }
 
-            CardGrid { width: parent.width; title: "Baru saja diputar"; items: page.home.recent || []; rows: 1 }
+            TrackSection {
+                width: parent.width
+                title: "Baru saja diputar"
+                tracks: library.recent
+            }
 
+            // loading / error state for the YouTube Music shelves
             Column {
                 width: parent.width
-                visible: (page.home.topTracks || []).length > 0
-                spacing: 4
-                Label {
-                    text: "Lagu favoritmu akhir-akhir ini"
-                    font.pixelSize: 22
-                    font.weight: Font.Bold
-                    leftPadding: 12
-                    bottomPadding: 6
-                }
-                Repeater {
-                    model: (page.home.topTracks || []).slice(0, 5)
-                    TrackRow {
-                        width: col.width
-                        track: modelData
-                        number: index + 1
-                        onPlay: player.playUris(page.home.topTracks.map(x => x.uri), index)
+                visible: page.sections.length === 0
+                spacing: 12
+                RowLayout {
+                    x: 12
+                    spacing: 12
+                    BusyIndicator {
+                        running: !!page.home.loading
+                        visible: running
+                        implicitWidth: 32; implicitHeight: 32
                     }
+                    Label {
+                        text: page.home.loading ? "Memuat musik dari YouTube Music…" : (page.home.error || "")
+                        color: page.home.loading ? Theme.dim : Theme.danger
+                        font.pixelSize: 15
+                        wrapMode: Text.WordWrap
+                    }
+                }
+                NButton {
+                    x: 12
+                    visible: !page.home.loading && !!page.home.error
+                    text: "Coba lagi"
+                    iconName: "refresh"
+                    onClicked: library.refreshAll()
                 }
             }
 
-            CardGrid { width: parent.width; title: "Artis favoritmu"; items: page.home.topArtists || []; rows: 1 }
-            CardGrid { width: parent.width; title: "Playlist kamu"; items: library.playlists; rows: 2 }
+            Repeater {
+                model: page.sections
+                Column {
+                    width: col.width
+                    spacing: 16
+                    TrackSection {
+                        width: parent.width
+                        title: modelData.title
+                        tracks: modelData.tracks || []
+                    }
+                    CardGrid {
+                        width: parent.width
+                        title: (modelData.tracks || []).length > 0 ? "" : modelData.title
+                        items: modelData.cards || []
+                        rows: 1
+                    }
+                }
+            }
+        }
+    }
+
+    // a titled list of tracks that shows five rows and expands on demand
+    component TrackSection: Column {
+        id: ts
+        property string title
+        property var tracks: []
+        property bool expanded: false
+        visible: tracks.length > 0
+        spacing: 2
+
+        Item {
+            width: parent.width
+            height: 40
+            Label {
+                text: ts.title
+                font.pixelSize: 22
+                font.weight: Font.Bold
+                anchors.left: parent.left
+                anchors.leftMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            LinkLabel {
+                visible: ts.tracks.length > 5
+                text: ts.expanded ? "Lebih sedikit" : "Tampilkan semua"
+                anchors.right: parent.right
+                anchors.rightMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
+                onClicked: ts.expanded = !ts.expanded
+            }
+        }
+        Repeater {
+            model: ts.expanded ? ts.tracks : ts.tracks.slice(0, 5)
+            TrackRow {
+                width: ts.width
+                track: modelData
+                number: index + 1
+                onPlay: player.playUris(ts.tracks.map(x => x.uri), index)
+            }
         }
     }
 }

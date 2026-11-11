@@ -1,5 +1,7 @@
-"""Audio resolver: maps Spotify track metadata (artist, title, duration)
-to YouTube Music streams without ads.
+"""Audio resolver: turns a track into a YouTube Music URL that mpv can stream (no ads).
+
+Tracks from the YouTube Music catalog already carry their video id. Tracks imported
+from Spotify only have artist/title/duration and are searched for here.
 """
 
 import json
@@ -35,6 +37,8 @@ class AudioResolver:
         """Resolve a Spotify track to a playable YouTube/YouTube Music URL.
         Returns 'https://music.youtube.com/watch?v={video_id}' or None.
         """
+        if track_uri.startswith("yt:track:"):
+            return f"https://music.youtube.com/watch?v={track_uri.split(':', 2)[2]}"
         if not title:
             return None
 
@@ -62,98 +66,6 @@ class AudioResolver:
             return f"https://music.youtube.com/watch?v={video_id}"
 
         return None
-
-    def search_tracks(self, query: str, limit: int = 20) -> list[dict]:
-        """Search tracks via YouTube Music Innertube API without requiring Spotify login."""
-        query = _clean_str(query)
-        if not query:
-            return []
-        payload = json.dumps({
-            "context": {
-                "client": {
-                    "clientName": "WEB_REMIX",
-                    "clientVersion": "1.20240101.01.00",
-                    "hl": "en",
-                }
-            },
-            "query": query,
-            "params": "EgWKAQIIAWoQEAMQBBAJEAoQBRAREBAQFA%3D%3D",
-        }).encode("utf-8")
-
-        req = urllib.request.Request(
-            "https://music.youtube.com/youtubei/v1/search",
-            data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)",
-            },
-        )
-        tracks = []
-        try:
-            with urllib.request.urlopen(req, timeout=8) as resp:
-                res = json.loads(resp.read().decode("utf-8"))
-            tabs = res.get("contents", {}).get("tabbedSearchResultsRenderer", {}).get("tabs", [])
-            if not tabs:
-                return []
-            section_list = tabs[0].get("tabRenderer", {}).get("content", {}).get("sectionListRenderer", {}).get("contents", [])
-            if not section_list:
-                return []
-            items = section_list[0].get("musicShelfRenderer", {}).get("contents", [])
-            for it in items[:limit]:
-                r = it.get("musicResponsiveListItemRenderer", {})
-                vid = r.get("playlistItemData", {}).get("videoId")
-                if not vid:
-                    badge = r.get("overlay", {}).get("musicItemThumbnailOverlayRenderer", {}).get("content", {}).get("musicPlayButtonRenderer", {}).get("playNavigationEndpoint", {})
-                    vid = badge.get("watchEndpoint", {}).get("videoId")
-                if not vid:
-                    continue
-                cols = r.get("flexColumns", [])
-                name = ""
-                artists = ""
-                album = ""
-                dur_ms = 0
-                if cols:
-                    try:
-                        name = cols[0]["musicResponsiveListItemFlexColumnRenderer"]["text"]["runs"][0]["text"]
-                    except (KeyError, IndexError):
-                        pass
-                    try:
-                        runs = cols[1]["musicResponsiveListItemFlexColumnRenderer"]["text"]["runs"]
-                        if runs:
-                            artists = runs[0].get("text", "")
-                        for rn in runs:
-                            txt = rn.get("text", "").strip()
-                            if ":" in txt and all(part.isdigit() for part in txt.split(":")):
-                                parts = list(map(int, txt.split(":")))
-                                if len(parts) == 2:
-                                    dur_ms = (parts[0] * 60 + parts[1]) * 1000
-                                elif len(parts) == 3:
-                                    dur_ms = (parts[0] * 3600 + parts[1] * 60 + parts[2]) * 1000
-                    except (KeyError, IndexError):
-                        pass
-                thumbs = r.get("thumbnail", {}).get("musicThumbnailRenderer", {}).get("thumbnail", {}).get("thumbnails", [])
-                img = thumbs[-1]["url"] if thumbs else ""
-                uri = f"spotify:track:{vid}"
-                self._cache[uri] = vid
-                tracks.append({
-                    "uri": uri,
-                    "id": vid,
-                    "name": name,
-                    "artists": artists,
-                    "artistId": "",
-                    "album": album or name,
-                    "albumId": "",
-                    "imageSmall": thumbs[0]["url"] if thumbs else "",
-                    "image": img,
-                    "imageLarge": img,
-                    "durationMs": dur_ms,
-                    "explicit": False,
-                    "playable": True,
-                })
-            self._save_cache()
-        except Exception as e:
-            logger.debug(f"search_tracks error: {e}")
-        return tracks
 
     def _search_innertube(self, title: str, artist: str, duration_ms: int) -> str | None:
         query = f"{artist} - {_clean_str(title)}"

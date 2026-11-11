@@ -57,7 +57,7 @@ Item {
                     Layout.maximumWidth: 560
                     Layout.leftMargin: 12
                     iconName: "search"
-                    placeholderText: "Mau dengar apa?"
+                    placeholderText: "Mau dengar apa? (atau tempel link Spotify/YouTube Music)"
                     onTextChanged: debounce.restart()
                     Keys.onEscapePressed: text = ""
                 }
@@ -66,7 +66,7 @@ Item {
 
             Label {
                 visible: !page.results.tracks && !page.searching
-                text: "Cari lagu, artis, album, atau playlist."
+                text: "Cari lagu, artis, album, atau playlist di YouTube Music. Link playlist Spotify publik juga bisa ditempel di sini."
                 color: Theme.dim
                 font.pixelSize: 15
                 leftPadding: 12

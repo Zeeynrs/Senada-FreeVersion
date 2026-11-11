@@ -33,16 +33,37 @@ Item {
         NavItem { Layout.fillWidth: true; text: "Cari"; iconName: "search"; active: side.currentKey === "search"; onClicked: Nav.go("search") }
         NavItem { Layout.fillWidth: true; text: "Lagu Disukai"; iconName: "heart"; active: side.currentKey === "liked:"; onClicked: Nav.go("liked") }
 
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.leftMargin: 14
+            Layout.topMargin: 12
+            Label {
+                Layout.fillWidth: true
+                text: "Library"
+                color: Theme.faint
+                font.pixelSize: 12
+                font.weight: Font.Bold
+                font.capitalization: Font.AllUppercase
+                font.letterSpacing: 1.2
+            }
+            IconButton {
+                iconName: "queue-add"
+                size: 18
+                tint: Theme.dim
+                tip: "Playlist baru"
+                onClicked: Nav.newPlaylist([])
+            }
+        }
+
         Label {
-            text: "Playlist"
+            visible: library.playlists.length === 0
+            Layout.fillWidth: true
+            Layout.leftMargin: 14
+            Layout.rightMargin: 10
+            text: "Buat playlist, atau tekan ♡ di album/playlist untuk menyimpannya di sini."
             color: Theme.faint
             font.pixelSize: 12
-            font.weight: Font.Bold
-            font.capitalization: Font.AllUppercase
-            font.letterSpacing: 1.2
-            Layout.leftMargin: 14
-            Layout.topMargin: 18
-            Layout.bottomMargin: 4
+            wrapMode: Text.WordWrap
         }
 
         ListView {
@@ -59,9 +80,9 @@ Item {
                 height: 56
                 hoverEnabled: true
                 focusPolicy: Qt.NoFocus
-                readonly property bool active: side.currentKey === "playlist:" + modelData.id
+                readonly property bool active: side.currentKey === modelData.kind + ":" + modelData.id
                 readonly property bool playingHere: player.state.contextUri === modelData.uri
-                onClicked: Nav.go("playlist", modelData.id)
+                onClicked: Nav.go(modelData.kind, modelData.id)
                 background: Rectangle {
                     radius: 12
                     color: d.active ? Theme.alpha(Theme.accent, 0.14) : d.hovered ? Theme.alpha(Theme.text, 0.06) : "transparent"
@@ -73,7 +94,9 @@ Item {
                         Layout.preferredWidth: 42
                         Layout.preferredHeight: 42
                         radius: 8
-                        source: modelData.imageSmall
+                        round: modelData.kind === "artist"
+                        source: modelData.imageSmall || ""
+                        fallbackIcon: modelData.kind === "artist" ? "speaker" : "note"
                     }
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -141,7 +164,7 @@ Item {
                     spacing: 1
                     Label {
                         Layout.fillWidth: true
-                        text: updater.updating ? "Memperbarui Nada…" : "Update tersedia (" + updater.commitsBehind + ")"
+                        text: updater.updating ? "Memperbarui Senada…" : "Update tersedia (" + updater.commitsBehind + ")"
                         font.pixelSize: 13
                         font.weight: Font.Bold
                         color: Theme.accent
