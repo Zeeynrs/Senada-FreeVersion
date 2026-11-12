@@ -16,6 +16,7 @@ TRACK_KEYS = ("uri", "id", "name", "artists", "artistId", "album", "albumId",
               "imageSmall", "image", "imageLarge", "durationMs", "explicit")
 OPTIONAL_KEYS = ("matchScore",)  # how sure the YouTube Music match of an imported track is (0-100)
 PATCHABLE = ("imageSmall", "image", "imageLarge", "matchScore")
+IMAGE_KEYS = ("imageSmall", "image", "imageLarge")
 
 
 def _clean_track(track: dict) -> dict:
@@ -167,6 +168,7 @@ class LocalStore:
 
     def patch_tracks(self, patches: dict[str, dict]) -> int:
         """Apply {uri: {imageSmall, image, imageLarge, matchScore}} wherever the track is stored.
+        Covers only fill in missing ones: an imported track's own Spotify album art is kept.
         Returns how many stored entries changed."""
         if not patches:
             return 0
@@ -179,6 +181,8 @@ class LocalStore:
                     if not patch:
                         continue
                     for k in PATCHABLE:
+                        if k in IMAGE_KEYS and t.get(k):
+                            continue
                         if patch.get(k) is not None and t.get(k) != patch[k]:
                             t[k] = patch[k]
                             changed += 1
