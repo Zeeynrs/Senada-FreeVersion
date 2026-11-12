@@ -17,6 +17,25 @@ Item {
     Component.onCompleted: reload()
 
     readonly property bool isLocal: !!info.local
+    readonly property var tracks: info.tracks || []
+    // table sorting: "" keeps the collection's own order
+    property string sortKey: ""
+    property bool sortAsc: true
+    readonly property var shown: {
+        const t = tracks.map((x, i) => Object.assign({}, x, { number: i + 1 }))
+        if (!sortKey) return t
+        const k = sortKey, dir = sortAsc ? 1 : -1
+        return t.sort((a, b) => {
+            const x = a[k], y = b[k]
+            if (typeof x === "number" || typeof y === "number") return ((x || 0) - (y || 0)) * dir
+            return String(x || "").localeCompare(String(y || ""), undefined, { sensitivity: "base" }) * dir
+        })
+    }
+    function sortBy(key) {
+        if (key === "number" || (sortKey === key && !sortAsc)) { sortKey = ""; sortAsc = true }
+        else if (sortKey === key) sortAsc = false
+        else { sortKey = key; sortAsc = true }
+    }
     readonly property bool isSpotify: itemId.indexOf("sp-") === 0
 
     Connections {
@@ -36,7 +55,11 @@ Item {
     }
 
     function playAt(i) {
-        const t = info.tracks || []
+        if (sortKey) {  // sorted view: play in the order shown
+            player.playUris(shown.map(x => x.uri), i)
+            return
+        }
+        const t = tracks
         if (info.playUri)
             player.playContext(info.playUri, t[i] ? t[i].uri : "")
         else
@@ -70,12 +93,14 @@ Item {
                 contentY = originY
             lastOriginY = originY
         }
-        model: page.info.tracks || []
+        model: page.shown
         reuseItems: true
         bottomMargin: Theme.dockSpace
         ScrollBar.vertical: NScrollBar {}
 
-        header: PageHeader {
+        header: Column {
+          width: list.width
+          PageHeader {
             width: list.width
             info: page.info
             loading: page.loading
@@ -90,11 +115,24 @@ Item {
             onImportRequested: library.importCollection(page.info)
             onRenameRequested: Nav.renamePlaylist(page.itemId, page.info.name)
             onDeleteRequested: Nav.deletePlaylist(page.itemId, page.info.name)
+          }
+          TrackTableHeader {
+            visible: page.tracks.length > 0
+            width: list.width
+            inset: 16
+            showCover: page.kind !== "album"
+            showAlbum: page.kind !== "album"
+            sortKey: page.sortKey
+            sortAsc: page.sortAsc
+            onSortBy: (key) => page.sortBy(key)
+          }
         }
 
         delegate: TrackRow {
+            inset: 16
+            table: true
             track: modelData
-            number: index + 1
+            number: modelData.number
             showCover: page.kind !== "album"
             showAlbum: page.kind !== "album"
             removable: page.isLocal

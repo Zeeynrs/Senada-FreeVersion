@@ -6,12 +6,11 @@ import QtQuick.Layouts
 Item {
     id: page
     readonly property string pageKey: "library"
-    property string filter: "all"  // all | own | album | playlist | artist
+    property string filter: "all"  // all | playlist | album | artist | imported
 
     readonly property var items: library.playlists.filter(p =>
         filter === "all" ? true
-        : filter === "own" ? !!p.local
-        : filter === "playlist" ? (p.kind === "playlist" && !p.local)
+        : filter === "imported" ? !!p.imported
         : p.kind === filter)
     readonly property int columns: Math.max(2, Math.floor((flick.width - 48 + 8) / 200))
 
@@ -26,17 +25,16 @@ Item {
 
         Column {
             id: col
-            x: 24
-            y: 4
-            width: flick.width - 48
-            spacing: 22
+            x: 28
+            y: 24
+            width: flick.width - 56
+            spacing: 20
 
             RowLayout {
                 width: parent.width
                 Column {
                     Layout.fillWidth: true
-                    Layout.leftMargin: 12
-                    Label { text: "Library"; font.pixelSize: 44; font.weight: Font.Black; font.letterSpacing: -1.2 }
+                    Label { text: "Koleksi"; font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
                     Label {
                         text: library.ownPlaylists.length + " playlist • " + (library.playlists.length - library.ownPlaylists.length)
                               + " tersimpan • semuanya di perangkat ini"
@@ -54,9 +52,9 @@ Item {
                 visible: false
                 width: parent.width
                 implicitHeight: importRow.implicitHeight + 32
-                radius: 28
-                color: Theme.glass
-                border.color: Theme.glassBorder
+                radius: 16
+                color: Theme.surface
+                border.color: Theme.line
                 RowLayout {
                     id: importRow
                     anchors.fill: parent
@@ -84,10 +82,10 @@ Item {
                 Repeater {
                     model: [
                         { key: "all", label: "Semua" },
-                        { key: "own", label: "Playlist Saya" },
-                        { key: "album", label: "Album" },
                         { key: "playlist", label: "Playlist" },
-                        { key: "artist", label: "Artis" }
+                        { key: "album", label: "Album" },
+                        { key: "artist", label: "Artis" },
+                        { key: "imported", label: "Impor" }
                     ]
                     Chip {
                         text: modelData.label
@@ -101,57 +99,55 @@ Item {
                 width: parent.width
                 spacing: 8
 
-                // liked songs: a big fuchsia bloom tile
+                // liked songs: same outlined card shape, with a heart instead of a cover
                 AbstractButton {
                     id: likedTile
-                    visible: page.filter === "all"
-                    width: Math.min(parent.width, (parent.width - 8 * (page.columns - 1)) / page.columns * 2 + 8)
-                    height: (parent.width - 8 * (page.columns - 1)) / page.columns + 58
+                    visible: page.filter === "all" || page.filter === "playlist"
+                    width: (parent.width - 8 * (page.columns - 1)) / page.columns
+                    height: likedCard.implicitHeight + 26
                     hoverEnabled: true
                     focusPolicy: Qt.NoFocus
-                    clip: true
                     onClicked: Nav.go("liked")
-                    background: Rectangle {
-                        radius: 30
-                        gradient: Gradient {
-                            orientation: Gradient.Horizontal
-                            GradientStop { position: 0; color: Theme.alpha(Theme.fuchsia, likedTile.hovered ? 0.42 : 0.32) }
-                            GradientStop { position: 1; color: Theme.alpha(Theme.mint, likedTile.hovered ? 0.16 : 0.1) }
-                        }
-                        border.color: Theme.glassBorder
-                    }
+                    background: Item {}
                     contentItem: Item {
-                        Scallop {
-                            width: parent.height * 0.95; height: width
-                            x: parent.width - width * 0.72
-                            y: -height * 0.18
-                            lobes: 14; depth: 0.1
-                            color: Theme.alpha(Theme.fuchsia, 0.35)
-                            rotation: likedTile.hovered ? 25 : 0
-                            Behavior on rotation { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: 4
+                            radius: 16
+                            color: likedTile.hovered ? Theme.hover : "transparent"
+                            border.color: likedTile.hovered ? Theme.lineStrong : Theme.line
                         }
                         Column {
-                            anchors.left: parent.left
-                            anchors.bottom: parent.bottom
-                            anchors.margins: 24
-                            spacing: 4
-                            Icon { glyph: "heart"; size: 30; color: Theme.text }
-                            Label { text: "Lagu yang Disukai"; font.pixelSize: 26; font.weight: Font.Black }
-                            Label {
-                                text: (library.likedRevision, library.likedCount) + " lagu"
-                                color: Theme.text
-                                opacity: 0.8
-                                font.pixelSize: 14
+                            id: likedCard
+                            x: 12; y: 12
+                            width: parent.width - 24
+                            spacing: 3
+                            Rectangle {
+                                width: parent.width
+                                height: width
+                                radius: 10
+                                color: Theme.surface3
+                                Icon { anchors.centerIn: parent; glyph: "heart"; size: parent.width * 0.32; color: Theme.like }
+                                IconButton {
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+                                    anchors.margins: 8
+                                    visible: likedTile.hovered && library.likedCount > 0
+                                    iconName: "play"
+                                    size: 20
+                                    filled: true
+                                    tip: "Putar lagu yang disukai"
+                                    onClicked: player.playContext("senada:liked:", "")
+                                }
                             }
-                        }
-                        BloomPlayButton {
-                            anchors.right: parent.right
-                            anchors.bottom: parent.bottom
-                            anchors.margins: 20
-                            size: 52
-                            visible: library.likedCount > 0
-                            tip: "Putar lagu yang disukai"
-                            onClicked: player.playContext("senada:liked:", "")
+                            Item { width: 1; height: 8 }
+                            Label { width: parent.width; text: "Lagu yang Disukai"; elide: Text.ElideRight; font.pixelSize: 14; font.weight: Font.Bold }
+                            Label {
+                                width: parent.width
+                                text: "Playlist • " + (library.likedRevision, library.likedCount) + " lagu"
+                                color: Theme.dim
+                                font.pixelSize: 12
+                            }
                         }
                     }
                 }
@@ -168,7 +164,7 @@ Item {
             Label {
                 visible: page.items.length === 0 && page.filter !== "all"
                 x: 12
-                text: page.filter === "own" ? "Belum ada playlist. Klik “Playlist baru” atau impor dari Spotify."
+                text: page.filter === "playlist" || page.filter === "imported" ? "Belum ada playlist di sini. Klik “Playlist baru” atau “Impor Spotify”."
                                             : "Belum ada yang disimpan. Tekan ♡ di halaman album, playlist, atau artis."
                 color: Theme.dim
                 font.pixelSize: 15

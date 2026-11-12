@@ -1,40 +1,50 @@
 pragma Singleton
 import QtQuick
 
-// Senada "Bloom" design tokens: ink base, glass layers, mint + fuchsia brand colours.
-// `accent` stays album-adaptive (immersive visualizer & ambience); brand colours are fixed.
+// Senada design tokens. Monochrome: the primary colour is white on the dark theme and
+// black on the light theme; colour comes only from album art (`accent`, used by the
+// immersive player) and the red "liked" heart.
 QtObject {
-    // base & surfaces (ink-tinted, used under/behind glass)
-    readonly property color bg: "#0b0f14"
-    readonly property color surface: "#111720"
-    readonly property color surface2: "#17202b"
-    readonly property color surface3: "#202b37"
+    // "system" | "dark" | "light" (bound to session.themeMode in Main.qml)
+    property string mode: "system"
+    readonly property bool dark: mode === "dark" || (mode !== "light" && Qt.styleHints.colorScheme !== Qt.ColorScheme.Light)
+
+    // base & surfaces
+    readonly property color bg: dark ? "#121212" : "#fafafa"        // content area
+    readonly property color sidebar: dark ? "#000000" : "#f0f0f0"
+    readonly property color surface: dark ? "#1b1b1b" : "#ffffff"   // cards, now-playing card
+    readonly property color surface2: dark ? "#222222" : "#ffffff"  // menus, popups, dialogs
+    readonly property color surface3: dark ? "#2a2a2a" : "#e9e9e9"  // placeholders, tracks of sliders
 
     // text
-    readonly property color text: "#f2f5f7"
-    readonly property color dim: "#9aa6b2"
-    readonly property color faint: "#5f6b78"
+    readonly property color text: dark ? "#f5f5f5" : "#111111"
+    readonly property color dim: dark ? "#a3a3a3" : "#5c5c5c"
+    readonly property color faint: dark ? "#6b6b6b" : "#9a9a9a"
 
-    // brand
-    readonly property color mint: "#6ff2c6"
-    readonly property color fuchsia: "#ff4f8b"
-    readonly property color primary: mint
-    readonly property color primaryText: "#04251a"
-    readonly property color accentText: primaryText
-    readonly property color danger: "#ff6b81"
-    readonly property color ok: "#6ff2c6"
+    // lines & interaction fills
+    readonly property color line: dark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.11)
+    readonly property color lineStrong: dark ? Qt.rgba(1, 1, 1, 0.55) : Qt.rgba(0, 0, 0, 0.6)
+    readonly property color subtle: dark ? Qt.rgba(1, 1, 1, 0.035) : Qt.rgba(0, 0, 0, 0.025)
+    readonly property color hover: dark ? Qt.rgba(1, 1, 1, 0.07) : Qt.rgba(0, 0, 0, 0.05)
+    readonly property color pressed: dark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.09)
 
-    // album-adaptive colour (set by Main.qml from the cover art)
-    property color accent: "#6ff2c6"
+    // monochrome primary: white on dark, black on light
+    readonly property color primary: text
+    readonly property color primaryText: dark ? "#000000" : "#ffffff"
 
-    // glass: white veils on top of the blurred album backdrop
-    readonly property color glass: Qt.rgba(1, 1, 1, 0.06)
-    readonly property color glassHover: Qt.rgba(1, 1, 1, 0.10)
-    readonly property color glassStrong: Qt.rgba(1, 1, 1, 0.14)
-    readonly property color glassBorder: Qt.rgba(1, 1, 1, 0.09)
-    readonly property color panel: Qt.rgba(0.067, 0.086, 0.114, 0.94)  // floating bars (dock)
+    // semantic
+    readonly property color like: "#ff3b4f"
+    readonly property color danger: "#ff5a6a"
+    readonly property color warn: "#f2b84b"
+    readonly property color ok: dark ? "#7ddc9a" : "#1f8a4c"
 
-    readonly property int dockSpace: 132  // scroll padding so content clears the floating dock
+    // album-adaptive colour (set by Main.qml from the cover art); used by the immersive player
+    property color accent: primary
+
+    readonly property int dockSpace: 32      // bottom padding of scrolling pages
+    readonly property int sidebarWidth: 232
+    readonly property int playerBarHeight: 88
+    readonly property int rightPanelWidth: 340
 
     readonly property string font: "Google Sans Flex"
     readonly property string mono: "JetBrainsMono Nerd Font"

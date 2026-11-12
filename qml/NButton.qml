@@ -1,24 +1,24 @@
 import QtQuick
 import QtQuick.Controls
 
-// Pill button: mint when `primary`, frosted glass otherwise.
+// Pill button: solid primary when `primary`, outlined otherwise.
 AbstractButton {
     id: b
     property bool primary: false
     property string iconName
 
-    implicitHeight: 40
-    implicitWidth: row.implicitWidth + 32
+    implicitHeight: 38
+    implicitWidth: row.implicitWidth + 30
     hoverEnabled: true
-    focusPolicy: Qt.NoFocus
+    focusPolicy: Qt.TabFocus
     opacity: enabled ? 1 : 0.4
 
     background: Rectangle {
         radius: height / 2
-        color: b.primary ? (b.down ? Qt.darker(Theme.mint, 1.12) : b.hovered ? Qt.lighter(Theme.mint, 1.06) : Theme.mint)
-                         : (b.down ? Theme.glassStrong : b.hovered ? Theme.glassHover : Theme.glass)
-        border.width: b.primary ? 0 : 1
-        border.color: Theme.glassBorder
+        color: b.primary ? (b.down ? Theme.alpha(Theme.primary, 0.8) : b.hovered ? Theme.alpha(Theme.primary, 0.9) : Theme.primary)
+                         : (b.down ? Theme.pressed : b.hovered ? Theme.hover : "transparent")
+        border.width: b.primary && !b.visualFocus ? 0 : 1
+        border.color: b.visualFocus || b.hovered ? Theme.lineStrong : Theme.line
         Behavior on color { ColorAnimation { duration: 120 } }
     }
     contentItem: Item {
@@ -29,13 +29,13 @@ AbstractButton {
             Icon {
                 visible: b.iconName !== ""
                 glyph: b.iconName
-                size: 18
+                size: 17
                 anchors.verticalCenter: parent.verticalCenter
                 color: b.primary ? Theme.primaryText : Theme.text
             }
             Label {
                 text: b.text
-                font.pixelSize: 14
+                font.pixelSize: 13
                 font.weight: Font.DemiBold
                 color: b.primary ? Theme.primaryText : Theme.text
                 anchors.verticalCenter: parent.verticalCenter

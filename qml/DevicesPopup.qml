@@ -19,7 +19,7 @@ Popup {
     background: Rectangle {
         color: Theme.surface2
         radius: 22
-        border.color: Theme.glassBorder
+        border.color: Theme.line
     }
 
     enter: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 140 } }
@@ -50,7 +50,7 @@ Popup {
                 onClicked: { player.transfer(modelData.id); p.close() }
                 background: Rectangle {
                     radius: 12
-                    color: modelData.active ? Theme.alpha(Theme.mint, 0.14) : d.hovered ? Theme.alpha(Theme.text, 0.07) : "transparent"
+                    color: modelData.active ? Theme.hover : d.hovered ? Theme.subtle : "transparent"
                 }
                 contentItem: RowLayout {
                     spacing: 12
@@ -58,7 +58,7 @@ Popup {
                         Layout.leftMargin: 10
                         glyph: p.deviceIcon(modelData.type)
                         size: 24
-                        color: modelData.active ? Theme.mint : Theme.dim
+                        color: modelData.active ? Theme.text : Theme.dim
                     }
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -69,7 +69,7 @@ Popup {
                             elide: Text.ElideRight
                             font.pixelSize: 15
                             font.weight: Font.Medium
-                            color: modelData.active ? Theme.mint : Theme.text
+                            color: Theme.text
                         }
                         Label {
                             text: modelData.active ? "Sedang diputar" : modelData.local ? "Komputer ini" : modelData.type

@@ -17,10 +17,10 @@ Column {
         height: c.title !== "" ? 44 : 8
         Column {
             anchors.left: parent.left
-            anchors.leftMargin: 12
+            anchors.leftMargin: 4
             anchors.verticalCenter: parent.verticalCenter
             visible: c.title !== ""
-            Label { text: c.title; font.pixelSize: 22; font.weight: Font.Bold }
+            Label { text: c.title; font.pixelSize: 18; font.weight: Font.Bold }
             Label { visible: c.subtitle !== ""; text: c.subtitle; color: Theme.dim; font.pixelSize: 13 }
         }
         Row {

@@ -115,7 +115,7 @@ Item {
                 wrapMode: Text.WordWrap
                 font.pixelSize: lyrics.synced ? 26 : 22
                 font.weight: Font.Bold
-                color: !lyrics.synced ? Theme.alpha(Theme.text, 0.85)
+                color: !lyrics.synced ? Qt.rgba(1, 1, 1, 0.85)
                      : row.isCurrent ? "#ffffff"
                      : row.past ? Qt.rgba(1, 1, 1, 0.42) : Qt.rgba(1, 1, 1, 0.36)
                 Behavior on x { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
@@ -146,7 +146,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             text: ({ "loading": "Memuat lirik…", "none": "Lirik tidak ditemukan untuk lagu ini",
                      "error": "Gagal memuat lirik", "idle": "Putar lagu untuk melihat lirik" })[lyrics.status] || ""
-            color: Theme.dim
+            color: Qt.rgba(1, 1, 1, 0.6)
             font.pixelSize: 18
         }
     }

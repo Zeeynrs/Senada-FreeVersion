@@ -31,6 +31,15 @@ Item {
         session.visualizerStyle = (session.visualizerStyle === "wave") ? "bars" : "wave"
     }
 
+    // always dark (it sits on the blurred cover art), whatever the app theme is
+    palette.windowText: "#f5f5f5"
+    palette.text: "#f5f5f5"
+    palette.buttonText: "#f5f5f5"
+    palette.window: "#0b0b0b"
+    palette.base: "#1c1c1c"
+    palette.button: "#1c1c1c"
+    palette.placeholderText: "#8a8a8a"
+
     y: open ? 0 : height
     visible: shown
     Behavior on y { NumberAnimation { duration: 460; easing.type: Easing.OutQuint } }

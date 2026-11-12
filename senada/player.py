@@ -12,7 +12,7 @@ from . import ytmusic
 from .engine import AudioEngine
 from .resolver import AudioResolver
 
-DEFAULT_ACCENT = "#6ff2c6"
+DEFAULT_ACCENT = "#d9d9d9"  # neutral until the album art gives a colour
 
 
 def download(url: str) -> bytes:

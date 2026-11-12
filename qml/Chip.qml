@@ -1,22 +1,22 @@
 import QtQuick
 import QtQuick.Controls
 
-// Pill-shaped toggle/filter chip. `checked` fills it with mint.
+// Outlined pill for filters, tabs and small stats. `checked` = the selected tab.
 AbstractButton {
     id: c
     property string iconName
     checkable: false
-    implicitHeight: 36
-    implicitWidth: row.implicitWidth + 28
+    implicitHeight: 32
+    implicitWidth: row.implicitWidth + 26
     hoverEnabled: true
     focusPolicy: Qt.NoFocus
 
     background: Rectangle {
         radius: height / 2
-        color: c.checked ? Theme.mint : c.hovered ? Theme.glassHover : Theme.glass
-        border.width: c.checked ? 0 : 1
-        border.color: Theme.glassBorder
-        Behavior on color { ColorAnimation { duration: 140 } }
+        color: c.checked ? Theme.hover : c.hovered ? Theme.subtle : "transparent"
+        border.width: 1
+        border.color: c.checked ? Theme.lineStrong : c.hovered ? Theme.lineStrong : Theme.line
+        Behavior on color { ColorAnimation { duration: 120 } }
     }
     contentItem: Item {
         Row {
@@ -26,15 +26,15 @@ AbstractButton {
             Icon {
                 visible: c.iconName !== ""
                 glyph: c.iconName
-                size: 16
+                size: 15
                 anchors.verticalCenter: parent.verticalCenter
-                color: c.checked ? Theme.primaryText : Theme.text
+                color: c.checked || c.hovered ? Theme.text : Theme.dim
             }
             Label {
                 text: c.text
-                font.pixelSize: 13
-                font.weight: Font.DemiBold
-                color: c.checked ? Theme.primaryText : Theme.text
+                font.pixelSize: 12
+                font.weight: c.checked ? Font.Bold : Font.DemiBold
+                color: c.checked || c.hovered ? Theme.text : Theme.dim
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
