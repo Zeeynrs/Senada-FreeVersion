@@ -12,7 +12,7 @@ from . import ytmusic
 from .engine import AudioEngine
 from .resolver import AudioResolver
 
-DEFAULT_ACCENT = "#9ecaff"
+DEFAULT_ACCENT = "#6ff2c6"
 
 
 def download(url: str) -> bytes:

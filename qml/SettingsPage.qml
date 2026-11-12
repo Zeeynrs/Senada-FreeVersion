@@ -12,8 +12,9 @@ Item {
         Layout.fillWidth: true
         Layout.maximumWidth: 760
         implicitHeight: inner.implicitHeight + 48
-        radius: 20
-        color: Theme.alpha(Theme.text, 0.04)
+        radius: 30
+        color: Theme.glass
+        border.color: Theme.glassBorder
         ColumnLayout {
             id: inner
             anchors.fill: parent
@@ -45,19 +46,19 @@ Item {
     Flickable {
         id: flick
         anchors.fill: parent
-        contentHeight: col.implicitHeight + 80
+        contentHeight: col.implicitHeight + Theme.dockSpace
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         ScrollBar.vertical: NScrollBar {}
 
         ColumnLayout {
             id: col
-            x: 32
-            y: 52
+            x: 36
+            y: 4
             width: flick.width - 64
             spacing: 18
 
-            Label { text: "Pengaturan"; font.pixelSize: 36; font.weight: Font.Black }
+            Label { text: "Pengaturan"; font.pixelSize: 44; font.weight: Font.Black; font.letterSpacing: -1.2 }
 
             Section {
                 title: "Profil & Library"
@@ -108,11 +109,11 @@ Item {
                     Rectangle {
                         implicitWidth: 10; implicitHeight: 10; radius: 5
                         color: updater.updating || updater.checking ? "#ffd36e"
-                             : updater.updateAvailable ? Theme.accent : "#7ee08f"
+                             : updater.updateAvailable ? Theme.fuchsia : Theme.mint
                     }
                     Label {
                         text: updater.statusText
-                        color: updater.updateAvailable ? Theme.accent : Theme.dim
+                        color: updater.updateAvailable ? Theme.mint : Theme.dim
                         font.pixelSize: 14
                         font.weight: updater.updateAvailable ? Font.DemiBold : Font.Normal
                     }
@@ -124,7 +125,7 @@ Item {
                     radius: 12
                     color: Theme.bg
                     border.width: 1
-                    border.color: Theme.alpha(Theme.accent, 0.25)
+                    border.color: Theme.alpha(Theme.mint, 0.25)
                     Label {
                         id: changelogLabel
                         anchors.fill: parent
@@ -161,7 +162,7 @@ Item {
                     hint: "Pemutar audio lokal bebas iklan & tanpa syarat Spotify Premium"
                     Rectangle {
                         implicitWidth: 10; implicitHeight: 10; radius: 5
-                        color: "#7ee08f"
+                        color: Theme.mint
                     }
                     Label { text: "Aktif (Lokal / MPV)"; color: Theme.dim; font.pixelSize: 14 }
                 }
@@ -238,7 +239,7 @@ Item {
                             text: modelData
                             font.family: index % 2 === 0 ? Theme.mono : Theme.font
                             font.pixelSize: 13
-                            color: index % 2 === 0 ? Theme.accent : Theme.dim
+                            color: index % 2 === 0 ? Theme.mint : Theme.dim
                         }
                     }
                 }

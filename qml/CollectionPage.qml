@@ -25,6 +25,7 @@ Item {
             if (key !== page.pageKey) return
             page.info = data
             page.loading = false
+            Qt.callLater(list.positionViewAtBeginning)  // the header grew; show it from the top
             if (data.error) session.toast(data.error)
         }
         // keep liked songs and own playlists in sync with edits made elsewhere
@@ -60,9 +61,10 @@ Item {
         id: list
         anchors.fill: parent
         clip: true
+        currentIndex: -1  // don't auto-scroll to the first row (it would clip the header)
         model: page.info.tracks || []
         reuseItems: true
-        bottomMargin: 24
+        bottomMargin: Theme.dockSpace
         ScrollBar.vertical: NScrollBar {}
 
         header: PageHeader {

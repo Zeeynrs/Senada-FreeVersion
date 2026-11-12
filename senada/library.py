@@ -96,6 +96,10 @@ class Library(QObject):
     def likedRevision(self):
         return self._liked_rev
 
+    @Property(int, notify=likedChanged)
+    def likedCount(self):
+        return len(self.store.liked())
+
     @Property(int, notify=savedChanged)
     def savedRevision(self):
         return self._saved_rev
@@ -118,13 +122,15 @@ class Library(QObject):
         saved = []
         for s in self.store.saved():
             label = {"album": "Album", "playlist": "Playlist", "artist": "Artis"}.get(s["kind"], "")
-            saved.append({**s, "subtitle": " • ".join(x for x in (label, s.get("subtitle", "")) if x)})
+            sub = s.get("subtitle", "")
+            saved.append({**s, "subtitle": " • ".join(x for x in (label, sub if sub != label else "") if x)})
         self._own = own
         self._playlists = own + saved
         self.playlistsChanged.emit()
 
     def _refresh_recent(self):
         self._recent = self.store.history(12)
+        self._cache(self._recent)  # so "Lanjut dengar" can replay them after a restart
         self.recentChanged.emit()
 
     def _cache(self, tracks):

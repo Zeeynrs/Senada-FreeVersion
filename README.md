@@ -9,7 +9,8 @@ Pemutar musik gratis & tanpa iklan untuk desktop Linux (Wayland/Hyprland & X11).
 - **Library Lokal**: lagu disukai, playlist buatan sendiri, album/playlist/artis yang disimpan, dan riwayat putar — semuanya di `~/.config/senada/library.json`.
 - **Impor dari Spotify**: tempel link playlist/album **publik** Spotify, Senada mencocokkan lagunya di YouTube Music. Tanpa login.
 - **Radio**: klik kanan lagu → *Putar radio dari lagu ini*.
-- **Immersive Player**: tampilan penuh dengan cover bergelombang, dual visualizer (*cava*), dan lirik tersinkron (*LRCLIB*).
+- **Tampilan "Bloom"**: tanpa sidebar — navigasi dan pemutar mini menyatu dalam satu kapsul kaca melayang (*Bloom Dock*) dengan seek bar bergelombang; latar seluruh aplikasi mengikuti warna sampul lagu; bentuk bunga/bergerigi jadi ciri khas (tombol putar, avatar artis, sampul). Palet mint & fuchsia di atas warna tinta gelap.
+- **Immersive Player**: tampilan penuh dengan cover bergelombang, dual visualizer (*cava*), equalizer, tempo & pitch, dan lirik tersinkron (*LRCLIB*).
 - **Warna Aksen Otomatis**, **Pre-fetching** lagu berikutnya, dan **MPRIS** (`playerctl`, tombol media, Hyprlock, Waybar).
 
 ---

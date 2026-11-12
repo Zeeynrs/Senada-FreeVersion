@@ -6,9 +6,9 @@ Menu {
     padding: 6
     background: Rectangle {
         implicitWidth: 230
-        color: Theme.surface3
-        radius: 14
-        border.color: Theme.alpha(Theme.text, 0.07)
+        color: Theme.surface2
+        radius: 18
+        border.color: Theme.glassBorder
     }
     delegate: MenuItem {
         id: mi
@@ -19,8 +19,8 @@ Menu {
             verticalAlignment: Text.AlignVCenter
         }
         background: Rectangle {
-            radius: 9
-            color: mi.highlighted ? Theme.alpha(Theme.text, 0.09) : "transparent"
+            radius: 12
+            color: mi.highlighted ? Theme.alpha(Theme.mint, 0.14) : "transparent"
         }
     }
 }

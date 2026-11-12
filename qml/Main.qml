@@ -19,8 +19,8 @@ ApplicationWindow {
         alternateBase: Theme.surface3
         button: Theme.surface2
         buttonText: Theme.text
-        highlight: Theme.accent
-        highlightedText: Theme.accentText
+        highlight: Theme.mint
+        highlightedText: Theme.primaryText
         placeholderText: Theme.faint
         toolTipBase: Theme.surface3
         toolTipText: Theme.text

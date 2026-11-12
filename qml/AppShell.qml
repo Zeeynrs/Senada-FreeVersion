@@ -7,22 +7,31 @@ Item {
     objectName: "shell"
     property bool immersive: false
 
+    readonly property string currentKey: stack.currentItem ? stack.currentItem.pageKey : ""
+    readonly property var topLevel: ["search", "library", "settings"]
+
     function navigate(kind, itemId) {
         const key = kind + ":" + itemId
-        const cur = stack.currentItem ? stack.currentItem.pageKey : ""
+        const cur = currentKey
         immersive = false
         if (kind === "home") {
             stack.pop(null)
             return
         }
-        if (cur === key || cur === kind || !kind || (kind !== "liked" && kind !== "search" && kind !== "settings" && !itemId))
+        const standalone = kind === "liked" || topLevel.indexOf(kind) >= 0
+        if (cur === key || cur === kind || !kind || (!standalone && !itemId))
             return
+        // dock destinations replace each other instead of piling up
+        if (topLevel.indexOf(kind) >= 0 && stack.depth > 1)
+            stack.pop(null, StackView.Immediate)
         if (kind === "playlist" || kind === "album" || kind === "liked")
             stack.push(collectionComp, { kind: kind, itemId: itemId })
         else if (kind === "artist")
             stack.push(artistComp, { itemId: itemId })
         else if (kind === "search")
             stack.push(searchComp)
+        else if (kind === "library")
+            stack.push(libraryComp)
         else if (kind === "settings")
             stack.push(settingsComp)
     }
@@ -121,39 +130,27 @@ Item {
         }
     }
 
-    ColumnLayout {
+    Ambient {
         anchors.fill: parent
-        spacing: 0
+        art: player.state.image || ""
+    }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            spacing: 0
+    TopBar {
+        id: topBar
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        currentKey: shell.currentKey
+        canGoBack: stack.depth > 1
+        onBack: stack.pop()
+    }
 
-            Sidebar {
-                Layout.fillHeight: true
-                Layout.preferredWidth: shell.width > 1100 ? 270 : 230
-                currentKey: stack.currentItem ? stack.currentItem.pageKey : ""
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.topMargin: 10
-                Layout.rightMargin: 10
-                radius: 24
-                color: Theme.surface
-                clip: true
-
-                Rectangle {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: 320
-                    gradient: Gradient {
-                        GradientStop { position: 0; color: Theme.alpha(Theme.accent, 0.16) }
-                        GradientStop { position: 1; color: "transparent" }
-                    }
-                }
+    Item {
+        id: content
+        anchors.top: topBar.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
 
                 StackView {
                     id: stack
@@ -176,14 +173,6 @@ Item {
                     }
                 }
 
-                IconButton {
-                    x: 14; y: 10
-                    visible: stack.depth > 1
-                    iconName: "back"
-                    tip: "Kembali (Alt+←)"
-                    onClicked: stack.pop()
-                }
-
                 Rectangle {
                     id: updateBanner
                     visible: opacity > 0
@@ -195,9 +184,9 @@ Item {
                     width: Math.min(480, parent.width - 90)
                     height: 58
                     radius: 18
-                    color: Theme.surface3
+                    color: Theme.surface2
                     border.width: 1
-                    border.color: Theme.alpha(Theme.accent, 0.35)
+                    border.color: Theme.alpha(Theme.mint, 0.4)
                     z: 20
 
                     Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
@@ -213,12 +202,12 @@ Item {
                             Layout.preferredWidth: 34
                             Layout.preferredHeight: 34
                             radius: 17
-                            color: Theme.alpha(Theme.accent, 0.16)
+                            color: Theme.alpha(Theme.mint, 0.16)
                             Icon {
                                 anchors.centerIn: parent
                                 glyph: "download"
                                 size: 18
-                                color: Theme.accent
+                                color: Theme.mint
                             }
                         }
 
@@ -257,14 +246,29 @@ Item {
                         }
                     }
                 }
-            }
-        }
+    }
 
-        PlayerBar {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 96
-            onOpenImmersive: shell.immersive = true
+    // content fades out before it slides under the dock
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 150
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "transparent" }
+            GradientStop { position: 0.75; color: Theme.alpha(Theme.bg, 0.82) }
+            GradientStop { position: 1.0; color: Theme.alpha(Theme.bg, 0.92) }
         }
+    }
+
+    BloomDock {
+        id: dock
+        width: Math.min(1040, shell.width - 40)
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 18
+        currentKey: shell.currentKey
+        onOpenImmersive: shell.immersive = true
     }
 
     // mouse "back" button
@@ -290,6 +294,7 @@ Item {
     Component { id: collectionComp; CollectionPage {} }
     Component { id: artistComp; ArtistPage {} }
     Component { id: searchComp; SearchPage {} }
+    Component { id: libraryComp; LibraryPage {} }
     Component { id: settingsComp; SettingsPage {} }
 
     Shortcut { sequence: "Space"; onActivated: player.togglePlay() }
