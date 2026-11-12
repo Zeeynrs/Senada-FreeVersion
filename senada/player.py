@@ -316,12 +316,14 @@ class Player(QObject):
             return
         patch = {k: info.get(k) for k in ("imageSmall", "image", "imageLarge") if info.get(k)}
         patch["matchScore"] = info.get("s", 0)
+        def fill(t):  # the match score always; covers only where the track has none (keep Spotify art)
+            t.update({k: v for k, v in patch.items() if k == "matchScore" or not t.get(k)})
         for t in [self._track_cache.get(uri)] + [q for q in self._queue if q.get("uri") == uri]:
             if t is not None:
-                t.update(patch)
+                fill(t)
         if self._state.get("uri") == uri:
             first_cover = not self._state.get("imageSmall") and patch.get("imageSmall")
-            self._state.update(patch)
+            fill(self._state)
             self.stateChanged.emit()
             if first_cover:
                 self._on_cover(patch["imageSmall"])

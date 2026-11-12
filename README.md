@@ -41,7 +41,7 @@ Buka **Koleksi → Impor Spotify** (atau **Pengaturan → Profil & Library → I
 
 Setelah diimpor, Senada mencocokkan setiap lagu dengan YouTube Music di latar belakang: judul, artis, dan durasi dibandingkan, dan versi yang berbeda (live, cover, karaoke, remix, slowed/sped up) dihindari kecuali memang itu yang dicari. Sampul lagu ikut terisi. Lagu yang pencocokannya kurang yakin diberi tanda **?** — klik tanda itu (atau klik kanan → *Pilih versi lain…*) untuk melihat semua kandidat beserta skornya, mencoba memutarnya, dan memilih versi yang benar. Pilihanmu diingat.
 
-Batasan: hanya playlist **publik**, dan Spotify hanya menampilkan sekitar 100 lagu pertama per playlist lewat halaman publiknya. *Lagu yang Disukai* (Liked Songs) Spotify bersifat privat sehingga tidak bisa diimpor otomatis — buat playlist publik berisi lagu-lagu itu di Spotify, lalu impor link-nya.
+Seluruh isi playlist ikut diimpor (sampai batas Spotify, 10.000 lagu), lengkap dengan sampul dan nama album. Playlist besar butuh beberapa menit sampai semua lagunya selesai dicocokkan. Batasan: hanya playlist **publik**. *Lagu yang Disukai* (Liked Songs) Spotify bersifat privat sehingga tidak bisa diimpor otomatis — buat playlist publik berisi lagu-lagu itu di Spotify, lalu impor link-nya.
 
 ### Kalau lagu tidak bisa diputar
 Senada memutar audio dari YouTube lewat `yt-dlp`. Jika YouTube mengubah sistemnya, perbarui `yt-dlp` (`yt-dlp -U`, lewat package manager distro Anda, atau ganti `yt-dlp.exe` di folder `bin\` di Windows). Jika YouTube diblokir di jaringan Anda, gunakan VPN.

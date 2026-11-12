@@ -145,7 +145,7 @@ Item {
                 }
                 SettingRow {
                     label: "Impor dari Spotify"
-                    hint: "Tempel link playlist atau album publik Spotify. Tanpa login; maks. ±100 lagu per playlist."
+                    hint: "Tempel link playlist atau album publik Spotify. Tanpa login; seluruh isi playlist ikut diimpor."
                 }
                 RowLayout {
                     Layout.fillWidth: true
