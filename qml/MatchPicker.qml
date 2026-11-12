@@ -25,7 +25,7 @@ Popup {
         return "Video"
     }
     function scoreColor(s) {
-        return s >= library.matchThreshold ? Theme.mint : s >= 45 ? "#ffc36b" : Theme.fuchsia
+        return s >= library.matchThreshold ? Theme.ok : s >= 45 ? Theme.warn : Theme.danger
     }
 
     Connections {
@@ -44,7 +44,7 @@ Popup {
     modal: true
     focus: true
     padding: 24
-    background: Rectangle { radius: 28; color: Theme.surface2; border.color: Theme.glassBorder }
+    background: Rectangle { radius: 16; color: Theme.surface2; border.color: Theme.line }
     Overlay.modal: Rectangle { color: Qt.rgba(0, 0, 0, 0.5) }
 
     contentItem: ColumnLayout {
@@ -53,7 +53,6 @@ Popup {
         RowLayout {
             Layout.fillWidth: true
             spacing: 14
-            Scallop { Layout.preferredWidth: 34; Layout.preferredHeight: 34; lobes: 9; depth: 0.13; color: Theme.mint }
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 2
@@ -103,10 +102,10 @@ Popup {
                     required property var modelData
                     width: list.width
                     height: 68
-                    radius: 18
-                    color: modelData.current ? Theme.alpha(Theme.mint, 0.10) : rowHover.hovered ? Theme.glass : "transparent"
+                    radius: 10
+                    color: modelData.current ? Theme.hover : rowHover.hovered ? Theme.subtle : "transparent"
                     border.width: modelData.current ? 1 : 0
-                    border.color: Theme.alpha(Theme.mint, 0.3)
+                    border.color: Theme.lineStrong
                     HoverHandler { id: rowHover }
 
                     RowLayout {

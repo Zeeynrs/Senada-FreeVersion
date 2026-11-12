@@ -1,27 +1,47 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 
 Item {
     id: shell
     objectName: "shell"
     property bool immersive: false
+    property bool sidebarOpen: true
+    property string panel: "lyrics"   // right panel: "lyrics" | "queue" | "" (closed)
+    property var forwardStack: []     // pages left with "back", for "forward"
 
     readonly property string currentKey: stack.currentItem ? stack.currentItem.pageKey : ""
-    readonly property var topLevel: ["search", "library", "settings"]
+    readonly property string libraryFilter: currentKey === "library" ? stack.currentItem.filter : ""
+    // these replace each other instead of piling up
+    readonly property var topLevel: ["search", "library", "settings", "liked"]
 
-    function navigate(kind, itemId) {
-        const key = kind + ":" + itemId
-        const cur = currentKey
+    function entryOf(item) {
+        if (!item) return null
+        const key = item.pageKey
+        if (key === "library") return { kind: "library", itemId: item.filter }
+        const i = key.indexOf(":")
+        return i < 0 ? { kind: key, itemId: "" } : { kind: key.slice(0, i), itemId: key.slice(i + 1) }
+    }
+
+    function navigate(kind, itemId, keepForward) {
+        if (!kind) return
+        itemId = itemId || ""
         immersive = false
+        if (!keepForward) forwardStack = []
         if (kind === "home") {
             stack.pop(null)
             return
         }
-        const standalone = kind === "liked" || topLevel.indexOf(kind) >= 0
-        if (cur === key || cur === kind || !kind || (!standalone && !itemId))
+        // library sections: switch the filter of the open library page
+        if (kind === "library" && currentKey === "library") {
+            stack.currentItem.filter = itemId || "all"
             return
-        // dock destinations replace each other instead of piling up
+        }
+        const key = kind + ":" + itemId
+        const standalone = kind === "liked" || topLevel.indexOf(kind) >= 0
+        if (currentKey === key || currentKey === kind || (!standalone && !itemId))
+            return
         if (topLevel.indexOf(kind) >= 0 && stack.depth > 1)
             stack.pop(null, StackView.Immediate)
         if (kind === "playlist" || kind === "album" || kind === "liked")
@@ -31,9 +51,26 @@ Item {
         else if (kind === "search")
             stack.push(searchComp)
         else if (kind === "library")
-            stack.push(libraryComp)
+            stack.push(libraryComp, { filter: itemId || "all" })
         else if (kind === "settings")
             stack.push(settingsComp)
+    }
+
+    function goBack() {
+        if (immersive) { immersive = false; return }
+        if (stack.depth <= 1) return
+        const e = entryOf(stack.currentItem)
+        if (e) forwardStack = forwardStack.concat([e])
+        stack.pop()
+    }
+    function goForward() {
+        if (forwardStack.length === 0) return
+        const e = forwardStack[forwardStack.length - 1]
+        forwardStack = forwardStack.slice(0, -1)
+        navigate(e.kind, e.itemId, true)
+    }
+    function togglePanel(name) {
+        panel = panel === name ? "" : name
     }
 
     Connections {
@@ -57,6 +94,7 @@ Item {
     Connections {
         target: Nav
         function onMatchPicker(track) { matchPicker.openFor(track) }
+        function onImmersive(on) { shell.immersive = on }
     }
     MatchPicker { id: matchPicker }
 
@@ -94,9 +132,9 @@ Item {
         }
 
         background: Rectangle {
-            radius: 22
+            radius: 16
             color: Theme.surface2
-            border.color: Theme.alpha(Theme.text, 0.08)
+            border.color: Theme.line
         }
         Overlay.modal: Rectangle { color: Qt.rgba(0, 0, 0, 0.45) }
 
@@ -136,9 +174,39 @@ Item {
         }
     }
 
-    Ambient {
+    // ---- glass backdrop ----------------------------------------------------------------
+    // "Sampul album": the current cover, heavily blurred, fills the window behind the
+    // translucent panels. ("Transparan" leaves the window itself see-through instead.)
+    Item {
         anchors.fill: parent
-        art: player.state.image || ""
+        visible: Theme.glassMode === "cover"
+        Image {
+            id: glassArt
+            anchors.fill: parent
+            source: player.state.image || ""
+            sourceSize: Qt.size(192, 192)
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            visible: false
+        }
+        MultiEffect {
+            anchors.fill: parent
+            source: glassArt
+            blurEnabled: true
+            blur: 1.0
+            blurMax: 64
+            saturation: 0.35
+            brightness: Theme.dark ? -0.1 : 0.15
+            scale: 1.2
+            opacity: glassArt.status === Image.Ready ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 600 } }
+        }
+    }
+
+    // content background (translucent in the glass modes)
+    Rectangle {
+        anchors.fill: content
+        color: Theme.bg
     }
 
     TopBar {
@@ -146,141 +214,147 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        currentKey: shell.currentKey
         canGoBack: stack.depth > 1
-        onBack: stack.pop()
+        canGoForward: shell.forwardStack.length > 0
+        sidebarOpen: shell.sidebarOpen
+        panel: shell.panel
+        onToggleSidebar: shell.sidebarOpen = !shell.sidebarOpen
+        onBack: shell.goBack()
+        onForward: shell.goForward()
+        onTogglePanel: shell.panel = shell.panel !== "" ? "" : "lyrics"
+    }
+
+    Sidebar {
+        id: sidebar
+        anchors.left: parent.left
+        anchors.top: topBar.bottom
+        anchors.bottom: playerBar.top
+        width: shell.sidebarOpen ? Theme.sidebarWidth : 0
+        visible: width > 0
+        currentKey: shell.currentKey
+        libraryFilter: shell.libraryFilter
+        Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+    }
+
+    RightPanel {
+        id: rightPanel
+        anchors.right: parent.right
+        anchors.top: topBar.bottom
+        anchors.bottom: playerBar.top
+        width: shell.panel !== "" ? Math.min(Theme.rightPanelWidth, shell.width * 0.3) : 0
+        visible: width > 0
+        panel: shell.panel || "lyrics"
+        onSelect: (name) => shell.panel = name
+        onClose: shell.panel = ""
+        Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
     }
 
     Item {
         id: content
         anchors.top: topBar.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        anchors.left: sidebar.right
+        anchors.right: rightPanel.left
+        anchors.bottom: playerBar.top
+        clip: true
 
-                StackView {
-                    id: stack
-                    anchors.fill: parent
-                    initialItem: HomePage {}
+        StackView {
+            id: stack
+            anchors.fill: parent
+            initialItem: HomePage {}
 
-                    pushEnter: Transition {
-                        ParallelAnimation {
-                            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 220 }
-                            NumberAnimation { property: "y"; from: 24; to: 0; duration: 280; easing.type: Easing.OutCubic }
-                        }
+            pushEnter: Transition {
+                ParallelAnimation {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
+                    NumberAnimation { property: "y"; from: 16; to: 0; duration: 240; easing.type: Easing.OutCubic }
+                }
+            }
+            pushExit: Transition { NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 140 } }
+            popEnter: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 } }
+            popExit: Transition {
+                ParallelAnimation {
+                    NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 140 }
+                    NumberAnimation { property: "y"; from: 0; to: 16; duration: 180 }
+                }
+            }
+        }
+
+        Rectangle {
+            id: updateBanner
+            visible: opacity > 0
+            opacity: updater.bannerVisible ? 1 : 0
+            anchors.top: parent.top
+            anchors.topMargin: updater.bannerVisible ? 14 : -70
+            anchors.right: parent.right
+            anchors.rightMargin: 18
+            width: Math.min(480, parent.width - 90)
+            height: 58
+            radius: 14
+            color: Theme.surface2
+            border.width: 1
+            border.color: Theme.lineStrong
+            z: 20
+
+            Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+            Behavior on anchors.topMargin { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 14
+                anchors.rightMargin: 10
+                spacing: 10
+
+                Icon { glyph: "download"; size: 20; color: Theme.text }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 1
+                    Label {
+                        Layout.fillWidth: true
+                        text: "Update GitHub tersedia (" + updater.commitsBehind + " commit)"
+                        font.pixelSize: 13
+                        font.weight: Font.Bold
+                        elide: Text.ElideRight
                     }
-                    pushExit: Transition { NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 160 } }
-                    popEnter: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 220 } }
-                    popExit: Transition {
-                        ParallelAnimation {
-                            NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 160 }
-                            NumberAnimation { property: "y"; from: 0; to: 24; duration: 200 }
-                        }
+                    Label {
+                        Layout.fillWidth: true
+                        text: updater.remoteMessage
+                        font.pixelSize: 12
+                        color: Theme.dim
+                        elide: Text.ElideRight
                     }
                 }
 
-                Rectangle {
-                    id: updateBanner
-                    visible: opacity > 0
-                    opacity: updater.bannerVisible ? 1 : 0
-                    anchors.top: parent.top
-                    anchors.topMargin: updater.bannerVisible ? 14 : -70
-                    anchors.right: parent.right
-                    anchors.rightMargin: 18
-                    width: Math.min(480, parent.width - 90)
-                    height: 58
-                    radius: 18
-                    color: Theme.surface2
-                    border.width: 1
-                    border.color: Theme.alpha(Theme.mint, 0.4)
-                    z: 20
-
-                    Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-                    Behavior on anchors.topMargin { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 14
-                        anchors.rightMargin: 10
-                        spacing: 10
-
-                        Rectangle {
-                            Layout.preferredWidth: 34
-                            Layout.preferredHeight: 34
-                            radius: 17
-                            color: Theme.alpha(Theme.mint, 0.16)
-                            Icon {
-                                anchors.centerIn: parent
-                                glyph: "download"
-                                size: 18
-                                color: Theme.mint
-                            }
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 1
-                            Label {
-                                Layout.fillWidth: true
-                                text: "Update GitHub tersedia (" + updater.commitsBehind + " commit)"
-                                font.pixelSize: 13
-                                font.weight: Font.Bold
-                                color: Theme.text
-                                elide: Text.ElideRight
-                            }
-                            Label {
-                                Layout.fillWidth: true
-                                text: updater.remoteMessage
-                                font.pixelSize: 12
-                                color: Theme.dim
-                                elide: Text.ElideRight
-                            }
-                        }
-
-                        NButton {
-                            text: updater.updating ? "Memperbarui…" : "Perbarui"
-                            primary: true
-                            enabled: !updater.updating
-                            onClicked: updater.applyUpdate()
-                        }
-
-                        IconButton {
-                            iconName: "close"
-                            size: 16
-                            tip: "Sembunyikan"
-                            onClicked: updater.dismissBanner()
-                        }
-                    }
+                NButton {
+                    text: updater.updating ? "Memperbarui…" : "Perbarui"
+                    primary: true
+                    enabled: !updater.updating
+                    onClicked: updater.applyUpdate()
                 }
-    }
 
-    // content fades out before it slides under the dock
-    Rectangle {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        height: 150
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: "transparent" }
-            GradientStop { position: 0.75; color: Theme.alpha(Theme.bg, 0.82) }
-            GradientStop { position: 1.0; color: Theme.alpha(Theme.bg, 0.92) }
+                IconButton {
+                    iconName: "close"
+                    size: 16
+                    tip: "Sembunyikan"
+                    onClicked: updater.dismissBanner()
+                }
+            }
         }
     }
 
-    BloomDock {
-        id: dock
-        width: Math.min(1040, shell.width - 40)
-        anchors.horizontalCenter: parent.horizontalCenter
+    PlayerBar {
+        id: playerBar
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 18
-        currentKey: shell.currentKey
+        panel: shell.panel
         onOpenImmersive: shell.immersive = true
+        onShowPanel: (name) => shell.togglePanel(name)
     }
 
     // mouse "back" button
     TapHandler {
         acceptedButtons: Qt.BackButton
-        onTapped: if (stack.depth > 1) stack.pop()
+        onTapped: shell.goBack()
     }
 
     ImmersivePlayer {
@@ -312,9 +386,11 @@ Item {
     Shortcut { sequence: "Ctrl+L"; onActivated: shell.immersive = !shell.immersive }
     Shortcut { sequence: "Ctrl+,"; onActivated: Nav.go("settings") }
     Shortcut { sequence: "Ctrl+Q"; onActivated: Qt.quit() }
-    Shortcut { sequence: "Alt+Left"; onActivated: if (stack.depth > 1) stack.pop() }
+    Shortcut { sequence: "Alt+Left"; onActivated: shell.goBack() }
+    Shortcut { sequence: "Alt+Right"; onActivated: shell.goForward() }
+    Shortcut { sequence: "Ctrl+B"; onActivated: shell.sidebarOpen = !shell.sidebarOpen }
     Shortcut {
         sequence: "Escape"
-        onActivated: shell.immersive ? shell.immersive = false : (stack.depth > 1 ? stack.pop() : null)
+        onActivated: shell.goBack()
     }
 }

@@ -6,7 +6,7 @@ Label {
     id: l
     signal clicked()
     elide: Text.ElideRight
-    color: hh.hovered ? Theme.text : Theme.dim
+    color: Theme.alpha(palette.windowText, hh.hovered ? 1 : 0.66)
     font.pixelSize: 13
     font.underline: hh.hovered
 

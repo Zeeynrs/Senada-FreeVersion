@@ -109,6 +109,13 @@ class Library(QObject):
     def likedCount(self):
         return len(self.store.liked())
 
+    @Property("QVariantList", notify=likedChanged)
+    def likedPreview(self):
+        """The most recently liked songs, for the home page."""
+        tracks = self.store.liked()[:6]
+        self._cache(tracks)
+        return tracks
+
     @Property(int, notify=savedChanged)
     def savedRevision(self):
         return self._saved_rev
@@ -126,6 +133,7 @@ class Library(QObject):
             cover = next((t for t in full.get("tracks", []) if t.get("imageSmall")), {})
             own.append({"kind": "playlist", "id": p["id"], "uri": f"senada:playlist:{p['id']}", "name": p["name"],
                         "subtitle": f"Playlist Saya • {p['count']} lagu", "count": p["count"], "local": True,
+                        "imported": bool(p.get("source")),
                         "imageSmall": cover.get("imageSmall", ""), "image": cover.get("image", ""),
                         "imageLarge": cover.get("imageLarge", "")})
         saved = []

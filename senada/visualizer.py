@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Property, QObject, QProcess, Signal, Slot
 
-from .config import CACHE_DIR
+from .config import CACHE_DIR, IS_WINDOWS
 
 BARS = 64
 
@@ -39,6 +39,8 @@ noise_reduction = 62
 
 
 def _default_input_method() -> str:
+    if IS_WINDOWS:
+        return "winscap"  # cava's Windows loopback capture
     runtime = os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
     if Path(runtime, "pipewire-0").exists():
         return "pipewire"

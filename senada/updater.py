@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
 
-from .config import CACHE_DIR
+from .config import CACHE_DIR, IS_WINDOWS, NO_WINDOW
 
 ROOT = Path(__file__).resolve().parent.parent
 CHECK_INTERVAL_MS = 180_000  # 3 minutes
@@ -18,7 +18,10 @@ def _git(*args: str, timeout: int = 15) -> str:
         ["git", "-C", str(ROOT), *args],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=timeout,
+        creationflags=NO_WINDOW,
     )
     if res.returncode != 0:
         err = (res.stderr or res.stdout or "").strip()
@@ -247,7 +250,7 @@ class Updater(QObject):
 
             # Keep launcher & icon up to date
             bin_dir = Path.home() / ".local" / "bin"
-            if bin_dir.exists():
+            if not IS_WINDOWS and bin_dir.exists():
                 launcher = bin_dir / "senada"
                 venv_py = ROOT / ".venv" / "bin" / "python3"
                 if venv_py.exists():

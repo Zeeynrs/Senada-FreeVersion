@@ -12,15 +12,15 @@ Item {
         Layout.fillWidth: true
         Layout.maximumWidth: 760
         implicitHeight: inner.implicitHeight + 48
-        radius: 30
-        color: Theme.glass
-        border.color: Theme.glassBorder
+        radius: 16
+        color: "transparent"
+        border.color: Theme.line
         ColumnLayout {
             id: inner
             anchors.fill: parent
             anchors.margins: 24
             spacing: 14
-            Label { text: parent.parent.title; font.pixelSize: 18; font.weight: Font.Bold }
+            Label { text: parent.parent.title; font.pixelSize: 16; font.weight: Font.Bold }
         }
     }
     component SettingRow: RowLayout {
@@ -31,7 +31,7 @@ Item {
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 2
-            Label { text: parent.parent.label; font.pixelSize: 15 }
+            Label { text: parent.parent.label; font.pixelSize: 14 }
             Label {
                 visible: text !== ""
                 Layout.fillWidth: true
@@ -54,12 +54,76 @@ Item {
 
         ColumnLayout {
             id: col
-            x: 36
-            y: 4
-            width: flick.width - 64
-            spacing: 18
+            x: 28
+            y: 24
+            width: flick.width - 56
+            spacing: 16
 
-            Label { text: "Pengaturan"; font.pixelSize: 44; font.weight: Font.Black; font.letterSpacing: -1.2 }
+            Label { text: "Pengaturan"; font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
+
+            Section {
+                title: "Tema"
+                SettingRow {
+                    label: "Mode warna"
+                    hint: "Ikuti sistem memakai tema terang/gelap dari Windows, KDE, atau GNOME. Warna utama otomatis putih di tema gelap dan hitam di tema terang."
+                    Row {
+                        spacing: 6
+                        Repeater {
+                            model: [
+                                { key: "system", label: "Ikuti sistem" },
+                                { key: "dark", label: "Gelap" },
+                                { key: "light", label: "Terang" }
+                            ]
+                            Chip {
+                                text: modelData.label
+                                checked: session.themeMode === modelData.key
+                                onClicked: session.themeMode = modelData.key
+                            }
+                        }
+                    }
+                }
+                SettingRow {
+                    label: "Efek kaca"
+                    hint: session.glassMode === "desktop"
+                          ? "Jendela tembus pandang. Blur di belakangnya dibuat sistem: acrylic di Windows 11, blur Hyprland, atau efek blur KDE. Tanpa compositor, latarnya bisa jadi hitam."
+                          : session.glassMode === "cover"
+                          ? "Panel tembus pandang di atas sampul lagu yang diburamkan. Jalan di semua sistem."
+                          : "Panel tidak tembus pandang."
+                    Row {
+                        spacing: 6
+                        Repeater {
+                            model: [
+                                { key: "off", label: "Mati" },
+                                { key: "cover", label: "Sampul album" },
+                                { key: "desktop", label: "Transparan" }
+                            ]
+                            Chip {
+                                text: modelData.label
+                                checked: session.glassMode === modelData.key
+                                onClicked: session.glassMode = modelData.key
+                            }
+                        }
+                    }
+                }
+                SettingRow {
+                    visible: session.glassMode !== "off"
+                    label: "Ketebalan kaca"
+                    hint: "Geser ke kiri supaya lebih tembus pandang, ke kanan supaya lebih pekat."
+                    NSlider {
+                        Layout.preferredWidth: 200
+                        from: 0.3; to: 0.9
+                        value: session.glassOpacity
+                        onMoved: session.glassOpacity = value
+                    }
+                    Label {
+                        Layout.preferredWidth: 40
+                        text: Math.round(session.glassOpacity * 100) + "%"
+                        color: Theme.dim
+                        font.pixelSize: 13
+                        font.features: { "tnum": 1 }
+                    }
+                }
+            }
 
             Section {
                 title: "Profil & Library"
@@ -109,12 +173,12 @@ Item {
                           + " • Diperiksa: " + updater.lastChecked
                     Rectangle {
                         implicitWidth: 10; implicitHeight: 10; radius: 5
-                        color: updater.updating || updater.checking ? "#ffd36e"
-                             : updater.updateAvailable ? Theme.fuchsia : Theme.mint
+                        color: updater.updating || updater.checking ? Theme.warn
+                             : updater.updateAvailable ? Theme.warn : Theme.ok
                     }
                     Label {
                         text: updater.statusText
-                        color: updater.updateAvailable ? Theme.mint : Theme.dim
+                        color: updater.updateAvailable ? Theme.text : Theme.dim
                         font.pixelSize: 14
                         font.weight: updater.updateAvailable ? Font.DemiBold : Font.Normal
                     }
@@ -123,10 +187,10 @@ Item {
                     visible: updater.updateAvailable && updater.changelog !== ""
                     Layout.fillWidth: true
                     implicitHeight: changelogLabel.implicitHeight + 24
-                    radius: 12
-                    color: Theme.bg
+                    radius: 10
+                    color: Theme.subtle
                     border.width: 1
-                    border.color: Theme.alpha(Theme.mint, 0.25)
+                    border.color: Theme.line
                     Label {
                         id: changelogLabel
                         anchors.fill: parent
@@ -163,7 +227,7 @@ Item {
                     hint: "Pemutar audio lokal bebas iklan & tanpa syarat Spotify Premium"
                     Rectangle {
                         implicitWidth: 10; implicitHeight: 10; radius: 5
-                        color: Theme.mint
+                        color: Theme.ok
                     }
                     Label { text: "Aktif (Lokal / MPV)"; color: Theme.dim; font.pixelSize: 14 }
                 }
@@ -185,9 +249,10 @@ Item {
                         model: ["Otomatis (Terbaik)", "Tinggi (160 kbps Opus)", "Sedang (128 kbps)"]
                         displayText: currentText
                         background: Rectangle {
-                            implicitHeight: 40
-                            radius: 20
-                            color: Theme.alpha(Theme.text, bitrateBox.hovered ? 0.11 : 0.07)
+                            implicitHeight: 38
+                            radius: 10
+                            color: bitrateBox.hovered ? Theme.hover : "transparent"
+                            border.color: Theme.line
                         }
                         contentItem: Label {
                             leftPadding: 18
@@ -195,7 +260,7 @@ Item {
                             font.pixelSize: 14
                             verticalAlignment: Text.AlignVCenter
                         }
-                        popup.background: Rectangle { color: Theme.surface3; radius: 12 }
+                        popup.background: Rectangle { color: Theme.surface2; radius: 10; border.color: Theme.line }
                     }
                 }
                 Label {
@@ -234,13 +299,15 @@ Item {
                             "Ctrl + F", "Cari",
                             "Ctrl + L", "Tampilan penuh + lirik",
                             "Alt + ← / Esc", "Kembali / tutup tampilan penuh",
+                            "Alt + →", "Maju",
+                            "Ctrl + B", "Tampilkan / sembunyikan sidebar",
                             "Ctrl + ,", "Pengaturan"
                         ]
                         Label {
                             text: modelData
                             font.family: index % 2 === 0 ? Theme.mono : Theme.font
                             font.pixelSize: 13
-                            color: index % 2 === 0 ? Theme.mint : Theme.dim
+                            color: index % 2 === 0 ? Theme.text : Theme.dim
                         }
                     }
                 }

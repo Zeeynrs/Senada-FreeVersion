@@ -1,8 +1,8 @@
 import QtQuick
 
-// Dual-mode audio visualizer around the scalloped cover:
-// - "bars": thick rounded radial capsule rays + wavy inner ring (Image 2)
-// - "wave": morphing liquid aura blob + scalloped collar ring (Image 1)
+// Dual-mode audio visualizer around the round cover:
+// - "bars": rounded radial rays + a thin inner ring
+// - "wave": a morphing liquid aura + a smooth collar ring
 Item {
     id: root
     property var bars: visualizer ? visualizer.bars : []
@@ -12,7 +12,7 @@ Item {
     property color accentColor: Theme.accent
     property real coverRadius: width * 0.30
     property int scallops: 24
-    property real scallopDepth: 0.038
+    property real scallopDepth: 0  // 0 = smooth circles (no scalloped edge)
     readonly property int numRays: 72
 
     property var _smooth: []
@@ -222,7 +222,7 @@ Item {
 
                 // 4. Scalloped dark collar ring + bright inner rim around the cover
                 ctx.save()
-                ctx.fillStyle = "rgba(42, 46, 54, 0.78)"
+                ctx.fillStyle = "rgba(18, 18, 22, 0.55)"
                 ctx.beginPath()
                 for (let i = 0; i <= 360; i++) {
                     const a = (i / 360) * Math.PI * 2

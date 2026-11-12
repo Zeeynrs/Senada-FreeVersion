@@ -13,14 +13,8 @@ Item {
     readonly property bool hasResults: tracks.length + (results.albums || []).length
                                        + (results.artists || []).length + (results.playlists || []).length > 0
     readonly property var suggestions: [
-        { text: "Top hits Indonesia", color: Theme.mint },
-        { text: "Lo-fi santai", color: "#8fb8ff" },
-        { text: "Dangdut koplo", color: Theme.fuchsia },
-        { text: "Jazz malam", color: "#ffc36b" },
-        { text: "K-Pop", color: "#c79bff" },
-        { text: "Lagu galau", color: "#7fd9ff" },
-        { text: "Indie Indonesia", color: "#9bf08a" },
-        { text: "Musik fokus", color: "#ff9a7a" }
+        "Top hits Indonesia", "Lo-fi santai", "Dangdut koplo", "Jazz malam",
+        "K-Pop", "Lagu galau", "Indie Indonesia", "Musik fokus"
     ]
 
     Component.onCompleted: field.forceActiveFocus()
@@ -58,21 +52,22 @@ Item {
 
         Column {
             id: col
-            x: 24
-            y: 4
-            width: flick.width - 48
-            spacing: 26
+            x: 28
+            y: 24
+            width: flick.width - 56
+            spacing: 22
 
-            // big search capsule
+            Label { text: "Cari"; font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
+
+            // search field
             Item {
                 width: parent.width
-                height: 64
+                height: 50
                 NTextField {
                     id: field
-                    anchors.horizontalCenter: parent.horizontalCenter
                     width: Math.min(720, parent.width)
-                    height: 60
-                    font.pixelSize: 18
+                    height: 50
+                    font.pixelSize: 15
                     iconName: "search"
                     placeholderText: "Mau dengar apa? (atau tempel link Spotify/YouTube Music)"
                     onTextChanged: debounce.restart()
@@ -90,7 +85,6 @@ Item {
 
             // filters
             Row {
-                anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 8
                 visible: page.hasResults
                 Repeater {
@@ -109,52 +103,49 @@ Item {
                 }
             }
 
-            // empty state: suggestion blooms
+            // empty state: suggestions
             Column {
                 width: parent.width
                 visible: !page.hasResults && !page.searching
-                spacing: 18
+                spacing: 14
                 Label {
-                    anchors.horizontalCenter: parent.horizontalCenter
                     text: field.text.trim() ? "Tidak ada hasil." : "Coba salah satu, atau tempel link playlist Spotify publik."
                     color: Theme.dim
                     font.pixelSize: 15
                 }
                 Flow {
-                    width: Math.min(820, parent.width)
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 14
+                    width: parent.width
+                    spacing: 10
                     visible: !field.text.trim()
                     Repeater {
                         model: page.suggestions
                         AbstractButton {
                             id: sug
-                            width: 186; height: 112
+                            width: 200; height: 64
                             hoverEnabled: true
                             focusPolicy: Qt.NoFocus
-                            onClicked: field.text = modelData.text
+                            onClicked: field.text = modelData
                             background: Rectangle {
-                                radius: 28
-                                color: sug.hovered ? Theme.glassHover : Theme.glass
-                                border.color: Theme.glassBorder
-                                clip: true
-                                Scallop {
-                                    width: 96; height: 96
-                                    x: parent.width - 62; y: parent.height - 64
-                                    lobes: 8 + index; depth: 0.14
-                                    color: modelData.color
-                                    opacity: sug.hovered ? 0.9 : 0.62
-                                    rotation: sug.hovered ? 30 : 0
-                                    Behavior on rotation { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
-                                }
+                                radius: 14
+                                color: sug.hovered ? Theme.hover : "transparent"
+                                border.color: sug.hovered ? Theme.lineStrong : Theme.line
                             }
-                            contentItem: Label {
-                                text: modelData.text
-                                wrapMode: Text.WordWrap
-                                leftPadding: 18; topPadding: 16; rightPadding: 40
-                                verticalAlignment: Text.AlignTop
-                                font.pixelSize: 17
-                                font.weight: Font.Bold
+                            contentItem: RowLayout {
+                                spacing: 12
+                                Rectangle {
+                                    Layout.leftMargin: 12
+                                    implicitWidth: 36; implicitHeight: 36; radius: 18
+                                    color: Theme.hover
+                                    Icon { anchors.centerIn: parent; glyph: "search"; size: 16; color: Theme.text }
+                                }
+                                Label {
+                                    Layout.fillWidth: true
+                                    Layout.rightMargin: 12
+                                    text: modelData
+                                    elide: Text.ElideRight
+                                    font.pixelSize: 14
+                                    font.weight: Font.Bold
+                                }
                             }
                         }
                     }
@@ -173,20 +164,20 @@ Item {
                     id: topCard
                     Layout.preferredWidth: parent.columns === 2 ? parent.width * 0.38 : parent.width
                     Layout.fillHeight: parent.columns === 2
-                    implicitHeight: 260
-                    radius: 36
-                    color: Theme.glass
-                    border.color: Theme.glassBorder
+                    implicitHeight: 250
+                    radius: 16
+                    color: Theme.surface
+                    border.color: Theme.line
                     readonly property var hit: page.tracks[0] || ({})
                     ColumnLayout {
                         anchors.fill: parent
                         anchors.margins: 24
                         spacing: 6
-                        Label { text: "HASIL TERATAS"; color: Theme.mint; font.pixelSize: 12; font.weight: Font.Bold; font.letterSpacing: 1.6 }
+                        Label { text: "Hasil teratas"; color: Theme.dim; font.pixelSize: 12; font.weight: Font.Bold }
                         Cover {
                             Layout.topMargin: 8
                             Layout.preferredWidth: 104; Layout.preferredHeight: 104
-                            scalloped: true; scallops: 14; scallopDepth: 0.05
+                            radius: 10
                             source: topCard.hit.image || topCard.hit.imageSmall || ""
                         }
                         Label {
@@ -204,8 +195,10 @@ Item {
                                 font.pixelSize: 14
                                 onClicked: if (topCard.hit.artistId) Nav.go("artist", topCard.hit.artistId)
                             }
-                            BloomPlayButton {
-                                size: 52
+                            IconButton {
+                                iconName: "play"
+                                size: 24
+                                filled: true
                                 tip: "Putar"
                                 onClicked: player.playUris(page.tracks.map(x => x.uri), 0)
                             }
@@ -215,7 +208,7 @@ Item {
                 Column {
                     Layout.fillWidth: true
                     spacing: 0
-                    Label { text: "Lagu"; font.pixelSize: 22; font.weight: Font.Bold; leftPadding: 12; bottomPadding: 6 }
+                    Label { text: "Lagu"; font.pixelSize: 18; font.weight: Font.Bold; bottomPadding: 6 }
                     Repeater {
                         model: page.tracks.slice(0, 5)
                         TrackRow {

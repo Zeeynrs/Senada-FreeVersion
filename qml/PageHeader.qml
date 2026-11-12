@@ -1,10 +1,8 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Effects
 import QtQuick.Layouts
 
-// Big cover + title block used by playlist, album, liked and artist pages.
-// The cover sits on a blurred glow of itself; artists get the bloom (scalloped) shape.
+// Cover + title block used by playlist, album, liked and artist pages.
 Item {
     id: h
     property var info: ({})
@@ -16,6 +14,9 @@ Item {
     property bool saved: false
     property bool canImport: false   // public Spotify page: copy into an own playlist
     property bool isLocal: false     // own playlist: rename / delete
+    // the player is playing this collection right now (the pill becomes "Jeda")
+    readonly property bool nowPlaying: !!player.state.contextUri
+                                       && (player.state.contextUri === h.info.playUri || player.state.contextUri === h.info.uri)
     signal playAll()
     signal shuffleAll()
     signal saveToggled()
@@ -24,7 +25,7 @@ Item {
     signal deleteRequested()
 
     readonly property url art: h.info.imageLarge || h.info.image || ""
-    readonly property real coverSide: Math.min(232, Math.max(150, h.width * 0.22))
+    readonly property real coverSide: Math.min(208, Math.max(140, h.width * 0.2))
 
     // cover and text are bottom-aligned; the taller of the two sets the height
     readonly property real rowHeight: Math.max(h.coverSide, textCol.implicitHeight)
@@ -46,34 +47,10 @@ Item {
             height: h.coverSide
             y: h.rowHeight - height
 
-            // glow: the cover itself, blurred, behind the cover
-            Image {
-                id: glowSrc
-                anchors.fill: parent
-                source: h.art
-                sourceSize: Qt.size(96, 96)
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                visible: false
-            }
-            MultiEffect {
-                anchors.fill: parent
-                anchors.margins: -18
-                anchors.topMargin: 6
-                source: glowSrc
-                blurEnabled: true
-                blur: 1.0
-                blurMax: 48
-                saturation: 0.4
-                opacity: glowSrc.status === Image.Ready ? 0.7 : 0
-                Behavior on opacity { NumberAnimation { duration: 500 } }
-            }
             Cover {
                 anchors.fill: parent
-                radius: 28
-                scalloped: h.round
-                scallops: 18
-                scallopDepth: 0.04
+                radius: 12
+                round: h.round
                 source: h.art
                 fallbackIcon: h.fallbackIcon
             }
@@ -86,30 +63,20 @@ Item {
             y: h.rowHeight - implicitHeight
             spacing: 8
 
-            // type label as a mint outline pill
-            Rectangle {
-                visible: typeText.text !== ""
-                implicitWidth: typeText.implicitWidth + 22
-                implicitHeight: 26
-                radius: 13
-                color: Theme.alpha(Theme.mint, 0.1)
-                border.color: Theme.alpha(Theme.mint, 0.45)
-                Label {
-                    id: typeText
-                    anchors.centerIn: parent
-                    text: h.info.typeLabel || (h.round ? "Artis" : "")
-                    color: Theme.mint
-                    font.pixelSize: 12
-                    font.weight: Font.Bold
-                    font.letterSpacing: 0.4
-                }
+            Label {
+                visible: text !== ""
+                text: (h.info.typeLabel || (h.round ? "Artis" : "")).toUpperCase()
+                color: Theme.dim
+                font.pixelSize: 12
+                font.weight: Font.Bold
+                font.letterSpacing: 1.4
             }
             Label {
                 Layout.fillWidth: true
                 text: h.loading && !h.info.name ? "Memuat…" : (h.info.name || "")
-                font.pixelSize: Math.max(32, Math.min(64, h.width / 15))
+                font.pixelSize: Math.max(30, Math.min(56, h.width / 16))
                 font.weight: Font.Black
-                font.letterSpacing: -1
+                font.letterSpacing: -0.8
                 elide: Text.ElideRight
                 maximumLineCount: 2
                 wrapMode: Text.WordWrap
@@ -131,55 +98,82 @@ Item {
                       ? (h.info.subtitle || "") + (h.info.tracks ? " • " + h.info.tracks.length + " lagu" : "")
                       : h.info.kind === "artist" ? "" : (h.info.subtitle || "")
                 visible: text !== ""
-                font.pixelSize: 14
-                color: Theme.text
+                font.pixelSize: 13
+                color: Theme.dim
             }
 
             Row {
                 Layout.topMargin: 12
-                spacing: 12
-                BloomPlayButton {
-                    size: 60
-                    tip: "Putar"
-                    enabled: !h.loading && (!!h.info.playUri || (h.info.tracks && h.info.tracks.length > 0))
-                    onClicked: h.playAll()
-                }
-                IconButton {
+                spacing: 8
+                // play / pause pill
+                AbstractButton {
+                    id: playPill
                     anchors.verticalCenter: parent.verticalCenter
+                    readonly property bool pausable: h.nowPlaying && player.state.isPlaying === true
+                    enabled: !h.loading && (!!h.info.playUri || (h.info.tracks && h.info.tracks.length > 0))
+                    opacity: enabled ? 1 : 0.4
+                    implicitHeight: 40
+                    implicitWidth: pillRow.implicitWidth + 32
+                    hoverEnabled: true
+                    focusPolicy: Qt.TabFocus
+                    onClicked: h.nowPlaying ? player.togglePlay() : h.playAll()
+                    background: Rectangle {
+                        radius: 10
+                        color: playPill.down ? Theme.alpha(Theme.primary, 0.8) : playPill.hovered ? Theme.alpha(Theme.primary, 0.9) : Theme.primary
+                    }
+                    contentItem: Item {
+                        Row {
+                            id: pillRow
+                            anchors.centerIn: parent
+                            spacing: 8
+                            Icon {
+                                anchors.verticalCenter: parent.verticalCenter
+                                glyph: playPill.pausable ? "pause" : "play"
+                                size: 18
+                                color: Theme.primaryText
+                            }
+                            Label {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: playPill.pausable ? "Jeda" : "Putar"
+                                font.pixelSize: 14
+                                font.weight: Font.DemiBold
+                                color: Theme.primaryText
+                            }
+                        }
+                    }
+                }
+                SquareButton {
                     iconName: "shuffle"
-                    size: 24
-                    tint: Theme.dim
                     tip: "Putar acak"
                     enabled: !h.loading
                     onClicked: h.shuffleAll()
                 }
-                IconButton {
-                    anchors.verticalCenter: parent.verticalCenter
+                SquareButton {
                     visible: h.canSave && !h.loading
                     iconName: h.saved ? "heart" : "heart-outline"
-                    size: 24
-                    tint: h.saved ? Theme.fuchsia : Theme.dim
-                    tip: h.saved ? "Hapus dari Library" : "Simpan ke Library"
+                    tint: h.saved ? Theme.like : Theme.text
+                    tip: h.saved ? "Hapus dari Koleksi" : "Simpan ke Koleksi"
                     onClicked: h.saveToggled()
                 }
                 NButton {
                     anchors.verticalCenter: parent.verticalCenter
                     visible: h.canImport && !h.loading
-                    text: "Impor ke Library"
+                    text: "Impor ke Koleksi"
                     iconName: "download"
                     onClicked: h.importRequested()
                 }
-                NButton {
+                IconButton {
                     anchors.verticalCenter: parent.verticalCenter
                     visible: h.isLocal && !h.loading
-                    text: "Ganti nama"
-                    onClicked: h.renameRequested()
-                }
-                NButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: h.isLocal && !h.loading
-                    text: "Hapus"
-                    onClicked: h.deleteRequested()
+                    iconName: "more"
+                    size: 18
+                    tip: "Opsi playlist"
+                    onClicked: moreMenu.popup()
+                    NMenu {
+                        id: moreMenu
+                        MenuItem { text: "Ganti nama…"; onTriggered: h.renameRequested() }
+                        MenuItem { text: "Hapus playlist…"; onTriggered: h.deleteRequested() }
+                    }
                 }
                 BusyIndicator {
                     anchors.verticalCenter: parent.verticalCenter
@@ -189,5 +183,30 @@ Item {
                 }
             }
         }
+    }
+
+    // outlined square icon button next to the play pill
+    component SquareButton: AbstractButton {
+        id: sq
+        property string iconName
+        property color tint: Theme.text
+        property string tip
+        anchors.verticalCenter: parent.verticalCenter
+        implicitWidth: 40
+        implicitHeight: 40
+        hoverEnabled: true
+        focusPolicy: Qt.TabFocus
+        opacity: enabled ? 1 : 0.4
+        background: Rectangle {
+            radius: 10
+            color: sq.down ? Theme.pressed : sq.hovered ? Theme.hover : "transparent"
+            border.color: sq.hovered || sq.visualFocus ? Theme.lineStrong : Theme.line
+        }
+        contentItem: Item {
+            Icon { anchors.centerIn: parent; glyph: sq.iconName; size: 18; color: sq.tint }
+        }
+        ToolTip.visible: tip !== "" && hovered
+        ToolTip.text: tip
+        ToolTip.delay: 600
     }
 }

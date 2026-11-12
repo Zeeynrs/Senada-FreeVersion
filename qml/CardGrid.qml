@@ -22,10 +22,10 @@ Column {
         visible: height > 0
         Label {
             text: g.title
-            font.pixelSize: 22
+            font.pixelSize: 18
             font.weight: Font.Bold
             anchors.left: parent.left
-            anchors.leftMargin: 12
+            anchors.leftMargin: 4
             anchors.verticalCenter: parent.verticalCenter
         }
         LinkLabel {

@@ -27,7 +27,7 @@ ListView {
         anchors.centerIn: parent
         visible: q.count === 0
         text: "Antrean kosong"
-        color: Theme.dim
+        color: Qt.rgba(1, 1, 1, 0.6)
         font.pixelSize: 16
     }
 }

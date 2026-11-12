@@ -14,13 +14,11 @@ old guesses), and a manual pick from "Pilih versi lain…" always wins.
 
 import json
 import logging
-import shutil
 import subprocess
 import threading
-from pathlib import Path
 
 from . import matching, ytmusic
-from .config import CACHE_DIR, read_json, write_private
+from .config import CACHE_DIR, NO_WINDOW, read_json, write_private
 
 logger = logging.getLogger("senada.resolver")
 
@@ -128,15 +126,14 @@ class AudioResolver:
     # ---- yt-dlp fallback ----------------------------------------------------------
 
     def _search_ytdlp(self, query: str) -> list[dict]:
-        ytdlp_bin = shutil.which("yt-dlp")
+        from .engine import find_tool
+        ytdlp_bin = find_tool("yt-dlp")
         if not ytdlp_bin:
-            local_bin = Path.home() / ".local" / "bin" / "yt-dlp"
-            if not local_bin.exists():
-                return []
-            ytdlp_bin = str(local_bin)
+            return []
         try:
             res = subprocess.run([ytdlp_bin, "--dump-json", "--flat-playlist", f"ytsearch5:{query}"],
-                                 capture_output=True, text=True, timeout=12)
+                                 capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                 timeout=12, creationflags=NO_WINDOW)
         except (OSError, subprocess.SubprocessError) as e:
             logger.debug("yt-dlp search error: %s", e)
             return []

@@ -7,224 +7,237 @@ Item {
     readonly property string pageKey: "home"
     readonly property var home: library.home
     readonly property var sections: home.sections || []
-    readonly property bool wide: width > 1100
-    // what "Lanjut dengar" offers: the current track, else the last one played
-    readonly property var resume: player.state.hasTrack ? player.state : (library.recent.length > 0 ? library.recent[0] : null)
+    readonly property bool wide: width > 1000
+    readonly property var liked: (library.likedRevision, library.likedPreview)
+    // what the "now playing" card offers: the current track, else the last one played
+    readonly property bool live: !!player.state.hasTrack
+    readonly property var resume: live ? player.state : (library.recent.length > 0 ? library.recent[0] : null)
 
     Flickable {
         id: flick
         SmoothScroll { flickable: flick }
         anchors.fill: parent
-        contentHeight: col.implicitHeight + Theme.dockSpace
+        contentHeight: col.implicitHeight + Theme.dockSpace + 24
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         ScrollBar.vertical: NScrollBar {}
 
         Column {
             id: col
-            x: 24
-            y: 4
-            width: flick.width - 48
-            spacing: 34
+            x: 28
+            y: 24
+            width: flick.width - 56
+            spacing: 28
 
-            // greeting
-            RowLayout {
+            // ---- title + stats --------------------------------------------------------
+            Column {
                 width: parent.width
-                Column {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 12
-                    spacing: 2
-                    Label {
-                        text: Theme.greeting().toUpperCase()
-                        color: Theme.mint
-                        font.pixelSize: 13
-                        font.weight: Font.Bold
-                        font.letterSpacing: 2
+                spacing: 12
+                RowLayout {
+                    width: parent.width
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+                        Label { Layout.fillWidth: true; text: "Beranda"; font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
+                        Label {
+                            Layout.fillWidth: true
+                            text: Theme.greeting() + (library.me.name ? ", " + library.me.name.split(" ")[0] : "")
+                            color: Theme.dim
+                            font.pixelSize: 14
+                        }
                     }
-                    Label {
-                        width: parent.width
-                        text: (library.me.name ? library.me.name.split(" ")[0] : "Hai") + ","
-                        font.pixelSize: 44
-                        font.weight: Font.Black
-                        font.letterSpacing: -1.2
-                        elide: Text.ElideRight
-                    }
-                    Label {
-                        text: "mau dengar apa hari ini?"
-                        color: Theme.dim
-                        font.pixelSize: 20
-                    }
+                    NButton { text: "Muat ulang"; iconName: "refresh"; onClicked: library.refreshAll() }
                 }
-                IconButton { iconName: "refresh"; tint: Theme.dim; tip: "Muat ulang"; onClicked: library.refreshAll() }
+                Flow {
+                    width: parent.width
+                    spacing: 8
+                    Chip { iconName: "heart"; text: library.likedCount + " lagu disukai"; onClicked: Nav.go("liked") }
+                    Chip { iconName: "list"; text: library.ownPlaylists.length + " playlist"; onClicked: Nav.go("library") }
+                    Chip {
+                        iconName: "album"
+                        text: (library.playlists.length - library.ownPlaylists.length) + " tersimpan"
+                        onClicked: Nav.go("library")
+                    }
+                    Chip { iconName: "clock"; text: library.recent.length + " baru diputar"; enabled: false }
+                }
             }
 
-            // resume card + library tiles
-            GridLayout {
+            // ---- now playing / resume card --------------------------------------------
+            Rectangle {
                 width: parent.width
-                columns: page.wide ? 2 : 1
-                columnSpacing: 20
-                rowSpacing: 20
+                height: 104
+                radius: 16
+                color: Theme.surface
+                border.color: Theme.line
 
-                // "Lanjut dengar"
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: page.wide ? parent.width * 0.48 : parent.width
-                    implicitHeight: 176
-                    radius: 36
-                    color: Theme.glass
-                    border.color: Theme.glassBorder
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 16
+                    spacing: 16
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 22
-                        spacing: 22
-                        Cover {
-                            Layout.preferredWidth: 132
-                            Layout.preferredHeight: 132
-                            scalloped: true
-                            scallops: 16
-                            scallopDepth: 0.045
-                            source: page.resume ? (page.resume.image || page.resume.imageSmall || "") : ""
-                            fallbackIcon: "note"
+                    Cover {
+                        Layout.preferredWidth: 72
+                        Layout.preferredHeight: 72
+                        radius: 8
+                        source: page.resume ? (page.resume.image || page.resume.imageSmall || "") : ""
+                        fallbackIcon: "music"
+                        HoverHandler { cursorShape: page.live ? Qt.PointingHandCursor : Qt.ArrowCursor }
+                        TapHandler { onTapped: if (page.live) Nav.immersive(true) }
+                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Label {
+                            text: page.resume ? (page.live ? "Sedang diputar" : "Terakhir diputar") : "Selamat datang di Senada"
+                            color: Theme.dim
+                            font.pixelSize: 12
                         }
-                        ColumnLayout {
+                        Label {
                             Layout.fillWidth: true
-                            spacing: 4
+                            text: page.resume ? page.resume.name : "Musik tanpa akun, tanpa iklan"
+                            font.pixelSize: 17
+                            font.weight: Font.Bold
+                            elide: Text.ElideRight
+                        }
+                        Label {
+                            Layout.fillWidth: true
+                            text: page.resume ? page.resume.artists + (page.resume.album ? " • " + page.resume.album : "")
+                                              : "Cari lagu, buka album, atau impor playlist Spotify."
+                            color: Theme.dim
+                            font.pixelSize: 13
+                            elide: Text.ElideRight
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 6
+                            visible: page.live
+                            spacing: 10
                             Label {
-                                text: page.resume ? (player.state.hasTrack ? "SEDANG DIPUTAR" : "LANJUT DENGAR") : "SELAMAT DATANG"
-                                color: Theme.mint
-                                font.pixelSize: 12
-                                font.weight: Font.Bold
-                                font.letterSpacing: 1.6
+                                text: Theme.fmt(player.position)
+                                color: Theme.faint
+                                font.pixelSize: 11
+                                font.features: { "tnum": 1 }
                             }
-                            Label {
+                            Rectangle {
                                 Layout.fillWidth: true
-                                text: page.resume ? page.resume.name : "Musik tanpa akun, tanpa iklan"
-                                font.pixelSize: 24
-                                font.weight: Font.Bold
-                                elide: Text.ElideRight
+                                implicitHeight: 2
+                                radius: 1
+                                color: Theme.surface3
+                                Rectangle {
+                                    height: parent.height
+                                    radius: 1
+                                    color: Theme.primary
+                                    width: player.state.durationMs > 0
+                                           ? parent.width * Math.min(1, player.position / player.state.durationMs) : 0
+                                }
                             }
                             Label {
-                                Layout.fillWidth: true
-                                text: page.resume ? page.resume.artists : "Pilih lagu di bawah atau cari apa saja."
-                                color: Theme.dim
-                                font.pixelSize: 14
-                                elide: Text.ElideRight
-                            }
-                            Row {
-                                Layout.topMargin: 10
-                                spacing: 10
-                                visible: !!page.resume
-                                BloomPlayButton {
-                                    size: 46
-                                    playing: player.state.hasTrack && player.state.isPlaying === true
-                                    onClicked: player.state.hasTrack ? player.togglePlay()
-                                                                     : player.playUris(library.recent.map(t => t.uri), 0)
-                                }
-                                NButton {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: "Radio"
-                                    iconName: "equalizer"
-                                    onClicked: player.playRadio(page.resume.uri)
-                                }
+                                text: Theme.fmt(player.state.durationMs)
+                                color: Theme.faint
+                                font.pixelSize: 11
+                                font.features: { "tnum": 1 }
                             }
                         }
+                    }
+                    IconButton {
+                        visible: !!page.resume
+                        iconName: page.live && player.state.isPlaying === true ? "pause" : "play"
+                        size: 20
+                        outlined: true
+                        implicitWidth: 46
+                        tip: page.live ? "Putar/Jeda" : "Lanjutkan"
+                        onClicked: page.live ? player.togglePlay() : player.playUris(library.recent.map(t => t.uri), 0)
+                    }
+                    NButton {
+                        visible: !page.resume
+                        text: "Cari lagu"
+                        iconName: "search"
+                        primary: true
+                        onClicked: Nav.go("search")
                     }
                 }
+            }
 
-                // library tiles
-                Flow {
-                    Layout.fillWidth: true
-                    spacing: 10
-                    Repeater {
-                        model: [{ kind: "liked", id: "", name: "Lagu yang Disukai", imageSmall: "" }].concat(library.playlists.slice(0, 5))
-                        AbstractButton {
-                            id: tile
-                            width: page.wide ? (parent.width - 10) / 2 : Math.max(220, (parent.width - 20) / 3)
-                            implicitHeight: 52
-                            hoverEnabled: true
-                            focusPolicy: Qt.NoFocus
-                            onClicked: Nav.go(modelData.kind, modelData.id)
-                            background: Rectangle {
-                                radius: 26
-                                color: tile.hovered ? Theme.glassHover : Theme.glass
-                                border.color: Theme.glassBorder
-                                Behavior on color { ColorAnimation { duration: 140 } }
-                            }
-                            contentItem: RowLayout {
-                                spacing: 12
-                                Item {
-                                    Layout.leftMargin: 6
-                                    Layout.preferredWidth: 40
-                                    Layout.preferredHeight: 40
-                                    Scallop {
-                                        anchors.fill: parent
-                                        visible: modelData.kind === "liked"
-                                        lobes: 10; depth: 0.08
-                                        color: Theme.fuchsia
-                                    }
-                                    Icon {
-                                        anchors.centerIn: parent
-                                        visible: modelData.kind === "liked"
-                                        glyph: "heart"; size: 18; color: "#2a0614"
-                                    }
-                                    Cover {
-                                        anchors.fill: parent
-                                        visible: modelData.kind !== "liked"
-                                        radius: 20
-                                        scalloped: modelData.kind === "artist"
-                                        source: modelData.imageSmall || ""
-                                        fallbackIcon: modelData.kind === "artist" ? "speaker" : "note"
-                                    }
-                                }
-                                Label {
-                                    Layout.fillWidth: true
-                                    Layout.rightMargin: 14
-                                    text: modelData.name
-                                    elide: Text.ElideRight
-                                    font.pixelSize: 14
-                                    font.weight: Font.DemiBold
-                                }
-                            }
-                        }
+            // ---- quick actions --------------------------------------------------------
+            Column {
+                width: parent.width
+                spacing: 12
+                Label { text: "Aksi cepat"; font.pixelSize: 18; font.weight: Font.Bold }
+                GridLayout {
+                    width: parent.width
+                    columns: page.wide ? 3 : 1
+                    columnSpacing: 12
+                    rowSpacing: 10
+                    QuickAction {
+                        iconName: "play"
+                        title: "Lagu yang Disukai"
+                        subtitle: library.likedCount + " lagu"
+                        enabled: library.likedCount > 0
+                        onClicked: player.playContext("senada:liked:", "")
                     }
-                    Chip {
-                        text: "Semua di Library"
-                        iconName: "library"
-                        height: 52
+                    QuickAction {
+                        iconName: "shuffle"
+                        title: "Acak"
+                        subtitle: "Lagu yang disukai, urutan acak"
+                        enabled: library.likedCount > 0
+                        onClicked: player.shufflePlay("senada:liked:")
+                    }
+                    QuickAction {
+                        iconName: "download"
+                        title: "Impor dari Spotify"
+                        subtitle: "Tempel link playlist atau album"
                         onClicked: Nav.go("library")
                     }
                 }
             }
 
-            TrackSection {
+            // ---- liked + recently played, side by side ----------------------------------
+            GridLayout {
                 width: parent.width
-                title: "Baru saja diputar"
-                tracks: library.recent
+                visible: page.liked.length > 0 || library.recent.length > 0
+                columns: page.wide ? 2 : 1
+                columnSpacing: 24
+                rowSpacing: 24
+                TrackColumn {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    Layout.alignment: Qt.AlignTop
+                    title: "Disukai"
+                    tracks: page.liked
+                    emptyText: "Tekan ♡ di lagu mana pun untuk menyimpannya di sini."
+                    onShowAll: Nav.go("liked")
+                }
+                TrackColumn {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    Layout.alignment: Qt.AlignTop
+                    title: "Baru diputar"
+                    tracks: library.recent.slice(0, 6)
+                    allTracks: library.recent
+                    emptyText: "Lagu yang kamu putar akan muncul di sini."
+                }
             }
 
-            // loading / error state for the YouTube Music shelves
+            // ---- YouTube Music shelves -----------------------------------------------------
             Column {
                 width: parent.width
                 visible: page.sections.length === 0
                 spacing: 12
                 RowLayout {
-                    x: 12
                     spacing: 12
                     BusyIndicator {
                         running: !!page.home.loading
                         visible: running
-                        implicitWidth: 32; implicitHeight: 32
+                        implicitWidth: 28; implicitHeight: 28
                     }
                     Label {
                         text: page.home.loading ? "Memuat musik dari YouTube Music…" : (page.home.error || "")
                         color: page.home.loading ? Theme.dim : Theme.danger
-                        font.pixelSize: 15
+                        font.pixelSize: 14
                         wrapMode: Text.WordWrap
                     }
                 }
                 NButton {
-                    x: 12
                     visible: !page.home.loading && !!page.home.error
                     text: "Coba lagi"
                     iconName: "refresh"
@@ -252,6 +265,87 @@ Item {
         }
     }
 
+    // outlined action tile: icon in a ring, title and a hint
+    component QuickAction: AbstractButton {
+        id: qa
+        property string iconName
+        property string title
+        property string subtitle
+        Layout.fillWidth: true
+        implicitHeight: 62
+        hoverEnabled: true
+        focusPolicy: Qt.NoFocus
+        opacity: enabled ? 1 : 0.45
+        background: Rectangle {
+            radius: 14
+            color: qa.hovered ? Theme.hover : "transparent"
+            border.color: qa.hovered ? Theme.lineStrong : Theme.line
+            Behavior on color { ColorAnimation { duration: 120 } }
+        }
+        contentItem: RowLayout {
+            spacing: 14
+            Rectangle {
+                Layout.leftMargin: 12
+                implicitWidth: 36; implicitHeight: 36; radius: 18
+                color: Theme.hover
+                Icon { anchors.centerIn: parent; glyph: qa.iconName; size: 18; color: Theme.text }
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 1
+                Label { Layout.fillWidth: true; text: qa.title; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                Label { Layout.fillWidth: true; text: qa.subtitle; color: Theme.dim; font.pixelSize: 12; elide: Text.ElideRight }
+            }
+        }
+    }
+
+    // a titled, numbered list of a few tracks with an "All →" link
+    component TrackColumn: Column {
+        id: tcol
+        property string title
+        property var tracks: []
+        property var allTracks: tracks
+        property string emptyText
+        signal showAll()
+        spacing: 6
+        Item {
+            width: parent.width
+            height: 32
+            Label {
+                anchors.verticalCenter: parent.verticalCenter
+                text: tcol.title
+                font.pixelSize: 18
+                font.weight: Font.Bold
+            }
+            LinkLabel {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                visible: tcol.title === "Disukai" && tcol.tracks.length > 0
+                text: "Semua →"
+                font.weight: Font.Bold
+                onClicked: tcol.showAll()
+            }
+        }
+        Label {
+            visible: tcol.tracks.length === 0
+            width: parent.width
+            text: tcol.emptyText
+            color: Theme.faint
+            font.pixelSize: 13
+            wrapMode: Text.WordWrap
+        }
+        Repeater {
+            model: tcol.tracks
+            TrackRow {
+                width: tcol.width
+                track: modelData
+                number: index + 1
+                showAlbum: false
+                onPlay: player.playUris(tcol.allTracks.map(x => x.uri), index)
+            }
+        }
+    }
+
     // titled tracks in one or two columns; shows a few rows and expands on demand
     component TrackSection: Column {
         id: ts
@@ -265,18 +359,16 @@ Item {
 
         Item {
             width: parent.width
-            height: 44
+            height: 40
             Label {
                 text: ts.title
-                font.pixelSize: 22
+                font.pixelSize: 18
                 font.weight: Font.Bold
                 anchors.left: parent.left
-                anchors.leftMargin: 12
                 anchors.verticalCenter: parent.verticalCenter
             }
             Row {
                 anchors.right: parent.right
-                anchors.rightMargin: 4
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 6
                 Chip {
@@ -294,7 +386,7 @@ Item {
         GridLayout {
             width: parent.width
             columns: ts.cols
-            columnSpacing: 0
+            columnSpacing: 24
             rowSpacing: 0
             Repeater {
                 model: ts.expanded ? ts.tracks : ts.tracks.slice(0, ts.collapsed)

@@ -7,20 +7,21 @@ Menu {
     background: Rectangle {
         implicitWidth: 230
         color: Theme.surface2
-        radius: 18
-        border.color: Theme.glassBorder
+        radius: 12
+        border.color: Theme.line
     }
     delegate: MenuItem {
         id: mi
-        implicitHeight: 38
+        implicitHeight: 36
         contentItem: Label {
             text: mi.text
-            font.pixelSize: 14
+            font.pixelSize: 13
+            color: mi.enabled ? Theme.text : Theme.faint
             verticalAlignment: Text.AlignVCenter
         }
         background: Rectangle {
-            radius: 12
-            color: mi.highlighted ? Theme.alpha(Theme.mint, 0.14) : "transparent"
+            radius: 8
+            color: mi.highlighted ? Theme.hover : "transparent"
         }
     }
 }

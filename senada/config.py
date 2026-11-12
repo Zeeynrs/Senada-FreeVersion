@@ -2,17 +2,34 @@
 
 import json
 import os
+import subprocess
+import sys
 from pathlib import Path
 
 APP_ID = "senada"
-CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / APP_ID
-CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / APP_ID
+IS_WINDOWS = sys.platform == "win32"
+ROOT = Path(__file__).resolve().parent.parent
+BIN_DIR = ROOT / "bin"  # optional bundled tools (mpv, yt-dlp), mainly for Windows
+
+if IS_WINDOWS:
+    # %APPDATA%\Senada for settings and the library, %LOCALAPPDATA%\Senada\Cache for caches
+    CONFIG_DIR = Path(os.environ.get("APPDATA") or Path.home() / "AppData" / "Roaming") / "Senada"
+    CACHE_DIR = Path(os.environ.get("LOCALAPPDATA") or Path.home() / "AppData" / "Local") / "Senada" / "Cache"
+else:
+    CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / APP_ID
+    CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / APP_ID
+
+# child processes (mpv, yt-dlp, git) must not flash a console window on Windows
+NO_WINDOW = subprocess.CREATE_NO_WINDOW if IS_WINDOWS else 0
 SETTINGS_FILE = CONFIG_DIR / "settings.json"
 LIBRARY_FILE = CONFIG_DIR / "library.json"
 AUDIO_CACHE = CACHE_DIR / "audio"
 
 DEFAULTS = {
     "display_name": "",
+    "theme": "system",  # "system", "dark", "light"
+    "glass": "off",  # "off", "cover" (blurred album art behind), "desktop" (see-through window)
+    "glass_opacity": 0.62,  # how opaque the glass panels are (0.3 - 0.9)
     "device_name": "Senada",
     "visualizer": True,
     "visualizer_style": "bars",

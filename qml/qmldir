@@ -1,8 +1,5 @@
-Ambient 1.0 Ambient.qml
 AppShell 1.0 AppShell.qml
 ArtistPage 1.0 ArtistPage.qml
-BloomDock 1.0 BloomDock.qml
-BloomPlayButton 1.0 BloomPlayButton.qml
 Card 1.0 Card.qml
 CardGrid 1.0 CardGrid.qml
 Carousel 1.0 Carousel.qml
@@ -28,15 +25,18 @@ NScrollBar 1.0 NScrollBar.qml
 NSlider 1.0 NSlider.qml
 NTextField 1.0 NTextField.qml
 PageHeader 1.0 PageHeader.qml
+PlayerBar 1.0 PlayerBar.qml
+RightPanel 1.0 RightPanel.qml
 QueueView 1.0 QueueView.qml
-Scallop 1.0 Scallop.qml
 SearchPage 1.0 SearchPage.qml
 SeekBar 1.0 SeekBar.qml
 SettingsPage 1.0 SettingsPage.qml
+Sidebar 1.0 Sidebar.qml
 SmoothScroll 1.0 SmoothScroll.qml
 singleton Theme 1.0 Theme.qml
 Toast 1.0 Toast.qml
 TopBar 1.0 TopBar.qml
 TrackRow 1.0 TrackRow.qml
+TrackTableHeader 1.0 TrackTableHeader.qml
 TransportControls 1.0 TransportControls.qml
 VolumeControl 1.0 VolumeControl.qml

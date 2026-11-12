@@ -9,3 +9,5 @@ src/
 pkg/
 *.pkg.tar*
 Senada-FreeVersion/
+bin/*
+!bin/README.txt

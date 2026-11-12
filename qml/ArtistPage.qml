@@ -53,15 +53,17 @@ Item {
             }
             Label {
                 visible: (page.info.tracks || []).length > 0
-                text: "Lagu teratas"
+                text: "Populer"
                 font.pixelSize: 22
                 font.weight: Font.Bold
                 leftPadding: 32
-                bottomPadding: 8
+                bottomPadding: 10
             }
         }
 
         delegate: TrackRow {
+            inset: 16
+            table: true
             track: modelData
             number: index + 1
             showAlbum: true

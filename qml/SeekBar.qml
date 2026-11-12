@@ -10,7 +10,7 @@ RowLayout {
 
     Label {
         text: Theme.fmt(seek.pressed ? seek.value : player.position)
-        color: Theme.dim
+        opacity: 0.65
         font.pixelSize: sb.fontSize
         font.features: { "tnum": 1 }
         Layout.preferredWidth: 40
@@ -31,7 +31,7 @@ RowLayout {
     }
     Label {
         text: Theme.fmt(sb.s.durationMs)
-        color: Theme.dim
+        opacity: 0.65
         font.pixelSize: sb.fontSize
         font.features: { "tnum": 1 }
         Layout.preferredWidth: 40
