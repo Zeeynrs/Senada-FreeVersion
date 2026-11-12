@@ -9,13 +9,16 @@ ApplicationWindow {
     minimumHeight: 600
     visible: true
     title: player.state.hasTrack ? player.state.name + " • " + player.state.artists : "Senada"
-    color: Theme.bg
+    // see-through only in the "Transparan" glass mode (the compositor / Windows acrylic shows behind)
+    color: Theme.glassMode === "desktop" ? "transparent" : Theme.bgSolid
 
     // light / dark follows the system unless chosen in Settings
     Binding { target: Theme; property: "mode"; value: session.themeMode }
+    Binding { target: Theme; property: "glassMode"; value: session.glassMode }
+    Binding { target: Theme; property: "glassOpacity"; value: session.glassOpacity }
 
     palette {
-        window: Theme.bg
+        window: Theme.bgSolid
         windowText: Theme.text
         text: Theme.text
         base: Theme.surface2

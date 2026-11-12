@@ -82,6 +82,47 @@ Item {
                         }
                     }
                 }
+                SettingRow {
+                    label: "Efek kaca"
+                    hint: session.glassMode === "desktop"
+                          ? "Jendela tembus pandang. Blur di belakangnya dibuat sistem: acrylic di Windows 11, blur Hyprland, atau efek blur KDE. Tanpa compositor, latarnya bisa jadi hitam."
+                          : session.glassMode === "cover"
+                          ? "Panel tembus pandang di atas sampul lagu yang diburamkan. Jalan di semua sistem."
+                          : "Panel tidak tembus pandang."
+                    Row {
+                        spacing: 6
+                        Repeater {
+                            model: [
+                                { key: "off", label: "Mati" },
+                                { key: "cover", label: "Sampul album" },
+                                { key: "desktop", label: "Transparan" }
+                            ]
+                            Chip {
+                                text: modelData.label
+                                checked: session.glassMode === modelData.key
+                                onClicked: session.glassMode = modelData.key
+                            }
+                        }
+                    }
+                }
+                SettingRow {
+                    visible: session.glassMode !== "off"
+                    label: "Ketebalan kaca"
+                    hint: "Geser ke kiri supaya lebih tembus pandang, ke kanan supaya lebih pekat."
+                    NSlider {
+                        Layout.preferredWidth: 200
+                        from: 0.3; to: 0.9
+                        value: session.glassOpacity
+                        onMoved: session.glassOpacity = value
+                    }
+                    Label {
+                        Layout.preferredWidth: 40
+                        text: Math.round(session.glassOpacity * 100) + "%"
+                        color: Theme.dim
+                        font.pixelSize: 13
+                        font.features: { "tnum": 1 }
+                    }
+                }
             }
 
             Section {

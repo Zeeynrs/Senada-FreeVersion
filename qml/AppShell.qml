@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 
 Item {
@@ -171,6 +172,41 @@ Item {
                 }
             }
         }
+    }
+
+    // ---- glass backdrop ----------------------------------------------------------------
+    // "Sampul album": the current cover, heavily blurred, fills the window behind the
+    // translucent panels. ("Transparan" leaves the window itself see-through instead.)
+    Item {
+        anchors.fill: parent
+        visible: Theme.glassMode === "cover"
+        Image {
+            id: glassArt
+            anchors.fill: parent
+            source: player.state.image || ""
+            sourceSize: Qt.size(192, 192)
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            visible: false
+        }
+        MultiEffect {
+            anchors.fill: parent
+            source: glassArt
+            blurEnabled: true
+            blur: 1.0
+            blurMax: 64
+            saturation: 0.35
+            brightness: Theme.dark ? -0.1 : 0.15
+            scale: 1.2
+            opacity: glassArt.status === Image.Ready ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 600 } }
+        }
+    }
+
+    // content background (translucent in the glass modes)
+    Rectangle {
+        anchors.fill: content
+        color: Theme.bg
     }
 
     TopBar {

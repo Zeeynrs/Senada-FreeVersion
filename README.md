@@ -10,7 +10,8 @@ Pemutar musik gratis & tanpa iklan untuk desktop Linux (Wayland/Hyprland & X11) 
 - **Impor dari Spotify**: tempel link playlist/album **publik** Spotify, Senada mencocokkan lagunya di YouTube Music. Tanpa login.
 - **Radio**: klik kanan lagu → *Putar radio dari lagu ini*.
 - **Tampilan monokrom**: bilah atas dengan tombol ← → dan sidebar yang bisa disembunyikan (Ctrl+B); sidebar berisi Beranda, Cari, *Koleksimu* (Lagu disukai, Album, Artis, Playlist, Impor), Pengaturan, dan semua yang tersimpan beserta sampulnya. Daftar lagu berbentuk tabel yang bisa diurutkan per kolom. **Panel kanan** menampilkan lirik tersinkron atau antrean; bilah pemutar di bawah dengan kontrol dan seek bar di tengah. Tema terang/gelap mengikuti sistem (Windows, KDE, GNOME) atau dipilih di Pengaturan; warna utama putih di tema gelap dan hitam di tema terang.
-- **Immersive Player**: tampilan penuh dengan cover bergelombang, dual visualizer (*cava*), equalizer, tempo & pitch, dan lirik tersinkron (*LRCLIB*).
+- **Efek kaca (opsional)**: di **Pengaturan → Tema → Efek kaca**. *Sampul album* menaruh sampul lagu yang diburamkan di belakang panel tembus pandang (jalan di semua sistem); *Transparan* membuat jendela tembus pandang sehingga wallpaper terlihat (blur dari sistem: acrylic di Windows 11, blur Hyprland/KDE). Ketebalan kacanya bisa diatur.
+- **Immersive Player**: tampilan penuh dengan sampul bulat di tengah visualizer melingkar (*cava*, gaya batang atau gelombang), equalizer, tempo & pitch, antrean, dan lirik tersinkron (*LRCLIB*) di atas sampul yang diburamkan.
 - **Warna Aksen Otomatis**, **Pre-fetching** lagu berikutnya, dan **MPRIS** (`playerctl`, tombol media, Hyprlock, Waybar).
 
 ---

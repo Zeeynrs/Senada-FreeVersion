@@ -6,6 +6,7 @@ from pathlib import Path
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QFont, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtQuick import QQuickWindow
 from PySide6.QtQuickControls2 import QQuickStyle
 
 from .catalog import Catalog
@@ -44,6 +45,8 @@ def main():
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Senada.MusicPlayer")
         except (AttributeError, OSError):
             pass
+    # windows get an alpha channel so the "Transparan" glass mode can show the desktop through
+    QQuickWindow.setDefaultAlphaBuffer(True)
     app = QGuiApplication(sys.argv)
     app.setApplicationName("Senada")
     app.setOrganizationName("senada")
@@ -99,6 +102,7 @@ def main():
         sys.exit("Senada: gagal memuat antarmuka (lihat pesan QML di atas)")
 
     window = engine.rootObjects()[0]
+    session.set_window(window)
     try:
         from .mpris import Mpris
         mpris = Mpris(player, lambda: (window.show(), window.raise_(), window.requestActivate()), app.quit)

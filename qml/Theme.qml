@@ -9,10 +9,18 @@ QtObject {
     property string mode: "system"
     readonly property bool dark: mode === "dark" || (mode !== "light" && Qt.styleHints.colorScheme !== Qt.ColorScheme.Light)
 
-    // base & surfaces
-    readonly property color bg: dark ? "#121212" : "#fafafa"        // content area
-    readonly property color sidebar: dark ? "#000000" : "#f0f0f0"
-    readonly property color surface: dark ? "#1b1b1b" : "#ffffff"   // cards, now-playing card
+    // glass look (bound to session in Main.qml): "off" | "cover" | "desktop"
+    property string glassMode: "off"
+    property real glassOpacity: 0.62
+    readonly property bool glass: glassMode !== "off"
+
+    // base & surfaces; with glass on, the big areas turn translucent
+    readonly property color bgSolid: dark ? "#121212" : "#fafafa"
+    readonly property color sidebarSolid: dark ? "#000000" : "#f0f0f0"
+    readonly property color bg: glass ? alpha(bgSolid, glassOpacity * 0.8) : bgSolid           // content area
+    readonly property color sidebar: glass ? alpha(sidebarSolid, Math.min(1, glassOpacity + 0.08)) : sidebarSolid
+    readonly property color surface: glass ? (dark ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(1, 1, 1, 0.55))
+                                           : (dark ? "#1b1b1b" : "#ffffff")   // cards, now-playing card
     readonly property color surface2: dark ? "#222222" : "#ffffff"  // menus, popups, dialogs
     readonly property color surface3: dark ? "#2a2a2a" : "#e9e9e9"  // placeholders, tracks of sliders
 
@@ -22,7 +30,9 @@ QtObject {
     readonly property color faint: dark ? "#6b6b6b" : "#9a9a9a"
 
     // lines & interaction fills
-    readonly property color line: dark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.11)
+    readonly property color line: dark ? Qt.rgba(1, 1, 1, glass ? 0.14 : 0.12) : Qt.rgba(0, 0, 0, 0.11)
+    // "liquid glass" sheen: a bright hairline along the top edge of glass panels
+    readonly property color sheen: glass ? (dark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.8)) : "transparent"
     readonly property color lineStrong: dark ? Qt.rgba(1, 1, 1, 0.55) : Qt.rgba(0, 0, 0, 0.6)
     readonly property color subtle: dark ? Qt.rgba(1, 1, 1, 0.035) : Qt.rgba(0, 0, 0, 0.025)
     readonly property color hover: dark ? Qt.rgba(1, 1, 1, 0.07) : Qt.rgba(0, 0, 0, 0.05)

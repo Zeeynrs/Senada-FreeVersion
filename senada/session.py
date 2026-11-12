@@ -50,6 +50,48 @@ class Session(QObject):
         except AttributeError:  # Qt older than 6.8
             pass
 
+    # ---- glass ("liquid glass") look -------------------------------------------
+
+    GLASS_MODES = ("off", "cover", "desktop")
+
+    def set_window(self, window):
+        """The main window, so the native see-through backdrop can follow the setting."""
+        self._window = window
+        self._apply_window_effects()
+
+    def _apply_window_effects(self):
+        window = getattr(self, "_window", None)
+        if window is None:
+            return
+        from .window_effects import apply_backdrop
+        apply_backdrop(window, self.glassMode == "desktop", self.settings["theme"])
+
+    @Property(str, notify=changed)
+    def glassMode(self):
+        mode = self.settings["glass"]
+        return mode if mode in self.GLASS_MODES else "off"
+
+    @glassMode.setter
+    def glassMode(self, value):
+        if value in self.GLASS_MODES and value != self.settings["glass"]:
+            self.settings["glass"] = value
+            self._apply_window_effects()
+            self.changed.emit()
+
+    @Property(float, notify=changed)
+    def glassOpacity(self):
+        try:
+            return max(0.3, min(0.9, float(self.settings["glass_opacity"])))
+        except (TypeError, ValueError):
+            return 0.62
+
+    @glassOpacity.setter
+    def glassOpacity(self, value):
+        value = round(max(0.3, min(0.9, float(value))), 2)
+        if value != self.settings["glass_opacity"]:
+            self.settings["glass_opacity"] = value
+            self.changed.emit()
+
     @Property(str, notify=changed)
     def themeMode(self):
         mode = self.settings["theme"]
@@ -60,6 +102,7 @@ class Session(QObject):
         if value in self.THEMES and value != self.settings["theme"]:
             self.settings["theme"] = value
             self._apply_theme()
+            self._apply_window_effects()
             self.changed.emit()
 
     @Property(str, constant=True)

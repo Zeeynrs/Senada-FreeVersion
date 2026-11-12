@@ -28,6 +28,8 @@ AUDIO_CACHE = CACHE_DIR / "audio"
 DEFAULTS = {
     "display_name": "",
     "theme": "system",  # "system", "dark", "light"
+    "glass": "off",  # "off", "cover" (blurred album art behind), "desktop" (see-through window)
+    "glass_opacity": 0.62,  # how opaque the glass panels are (0.3 - 0.9)
     "device_name": "Senada",
     "visualizer": True,
     "visualizer_style": "bars",

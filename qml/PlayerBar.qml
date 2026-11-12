@@ -19,6 +19,7 @@ Rectangle {
     color: Theme.sidebar
 
     Rectangle { width: parent.width; height: 1; color: Theme.line }
+    Rectangle { y: 1; width: parent.width; height: 1; color: Theme.sheen }  // liquid-glass sheen
 
     // ---- now playing ------------------------------------------------------------------
     RowLayout {
