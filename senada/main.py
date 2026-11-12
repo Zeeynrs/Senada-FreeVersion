@@ -6,7 +6,7 @@ from pathlib import Path
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QFont, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtQuick import QQuickWindow
+from PySide6.QtQuick import QQuickWindow, QSGRendererInterface
 from PySide6.QtQuickControls2 import QQuickStyle
 
 from .catalog import Catalog
@@ -45,6 +45,10 @@ def main():
             pass
     # windows get an alpha channel so the "Transparan" glass mode can show the desktop through
     QQuickWindow.setDefaultAlphaBuffer(True)
+    if IS_WINDOWS:
+        # Qt's default Direct3D renderer does not hand that alpha to the Windows compositor, so
+        # "Transparan" showed a flat grey/black sheet; OpenGL does (QSG_RHI_BACKEND still overrides)
+        QQuickWindow.setGraphicsApi(QSGRendererInterface.GraphicsApi.OpenGL)
     app = QGuiApplication(sys.argv)
     app.setApplicationName("Senada")
     app.setOrganizationName("senada")
