@@ -19,15 +19,12 @@ import threading
 
 from . import matching, ytmusic
 from .config import CACHE_DIR, NO_WINDOW, read_json, write_private
+from .streams import watch_url
 
 logger = logging.getLogger("senada.resolver")
 
 RESOLVER_CACHE_FILE = CACHE_DIR / "resolved_tracks.json"
 CACHE_LIMIT = 3000
-
-
-def watch_url(video_id: str) -> str:
-    return f"https://music.youtube.com/watch?v={video_id}"
 
 
 class AudioResolver:

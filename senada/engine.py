@@ -1,7 +1,9 @@
 """Local audio engine: a headless mpv driven over its JSON IPC.
 
-mpv streams YouTube Music audio (through its yt-dlp hook) with no ads and plays it on the
-system output. The IPC endpoint is a Unix socket on Linux and a named pipe on Windows;
+mpv plays YouTube Music audio with no ads on the system output: normally from a stream
+address Senada already looked up (see streams.py), else from a watch link through mpv's own
+yt-dlp hook. The next track can be lined up in mpv's playlist so it starts without a gap.
+The IPC endpoint is a Unix socket on Linux and a named pipe on Windows;
 QLocalSocket speaks both, and runs on the Qt event loop so no reader thread is needed.
 """
 
@@ -46,6 +48,7 @@ class AudioEngine(QObject):
     durationChanged = Signal(int)    # duration in ms
     stateChanged = Signal(bool)      # is_playing
     trackEnded = Signal()            # track finished playing
+    loadFailed = Signal()            # the file could not be opened or broke off
     errorOccurred = Signal(str)
 
     def __init__(self, parent=None):
@@ -66,6 +69,8 @@ class AudioEngine(QObject):
         self._idle = True  # mpv with nothing loaded reports pause=false, which isn't "playing"
         self._last_pos_ms = 0
         self._duration_ms = 0
+        self._queued = ""    # url appended to mpv's playlist, played by mpv itself when the current file ends
+        self._advanced = ""  # queued url mpv has already moved on to; the next play() of it is a no-op
 
         self.sock = QLocalSocket(self)
         self.sock.connected.connect(self._on_connected)
@@ -104,10 +109,15 @@ class AudioEngine(QObject):
             "--demuxer-readahead-secs=45",
             "--audio-pitch-correction=yes",
             "--gapless-audio=weak",
+            "--prefetch-playlist=yes",  # opens the queued next track while the current one is ending
         ]
+        # stream addresses Senada resolved itself never go through the (slow) yt-dlp hook
+        # (the pattern is matched against the address after its "https://")
+        script_opts = ["ytdl_hook-exclude=^[^/]*googlevideo%.com/"]
         ytdlp = find_tool("yt-dlp")
         if ytdlp:
-            cmd.append(f"--script-opts=ytdl_hook-ytdl_path={ytdlp}")
+            script_opts.append(f"ytdl_hook-ytdl_path={ytdlp}")
+        cmd.append("--script-opts=" + ",".join(script_opts))
         try:
             self.proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                          stdin=subprocess.DEVNULL, creationflags=NO_WINDOW)
@@ -190,11 +200,19 @@ class AudioEngine(QObject):
 
         elif event == "end-file":
             reason = msg.get("reason")
-            if reason in ("eof", "stop"):
+            if reason == "eof" and self._queued:
+                # mpv is already starting the queued file: playback goes on without a gap
+                self._advanced, self._queued = self._queued, ""
+                self._duration_ms = 0  # the next file reports its own
+                self.trackEnded.emit()
+            elif reason in ("eof", "stop"):
                 self._is_playing = False
                 self.stateChanged.emit(False)
                 if reason == "eof":
                     self.trackEnded.emit()
+            elif reason == "error":
+                self._advanced = self._queued = ""
+                self.loadFailed.emit()
 
         elif event == "playback-restart":  # a file started (or a seek finished)
             self._idle = False
@@ -209,10 +227,27 @@ class AudioEngine(QObject):
     # ---- public API -------------------------------------------------------------------
 
     def play(self, url: str):
+        if url and url == self._advanced:  # mpv moved on to this queued file by itself: it is playing
+            self._advanced = ""
+            if self._duration_ms:
+                self.durationChanged.emit(self._duration_ms)
+            self._send_command(["set_property", "pause", False])
+            return
+        self._advanced = self._queued = ""  # "replace" drops the rest of mpv's playlist
         self._duration_ms = 0
         self._last_pos_ms = 0
         self._send_command(["loadfile", url, "replace"])
         self._send_command(["set_property", "pause", False])
+
+    def queue_next(self, url: str):
+        """Line up the file mpv plays by itself, gapless, when the current one ends ("" for none)."""
+        if url == self._queued:
+            return
+        if self._queued:
+            self._send_command(["playlist-clear"])  # keeps only the file that is playing
+        self._queued = url
+        if url:
+            self._send_command(["loadfile", url, "append"])
 
     def pause(self):
         self._send_command(["set_property", "pause", True])
@@ -230,6 +265,7 @@ class AudioEngine(QObject):
         self._send_command(["set_property", "volume", max(0, min(100, pct))])
 
     def stop(self):
+        self._advanced = self._queued = ""
         self._send_command(["stop"])
         self._is_playing = False
         self.stateChanged.emit(False)

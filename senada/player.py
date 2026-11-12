@@ -1,6 +1,7 @@
 """Playback state and controls using local AudioEngine and AudioResolver."""
 
 import colorsys
+import logging
 import random
 import time
 
@@ -10,6 +11,9 @@ from PySide6.QtGui import QImage
 from . import net, ytmusic
 from .engine import AudioEngine
 from .resolver import AudioResolver
+from .streams import StreamError, StreamResolver, watch_url
+
+logger = logging.getLogger("senada.player")
 
 DEFAULT_ACCENT = "#d9d9d9"  # neutral until the album art gives a colour
 
@@ -65,6 +69,7 @@ class Player(QObject):
         self.worker = worker
         self.engine = engine
         self.resolver = resolver
+        self.streams = StreamResolver()
         self.settings = settings
 
         self._state = {
@@ -88,6 +93,8 @@ class Player(QObject):
         self._track_cache = {}  # uri -> track_dict
         self._play_token = 0  # bumps on every track change; stale stream lookups are dropped
         self._prefetched = ""  # uri already being resolved ahead of time
+        self._started = (0, "")  # (play token, video id) of the file last handed to the engine
+        self._fallback_token = -1  # play token whose direct stream failed: mpv's yt-dlp hook plays it
         self._devices = [{
             "id": "local",
             "name": "Senada (Lokal)",
@@ -103,6 +110,7 @@ class Player(QObject):
         self.engine.durationChanged.connect(self._on_engine_duration)
         self.engine.stateChanged.connect(self._on_engine_state)
         self.engine.trackEnded.connect(self._on_track_ended)
+        self.engine.loadFailed.connect(self._on_load_failed)
         self.engine.errorOccurred.connect(lambda msg: self.worker.error.emit(msg))
 
         # Initial volume
@@ -138,11 +146,7 @@ class Player(QObject):
     def _on_engine_pos(self, pos_ms: int):
         self._position = pos_ms
         self.positionChanged.emit()
-
-        # Pre-fetch next track when reaching last 15 seconds
-        dur = self._state.get("durationMs", 0)
-        if dur > 20000 and (dur - pos_ms) < 15000:
-            self._prefetch_next()
+        self._prefetch_next()  # cheap once the next track is ready
 
     def _on_engine_duration(self, dur_ms: int):
         if dur_ms > 0 and abs(dur_ms - self._state.get("durationMs", 0)) > 2000:
@@ -156,24 +160,63 @@ class Player(QObject):
 
     def _on_track_ended(self):
         if self._state.get("repeat") == "track":
-            self.seek(0)
-            self.engine.resume()
+            self._play_index(self._queue_index)
         else:
             self.next()
 
-    def _prefetch_next(self):
+    def _on_load_failed(self):
+        """The stream did not open or broke off: play the track through mpv's own yt-dlp hook instead."""
+        token, video_id = self._started
+        if self._fallback_token == self._play_token:
+            if token == self._play_token:  # the fallback failed too
+                self.worker.error.emit(f"Gagal memutar audio: {self._state.get('name', '')}")
+            return
+        self._fallback_token = self._play_token
+        if token == self._play_token and video_id:  # else the pending lookup starts it as a fallback
+            self.streams.forget(video_id)
+            self.engine.play(watch_url(video_id))
+
+    def _next_track(self) -> dict | None:
+        """The track that plays by itself when the current one ends."""
+        if not 0 <= self._queue_index < len(self._queue):
+            return None
+        if self._state.get("repeat") == "track":
+            return self._queue[self._queue_index]
         nxt_idx = self._queue_index + 1
-        if self._state.get("repeat") == "context" and nxt_idx >= len(self._queue) and len(self._queue) > 0:
+        if nxt_idx >= len(self._queue):
+            if self._state.get("repeat") != "context":
+                return None
             nxt_idx = 0
-        if 0 <= nxt_idx < len(self._queue):
-            nxt_track = self._queue[nxt_idx]
-            uri = nxt_track.get("uri", "")
-            # position updates arrive many times a second: only start one lookup per track
-            if not uri or uri == self._prefetched or uri.startswith("yt:track:"):
-                return
+        return self._queue[nxt_idx]
+
+    def _resolve(self, track: dict) -> tuple[dict | None, str]:
+        """(match, stream address) for a track; blocking. The address is "" when yt-dlp could not get it."""
+        info = self.resolver.match(track)
+        url = ""
+        if info and info.get("v"):
+            try:
+                url = self.streams.resolve(info["v"])
+            except StreamError as e:
+                logger.info("no direct stream for %s: %s", info["v"], e)
+        return info, url
+
+    def _prefetch_next(self):
+        """Look the next track up ahead of time and hand it to the engine for a gapless change.
+        Called on every position update, so it must stay cheap when there is nothing to do."""
+        track = self._next_track()
+        uri = (track or {}).get("uri", "")
+        if not uri or self._started[0] != self._play_token:  # nothing next, or a track change is under way
+            self.engine.queue_next("")
+            return
+        video_id = uri.split(":", 2)[2] if uri.startswith("yt:track:") else (self.resolver.cached(uri) or {}).get("v")
+        url = self.streams.cached(video_id) if video_id else None
+        if url:
+            self.engine.queue_next(url)
+        elif uri != self._prefetched:  # only one lookup per track
             self._prefetched = uri
-            self.worker.run(lambda: self.resolver.match(nxt_track),
-                            lambda info: self._apply_match(nxt_track, info),
+            self.engine.queue_next("")
+            self.worker.run(lambda: self._resolve(track),
+                            lambda found: self._apply_match(track, found[0]),
                             lambda e: None)
 
     # ---- controls -------------------------------------------------------
@@ -289,15 +332,17 @@ class Player(QObject):
         self._on_track_changed(track)
 
         # Resolve stream URL and play (imported tracks are matched to a YouTube Music upload first)
-        def do_resolve():
-            return self.resolver.match(track)
-
-        def on_resolved(info):
+        def on_resolved(found):
+            info, url = found
             if token != self._play_token:
                 return  # the user already moved on to another track
             if info and info.get("v"):
                 self._apply_match(track, info)
-                self.engine.play(f"https://music.youtube.com/watch?v={info['v']}")
+                self._started = (token, info["v"])
+                if not url or self._fallback_token == token:
+                    self.streams.forget(info["v"])
+                    url = watch_url(info["v"])  # slower: mpv's yt-dlp hook looks the stream up
+                self.engine.play(url)
             else:
                 self.worker.error.emit(f"Tidak ketemu di YouTube Music: {track.get('name')} — coba klik kanan → Pilih versi lain")
                 self.next()
@@ -306,7 +351,7 @@ class Player(QObject):
             if token == self._play_token:
                 self.worker.error.emit(f"Gagal memutar audio: {e}")
 
-        self.worker.run(do_resolve, on_resolved, on_fail)
+        self.worker.run(lambda: self._resolve(track), on_resolved, on_fail)
 
     def _apply_match(self, track: dict, info: dict | None):
         """Give an imported (metadata-only) track the cover and confidence of its match."""
