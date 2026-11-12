@@ -26,9 +26,11 @@ Item {
     readonly property url art: h.info.imageLarge || h.info.image || ""
     readonly property real coverSide: Math.min(232, Math.max(150, h.width * 0.22))
 
-    implicitHeight: row.implicitHeight + 56
+    // cover and text are bottom-aligned; the taller of the two sets the height
+    readonly property real rowHeight: Math.max(h.coverSide, textCol.implicitHeight)
+    implicitHeight: rowHeight + 16 + 40
 
-    RowLayout {
+    Item {
         id: row
         anchors.left: parent.left
         anchors.right: parent.right
@@ -36,12 +38,13 @@ Item {
         anchors.leftMargin: 32
         anchors.rightMargin: 32
         anchors.topMargin: 16
-        spacing: 32
+        height: h.rowHeight
 
         Item {
-            Layout.preferredWidth: h.coverSide
-            Layout.preferredHeight: h.coverSide
-            Layout.alignment: Qt.AlignBottom
+            id: coverBox
+            width: h.coverSide
+            height: h.coverSide
+            y: h.rowHeight - height
 
             // glow: the cover itself, blurred, behind the cover
             Image {
@@ -77,8 +80,10 @@ Item {
         }
 
         ColumnLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignBottom
+            id: textCol
+            x: coverBox.width + 32
+            width: row.width - x
+            y: h.rowHeight - implicitHeight
             spacing: 8
 
             // type label as a mint outline pill

@@ -15,7 +15,6 @@ Item {
             if (key !== page.pageKey) return
             page.info = data
             page.loading = false
-            Qt.callLater(list.positionViewAtBeginning)  // the header grew; show it from the top
             if (data.error) session.toast(data.error)
         }
     }
@@ -25,6 +24,14 @@ Item {
         anchors.fill: parent
         clip: true
         currentIndex: -1  // don't auto-scroll to the first row (it would clip the header)
+        // when the header grows (cover, title, "Lagu teratas" arrive later) and the user hasn't
+        // scrolled yet, stay at the very top instead of letting the header slide up under the bar
+        property real lastOriginY: 0
+        onOriginYChanged: {
+            if (!moving && contentY <= lastOriginY + 1)
+                contentY = originY
+            lastOriginY = originY
+        }
         model: page.info.tracks || []
         bottomMargin: Theme.dockSpace
         ScrollBar.vertical: NScrollBar {}
