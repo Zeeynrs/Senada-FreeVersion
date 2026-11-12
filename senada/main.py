@@ -8,8 +8,7 @@ from PySide6.QtGui import QFont, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuickControls2 import QQuickStyle
 
-from .api import SpotifyApi
-from .auth import TokenStore
+from .catalog import Catalog
 from .config import Settings
 from .engine import AudioEngine
 from .resolver import AudioResolver
@@ -17,6 +16,7 @@ from .library import Library
 from .lyrics import Lyrics
 from .player import Player
 from .session import Session
+from .store import LocalStore
 from .updater import Updater
 from .visualizer import Visualizer
 from .worker import Async
@@ -51,14 +51,15 @@ def main():
     keepalive.start(500)
 
     settings = Settings()
-    tokens = TokenStore()
     worker = Async()
-    api = SpotifyApi(tokens)
-    session = Session(tokens, settings, worker)
+    store = LocalStore()
+    catalog = Catalog(store)
+    session = Session(settings, worker)
     audio_engine = AudioEngine()
     resolver = AudioResolver()
-    player = Player(api, worker, audio_engine, resolver, settings)
-    library = Library(api, worker, player)
+    player = Player(worker, audio_engine, resolver, settings, store, catalog)
+    library = Library(store, catalog, worker, session, player)
+    library.toast.connect(session.toast)
     lyrics = Lyrics(player, worker)
     visualizer = Visualizer()
     updater = Updater(worker)
@@ -71,13 +72,6 @@ def main():
         app.quit()
 
     updater.restartRequested.connect(request_restart)
-
-    def on_logged_in():
-        library.refreshAll()
-        player.start()
-
-    session.loggedIn.connect(on_logged_in)
-    session.loggedOut.connect(player.stop)
 
     def on_quit():
         audio_engine.quit()
@@ -105,8 +99,8 @@ def main():
         print(f"MPRIS tidak aktif: {e}", file=sys.stderr)
         mpris = None
 
-    if session.authenticated:
-        on_logged_in()
+    library.refreshAll()
+    player.start()
 
     ret = app.exec()
     if restarting:

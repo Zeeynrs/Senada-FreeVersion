@@ -8,14 +8,11 @@ APP_ID = "senada"
 CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / APP_ID
 CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / APP_ID
 SETTINGS_FILE = CONFIG_DIR / "settings.json"
-TOKENS_FILE = CONFIG_DIR / "tokens.json"
+LIBRARY_FILE = CONFIG_DIR / "library.json"
 AUDIO_CACHE = CACHE_DIR / "audio"
 
-REDIRECT_PORT = 8898
-REDIRECT_URI = f"http://127.0.0.1:{REDIRECT_PORT}/login"
-
 DEFAULTS = {
-    "client_id": "e37ebd248fee46b8b99f79be6cec7ee6",
+    "display_name": "",
     "device_name": "Senada",
     "visualizer": True,
     "visualizer_style": "bars",
@@ -44,13 +41,7 @@ def read_json(path: Path) -> dict:
 class Settings:
     def __init__(self):
         saved = read_json(SETTINGS_FILE)
-        # Jika client_id masih kosong di Senada, coba ambil dari konfigurasi Nada
-        if not saved.get("client_id"):
-            nada_settings = SETTINGS_FILE.parent.parent / "nada" / "settings.json"
-            if nada_settings.exists():
-                nada_cfg = read_json(nada_settings)
-                if nada_cfg.get("client_id"):
-                    saved["client_id"] = nada_cfg["client_id"]
+        saved.pop("client_id", None)  # left over from the Spotify login era
         self._data = {**DEFAULTS, **saved}
 
     def __getitem__(self, key):

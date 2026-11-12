@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
+// Pill button: mint when `primary`, frosted glass otherwise.
 AbstractButton {
     id: b
     property bool primary: false
@@ -14,8 +15,10 @@ AbstractButton {
 
     background: Rectangle {
         radius: height / 2
-        color: b.primary ? (b.hovered ? Qt.lighter(Theme.accent, 1.08) : Theme.accent)
-                         : (b.down ? Theme.alpha(Theme.text, 0.16) : b.hovered ? Theme.alpha(Theme.text, 0.11) : Theme.alpha(Theme.text, 0.07))
+        color: b.primary ? (b.down ? Qt.darker(Theme.mint, 1.12) : b.hovered ? Qt.lighter(Theme.mint, 1.06) : Theme.mint)
+                         : (b.down ? Theme.glassStrong : b.hovered ? Theme.glassHover : Theme.glass)
+        border.width: b.primary ? 0 : 1
+        border.color: Theme.glassBorder
         Behavior on color { ColorAnimation { duration: 120 } }
     }
     contentItem: Item {
@@ -28,13 +31,13 @@ AbstractButton {
                 glyph: b.iconName
                 size: 18
                 anchors.verticalCenter: parent.verticalCenter
-                color: b.primary ? Theme.accentText : Theme.text
+                color: b.primary ? Theme.primaryText : Theme.text
             }
             Label {
                 text: b.text
                 font.pixelSize: 14
                 font.weight: Font.DemiBold
-                color: b.primary ? Theme.accentText : Theme.text
+                color: b.primary ? Theme.primaryText : Theme.text
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

@@ -3,7 +3,7 @@ import QtQuick.Controls
 
 Slider {
     id: c
-    property color fill: Theme.accent
+    property color fill: Theme.mint
     readonly property bool engaged: hovered || pressed
 
     implicitHeight: 20
@@ -17,7 +17,7 @@ Slider {
         width: c.availableWidth
         height: c.engaged ? 6 : 4
         radius: height / 2
-        color: Theme.alpha(Theme.text, 0.16)
+        color: Theme.alpha(Theme.text, 0.14)
         Behavior on height { NumberAnimation { duration: 120 } }
 
         Rectangle {

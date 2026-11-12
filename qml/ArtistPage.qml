@@ -23,8 +23,17 @@ Item {
         id: list
         anchors.fill: parent
         clip: true
+        currentIndex: -1  // don't auto-scroll to the first row (it would clip the header)
+        // when the header grows (cover, title, "Lagu teratas" arrive later) and the user hasn't
+        // scrolled yet, stay at the very top instead of letting the header slide up under the bar
+        property real lastOriginY: 0
+        onOriginYChanged: {
+            if (!moving && contentY <= lastOriginY + 1)
+                contentY = originY
+            lastOriginY = originY
+        }
         model: page.info.tracks || []
-        bottomMargin: 24
+        bottomMargin: Theme.dockSpace
         ScrollBar.vertical: NScrollBar {}
 
         header: Column {
@@ -35,12 +44,15 @@ Item {
                 loading: page.loading
                 round: true
                 fallbackIcon: "speaker"
-                onPlayAll: player.playContext(page.info.uri, "")
-                onShuffleAll: player.shufflePlay(page.info.uri)
+                canSave: !page.info.error
+                saved: (library.savedRevision, library.isSaved("artist", page.itemId))
+                onPlayAll: player.playContext(page.info.playUri || page.info.uri, "")
+                onShuffleAll: player.shufflePlay(page.info.playUri || page.info.uri)
+                onSaveToggled: library.toggleSaved(page.info)
             }
             Label {
                 visible: (page.info.tracks || []).length > 0
-                text: "Populer"
+                text: "Lagu teratas"
                 font.pixelSize: 22
                 font.weight: Font.Bold
                 leftPadding: 32
@@ -55,17 +67,27 @@ Item {
             onPlay: player.playUris((page.info.tracks || []).map(x => x.uri), index)
         }
 
-        footer: Item {
+        footer: Column {
             width: list.width
-            height: grid.height + 40
+            topPadding: 24
+            bottomPadding: 16
+            spacing: 24
             CardGrid {
-                id: grid
                 x: 20
-                y: 24
                 width: parent.width - 40
                 title: "Diskografi"
                 items: page.info.albums || []
                 rows: 2
+            }
+            Repeater {
+                model: page.info.sections || []
+                CardGrid {
+                    x: 20
+                    width: list.width - 40
+                    title: modelData.title
+                    items: modelData.cards || []
+                    rows: 1
+                }
             }
         }
     }

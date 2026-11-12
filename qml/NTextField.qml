@@ -11,14 +11,14 @@ TextField {
     font.pixelSize: 15
     color: Theme.text
     placeholderTextColor: Theme.faint
-    selectionColor: Theme.alpha(Theme.accent, 0.45)
+    selectionColor: Theme.alpha(Theme.mint, 0.4)
     selectedTextColor: Theme.text
 
     background: Rectangle {
         radius: height / 2
-        color: f.activeFocus ? Theme.alpha(Theme.text, 0.12) : Theme.alpha(Theme.text, 0.07)
-        border.width: f.activeFocus ? 2 : 0
-        border.color: Theme.alpha(Theme.accent, 0.7)
+        color: f.activeFocus ? Theme.glassStrong : f.hovered ? Theme.glassHover : Theme.glass
+        border.width: f.activeFocus ? 2 : 1
+        border.color: f.activeFocus ? Theme.alpha(Theme.mint, 0.75) : Theme.glassBorder
         Icon {
             visible: f.iconName !== ""
             glyph: f.iconName

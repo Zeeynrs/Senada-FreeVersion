@@ -1,5 +1,7 @@
-"""Audio resolver: maps Spotify track metadata (artist, title, duration)
-to YouTube Music streams without ads.
+"""Audio resolver: turns a track into a YouTube Music URL that mpv can stream (no ads).
+
+Tracks from the YouTube Music catalog already carry their video id. Tracks imported
+from Spotify only have artist/title/duration and are searched for here.
 """
 
 import json
@@ -35,6 +37,8 @@ class AudioResolver:
         """Resolve a Spotify track to a playable YouTube/YouTube Music URL.
         Returns 'https://music.youtube.com/watch?v={video_id}' or None.
         """
+        if track_uri.startswith("yt:track:"):
+            return f"https://music.youtube.com/watch?v={track_uri.split(':', 2)[2]}"
         if not title:
             return None
 

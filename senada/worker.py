@@ -5,8 +5,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PySide6.QtCore import QObject, Signal, Slot
 
-from .api import ApiError
-from .auth import AuthError
+from .spotify_import import SpotifyImportError
+from .ytmusic import YTMusicError
+
+EXPECTED_ERRORS = (YTMusicError, SpotifyImportError, LookupError)
 
 
 class Async(QObject):
@@ -15,7 +17,7 @@ class Async(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._pool = ThreadPoolExecutor(max_workers=6, thread_name_prefix="nada")
+        self._pool = ThreadPoolExecutor(max_workers=6, thread_name_prefix="senada")
         self._done.connect(self._dispatch)
 
     def run(self, fn, on_ok=None, on_err=None):
@@ -23,7 +25,7 @@ class Async(QObject):
             try:
                 result = fn()
             except Exception as e:  # delivered to the UI thread
-                if not isinstance(e, (ApiError, AuthError)):
+                if not isinstance(e, EXPECTED_ERRORS):
                     traceback.print_exc()
                 self._done.emit(on_err or self._default_err, None, e)
             else:

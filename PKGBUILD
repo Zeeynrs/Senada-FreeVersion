@@ -1,9 +1,9 @@
 # Maintainer: Zeeynrs <https://github.com/Zeeynrs>
 pkgname=senada-music-player-git
 _pkgname=senada
-pkgver=r1.0.0
+pkgver=r7.758ae35
 pkgrel=1
-pkgdesc="Pemutar Spotify gratis & tanpa iklan untuk Linux desktop (Wayland/Hyprland) dengan Qt Quick & MPV"
+pkgdesc="Pemutar musik gratis & tanpa iklan tanpa akun untuk Linux desktop (Wayland/Hyprland) dengan Qt Quick & MPV"
 arch=('any')
 url="https://github.com/Zeeynrs/Senada-FreeVersion"
 license=('GPL-3.0-only')

@@ -2,10 +2,10 @@
 Type=Application
 Name=Senada
 GenericName=Music Player
-Comment=Pemutar musik Spotify gratis & tanpa iklan untuk Linux
+Comment=Pemutar musik gratis & tanpa iklan untuk Linux, tanpa akun
 Exec=@BIN@
 Icon=senada
 Terminal=false
 Categories=Audio;Music;Player;AudioVideo;
-Keywords=spotify;music;musik;lagu;senada;
+Keywords=music;musik;lagu;youtube;spotify;senada;
 StartupWMClass=senada

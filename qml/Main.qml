@@ -19,8 +19,8 @@ ApplicationWindow {
         alternateBase: Theme.surface3
         button: Theme.surface2
         buttonText: Theme.text
-        highlight: Theme.accent
-        highlightedText: Theme.accentText
+        highlight: Theme.mint
+        highlightedText: Theme.primaryText
         placeholderText: Theme.faint
         toolTipBase: Theme.surface3
         toolTipText: Theme.text
@@ -38,12 +38,8 @@ ApplicationWindow {
 
     onActiveChanged: player.setFastPolling(active)
 
-    Loader {
-        anchors.fill: parent
-        sourceComponent: session.authenticated ? appUi : loginUi
-    }
-    Component { id: loginUi; LoginView {} }
-    Component { id: appUi; AppShell {} }
+    // no account needed: the app opens straight into the library
+    AppShell { anchors.fill: parent }
 
     Connections {
         target: session

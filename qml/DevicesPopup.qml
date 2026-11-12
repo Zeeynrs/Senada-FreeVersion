@@ -17,9 +17,9 @@ Popup {
     }
 
     background: Rectangle {
-        color: Theme.surface3
-        radius: 20
-        border.color: Theme.alpha(Theme.text, 0.07)
+        color: Theme.surface2
+        radius: 22
+        border.color: Theme.glassBorder
     }
 
     enter: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 140 } }
@@ -50,7 +50,7 @@ Popup {
                 onClicked: { player.transfer(modelData.id); p.close() }
                 background: Rectangle {
                     radius: 12
-                    color: modelData.active ? Theme.alpha(Theme.accent, 0.14) : d.hovered ? Theme.alpha(Theme.text, 0.07) : "transparent"
+                    color: modelData.active ? Theme.alpha(Theme.mint, 0.14) : d.hovered ? Theme.alpha(Theme.text, 0.07) : "transparent"
                 }
                 contentItem: RowLayout {
                     spacing: 12
@@ -58,7 +58,7 @@ Popup {
                         Layout.leftMargin: 10
                         glyph: p.deviceIcon(modelData.type)
                         size: 24
-                        color: modelData.active ? Theme.accent : Theme.dim
+                        color: modelData.active ? Theme.mint : Theme.dim
                     }
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -69,7 +69,7 @@ Popup {
                             elide: Text.ElideRight
                             font.pixelSize: 15
                             font.weight: Font.Medium
-                            color: modelData.active ? Theme.accent : Theme.text
+                            color: modelData.active ? Theme.mint : Theme.text
                         }
                         Label {
                             text: modelData.active ? "Sedang diputar" : modelData.local ? "Komputer ini" : modelData.type
@@ -88,7 +88,7 @@ Popup {
             wrapMode: Text.WordWrap
             color: Theme.dim
             font.pixelSize: 13
-            text: "Belum ada perangkat. Tunggu perangkat lokal siap, atau buka Spotify di HP."
+            text: "Belum ada perangkat. Tunggu perangkat lokal (MPV) siap."
         }
 
         Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.alpha(Theme.text, 0.08); Layout.topMargin: 4 }
