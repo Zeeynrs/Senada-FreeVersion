@@ -14,11 +14,15 @@ from .config import LIBRARY_FILE, read_json, write_private
 HISTORY_LIMIT = 200
 TRACK_KEYS = ("uri", "id", "name", "artists", "artistId", "album", "albumId",
               "imageSmall", "image", "imageLarge", "durationMs", "explicit")
+OPTIONAL_KEYS = ("matchScore",)  # how sure the YouTube Music match of an imported track is (0-100)
+PATCHABLE = ("imageSmall", "image", "imageLarge", "matchScore")
 
 
 def _clean_track(track: dict) -> dict:
-    return {k: track.get(k, "" if k not in ("durationMs", "explicit") else (0 if k == "durationMs" else False))
-            for k in TRACK_KEYS}
+    out = {k: track.get(k, "" if k not in ("durationMs", "explicit") else (0 if k == "durationMs" else False))
+           for k in TRACK_KEYS}
+    out.update({k: track[k] for k in OPTIONAL_KEYS if track.get(k) is not None})
+    return out
 
 
 class LocalStore:
@@ -158,6 +162,29 @@ class LocalStore:
                 self._data["saved"] = [s for s in self._data["saved"] if not (s["kind"] == kind and s["id"] == cid)]
             self._save()
             return True
+
+    # ---- match results ---------------------------------------------------------
+
+    def patch_tracks(self, patches: dict[str, dict]) -> int:
+        """Apply {uri: {imageSmall, image, imageLarge, matchScore}} wherever the track is stored.
+        Returns how many stored entries changed."""
+        if not patches:
+            return 0
+        changed = 0
+        with self._lock:
+            lists = [self._data["liked"], self._data["history"]] + [p["tracks"] for p in self._data["playlists"]]
+            for tracks in lists:
+                for t in tracks:
+                    patch = patches.get(t.get("uri"))
+                    if not patch:
+                        continue
+                    for k in PATCHABLE:
+                        if patch.get(k) is not None and t.get(k) != patch[k]:
+                            t[k] = patch[k]
+                            changed += 1
+            if changed:
+                self._save()
+        return changed
 
     # ---- history -------------------------------------------------------------
 

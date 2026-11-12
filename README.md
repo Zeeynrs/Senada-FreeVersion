@@ -38,6 +38,8 @@ Pemutar musik gratis & tanpa iklan untuk desktop Linux (Wayland/Hyprland & X11).
 ### Pindah dari Spotify
 Buka **Pengaturan → Profil & Library → Impor dari Spotify**, tempel link playlist atau album publik (contoh `https://open.spotify.com/playlist/...`), lalu klik **Impor**. Playlist akan muncul di sidebar.
 
+Setelah diimpor, Senada mencocokkan setiap lagu dengan YouTube Music di latar belakang: judul, artis, dan durasi dibandingkan, dan versi yang berbeda (live, cover, karaoke, remix, slowed/sped up) dihindari kecuali memang itu yang dicari. Sampul lagu ikut terisi. Lagu yang pencocokannya kurang yakin diberi tanda **?** — klik tanda itu (atau klik kanan → *Pilih versi lain…*) untuk melihat semua kandidat beserta skornya, mencoba memutarnya, dan memilih versi yang benar. Pilihanmu diingat.
+
 Batasan: hanya playlist **publik**, dan Spotify hanya menampilkan sekitar 100 lagu pertama per playlist lewat halaman publiknya. *Lagu yang Disukai* (Liked Songs) Spotify bersifat privat sehingga tidak bisa diimpor otomatis — buat playlist publik berisi lagu-lagu itu di Spotify, lalu impor link-nya.
 
 ### Kalau lagu tidak bisa diputar

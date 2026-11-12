@@ -15,6 +15,8 @@ Item {
     readonly property bool current: track.uri !== undefined && player.state.uri === track.uri
     readonly property bool playing: current && player.state.isPlaying
     readonly property bool liked: (library.likedRevision, library.isLiked(track.uri || ""))
+    readonly property bool imported: (track.uri || "").indexOf("spotify:track:") === 0
+    readonly property bool unsure: imported && track.matchScore !== undefined && track.matchScore < library.matchThreshold
     signal play()
     signal remove()
 
@@ -131,6 +133,18 @@ Item {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 6
+                Rectangle {  // the YouTube Music match for this imported song may be off
+                    visible: row.unsure
+                    implicitWidth: 16; implicitHeight: 16; radius: 8
+                    color: Theme.alpha(Theme.fuchsia, 0.25)
+                    border.color: Theme.fuchsia
+                    Label { anchors.centerIn: parent; text: "?"; font.pixelSize: 10; font.bold: true; color: Theme.fuchsia }
+                    HoverHandler { id: unsureHover; cursorShape: Qt.PointingHandCursor }
+                    TapHandler { onTapped: Nav.matchPicker(row.track) }
+                    ToolTip.visible: unsureHover.hovered
+                    ToolTip.text: "Versi YouTube Music-nya mungkin kurang tepat — klik untuk memilih versi lain"
+                    ToolTip.delay: 300
+                }
                 Rectangle {
                     visible: !!row.track.explicit
                     implicitWidth: 16; implicitHeight: 16; radius: 5
@@ -202,6 +216,12 @@ Item {
                 onObjectAdded: (index, object) => addMenu.insertItem(index + 2, object)
                 onObjectRemoved: (index, object) => addMenu.removeItem(object)
             }
+        }
+        MenuItem {
+            visible: row.imported
+            height: visible ? implicitHeight : 0
+            text: "Pilih versi lain…"
+            onTriggered: Nav.matchPicker(row.track)
         }
         MenuItem {
             visible: row.removable

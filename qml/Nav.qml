@@ -7,6 +7,7 @@ QtObject {
     signal immersive(bool on)
     // playlist dialogs live in the shell so every page can use them
     signal playlistDialog(string mode, string playlistId, string currentName, var tracks)
+    signal matchPicker(var track)  // "Pilih versi lain…" for an imported track
 
     function go(kind, itemId) {
         if (kind)
