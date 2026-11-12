@@ -92,6 +92,7 @@ Popup {
 
             ListView {
                 id: list
+                SmoothScroll { flickable: list }
                 anchors.fill: parent
                 clip: true
                 spacing: 4

@@ -17,6 +17,7 @@ Item {
 
     Flickable {
         id: flick
+        SmoothScroll { flickable: flick }
         anchors.fill: parent
         contentHeight: col.implicitHeight + Theme.dockSpace
         clip: true

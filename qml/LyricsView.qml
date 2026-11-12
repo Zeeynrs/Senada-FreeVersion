@@ -7,6 +7,7 @@ Item {
 
     ListView {
         id: list
+        SmoothScroll { flickable: list }
         anchors.fill: parent
         clip: true
         model: lyrics.lines

@@ -33,6 +33,7 @@ Scallop 1.0 Scallop.qml
 SearchPage 1.0 SearchPage.qml
 SeekBar 1.0 SeekBar.qml
 SettingsPage 1.0 SettingsPage.qml
+SmoothScroll 1.0 SmoothScroll.qml
 singleton Theme 1.0 Theme.qml
 Toast 1.0 Toast.qml
 TopBar 1.0 TopBar.qml

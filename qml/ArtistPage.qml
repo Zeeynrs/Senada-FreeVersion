@@ -21,6 +21,7 @@ Item {
 
     ListView {
         id: list
+        SmoothScroll { flickable: list }
         anchors.fill: parent
         clip: true
         currentIndex: -1  // don't auto-scroll to the first row (it would clip the header)
