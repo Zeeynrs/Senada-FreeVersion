@@ -1,3 +1,5 @@
 # Build-time dependencies for the Windows installer (see build.ps1)
 PySide6-Essentials>=6.8
 pyinstaller>=6.11
+# root certificates Windows may not have installed yet (see senada/net.py)
+certifi

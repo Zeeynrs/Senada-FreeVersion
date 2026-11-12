@@ -13,6 +13,8 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
+from . import net
+
 API_URL = "https://music.youtube.com/youtubei/v1/"
 CLIENT_NAME = "WEB_REMIX"
 CLIENT_VERSION = "1.20240101.01.00"
@@ -70,7 +72,7 @@ def _post(endpoint: str, body: dict, timeout: float = 12) -> dict:
         headers=headers,
     )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with net.urlopen(req, timeout=timeout) as resp:
             data = json.loads(resp.read())
         visitor = _get(data, "responseContext", "visitorData")
         if visitor and not _visitor:

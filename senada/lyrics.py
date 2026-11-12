@@ -9,6 +9,8 @@ import urllib.request
 
 from PySide6.QtCore import Property, QObject, Signal
 
+from . import net
+
 LRC_LINE = re.compile(r"\[(\d+):(\d+(?:\.\d+)?)\]")
 HEADERS = {"User-Agent": "Senada/0.1 (desktop music player)"}
 
@@ -17,7 +19,7 @@ def _get(path, **params):
     url = "https://lrclib.net/api" + path + "?" + urllib.parse.urlencode(params)
     req = urllib.request.Request(url, headers=HEADERS)
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with net.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read())
     except urllib.error.HTTPError as e:
         if e.code == 404:

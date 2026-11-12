@@ -3,12 +3,11 @@
 import colorsys
 import random
 import time
-import urllib.request
 
 from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
 from PySide6.QtGui import QImage
 
-from . import ytmusic
+from . import net, ytmusic
 from .engine import AudioEngine
 from .resolver import AudioResolver
 
@@ -16,7 +15,7 @@ DEFAULT_ACCENT = "#d9d9d9"  # neutral until the album art gives a colour
 
 
 def download(url: str) -> bytes:
-    with urllib.request.urlopen(url, timeout=10) as resp:
+    with net.urlopen(url, timeout=10) as resp:
         return resp.read()
 
 

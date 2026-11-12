@@ -16,6 +16,7 @@ import re
 import urllib.error
 import urllib.request
 
+from . import net
 from .config import CACHE_DIR, read_json, write_private
 
 logger = logging.getLogger("senada.spotify")
@@ -52,7 +53,7 @@ def _entity(kind: str, sid: str) -> tuple[dict, str]:
     """(entity, anonymous access token) from the embed page."""
     req = urllib.request.Request(f"https://open.spotify.com/embed/{kind}/{sid}", headers={"User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with net.urlopen(req, timeout=10) as resp:
             html = resp.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
         raise SpotifyImportError("Spotify tidak menemukan link ini (pastikan playlist-nya publik)."
@@ -83,20 +84,20 @@ def _request_json(url: str, token: str, body: dict | None = None):
         data = json.dumps(body).encode()
         headers.update({"Content-Type": "application/json;charset=UTF-8", "App-Platform": "WebPlayer"})
     req = urllib.request.Request(url, data=data, headers=headers, method="POST" if body is not None else "GET")
-    with urllib.request.urlopen(req, timeout=15) as resp:
+    with net.urlopen(req, timeout=15) as resp:
         return json.loads(resp.read())
 
 
 def _scrape_playlist_hash() -> str:
     """Current "fetchPlaylist" query id, read from the web player's script."""
     req = urllib.request.Request("https://open.spotify.com/", headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=15) as resp:
+    with net.urlopen(req, timeout=15) as resp:
         html = resp.read().decode("utf-8", "replace")
     scripts = re.findall(r'https://[a-z.]*spotifycdn\.com/cdn/build/web-player/[^"]+\.js', html)
     scripts.sort(key=lambda u: "/web-player/web-player." not in u)  # the main bundle first
     for src in scripts:
         try:
-            with urllib.request.urlopen(urllib.request.Request(src, headers={"User-Agent": USER_AGENT}), timeout=20) as resp:
+            with net.urlopen(urllib.request.Request(src, headers={"User-Agent": USER_AGENT}), timeout=20) as resp:
                 m = re.search(r'"fetchPlaylist","query","([0-9a-f]{64})"', resp.read().decode("utf-8", "replace"))
         except (urllib.error.URLError, TimeoutError, OSError):
             continue

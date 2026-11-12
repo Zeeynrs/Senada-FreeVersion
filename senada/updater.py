@@ -17,7 +17,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
 
-from . import __version__
+from . import __version__, net
 from .config import CACHE_DIR, FROZEN, IS_WINDOWS, NO_WINDOW, ROOT
 
 REPO = "Zeeynrs/Senada-FreeVersion"
@@ -41,7 +41,7 @@ def pick_setup_asset(assets: list[dict]) -> dict | None:
 def _http(url: str, timeout: int = 20):
     req = urllib.request.Request(url, headers={"User-Agent": f"Senada/{__version__}",
                                                "Accept": "application/vnd.github+json"})
-    return urllib.request.urlopen(req, timeout=timeout)
+    return net.urlopen(req, timeout=timeout)
 
 
 def _latest_release() -> dict:
