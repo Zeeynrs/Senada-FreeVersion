@@ -491,7 +491,7 @@ Item {
                 RowLayout {
                     Layout.fillWidth: true
                     Label {
-                        text: "Keep Original Pitch"
+                        text: I18n.t("Keep original pitch")
                         font.pixelSize: 15
                         font.weight: Font.Medium
                         color: Qt.rgba(1, 1, 1, 0.90)
@@ -525,7 +525,7 @@ Item {
 
                 Label {
                     Layout.fillWidth: true
-                    text: "speed also affects the key, js like sped up or slowed down songs are"
+                    text: I18n.t("Speed also changes the key, just like sped-up or slowed-down songs.")
                     font.pixelSize: 12
                     color: Qt.rgba(1, 1, 1, 0.48)
                     elide: Text.ElideRight

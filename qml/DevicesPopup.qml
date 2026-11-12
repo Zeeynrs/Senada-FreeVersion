@@ -31,11 +31,11 @@ Popup {
             Layout.fillWidth: true
             Label {
                 Layout.fillWidth: true
-                text: "Putar di perangkat"
+                text: I18n.t("Play on a device")
                 font.pixelSize: 17
                 font.weight: Font.Bold
             }
-            IconButton { iconName: "refresh"; size: 18; tip: "Muat ulang"; onClicked: player.refreshDevices() }
+            IconButton { iconName: "refresh"; size: 18; tip: I18n.t("Reload"); onClicked: player.refreshDevices() }
         }
 
         Repeater {
@@ -72,7 +72,7 @@ Popup {
                             color: Theme.text
                         }
                         Label {
-                            text: modelData.active ? "Sedang diputar" : modelData.local ? "Komputer ini" : modelData.type
+                            text: modelData.active ? I18n.t("Now playing") : modelData.local ? I18n.t("This computer") : modelData.type
                             font.pixelSize: 12
                             color: Theme.dim
                         }
@@ -88,7 +88,7 @@ Popup {
             wrapMode: Text.WordWrap
             color: Theme.dim
             font.pixelSize: 13
-            text: "Belum ada perangkat. Tunggu perangkat lokal (MPV) siap."
+            text: I18n.t("No devices yet. Wait for the local device (MPV) to be ready.")
         }
 
         Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.alpha(Theme.text, 0.08); Layout.topMargin: 4 }
@@ -103,7 +103,7 @@ Popup {
             }
             Label {
                 Layout.fillWidth: true
-                text: "Perangkat lokal “" + session.deviceName + "”: Siap (MPV)"
+                text: I18n.t("Local device “{name}”: ready (MPV)", { name: session.deviceName })
                 font.pixelSize: 12
                 color: Theme.dim
                 elide: Text.ElideRight

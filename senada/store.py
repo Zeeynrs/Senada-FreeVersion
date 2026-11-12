@@ -10,6 +10,7 @@ import time
 import uuid
 
 from .config import LIBRARY_FILE, read_json, write_private
+from .i18n import tr
 
 HISTORY_LIMIT = 200
 TRACK_KEYS = ("uri", "id", "name", "artists", "artistId", "album", "albumId",
@@ -86,7 +87,7 @@ class LocalStore:
         with self._lock:
             self._data["playlists"].insert(0, {
                 "id": pid,
-                "name": (name or "").strip() or "Playlist baru",
+                "name": (name or "").strip() or tr("New playlist"),
                 "description": description,
                 "source": source,
                 "created": int(time.time()),

@@ -70,9 +70,8 @@ QtObject {
 
     function greeting() {
         const h = new Date().getHours()
-        if (h < 11) return "Selamat pagi"
-        if (h < 15) return "Selamat siang"
-        if (h < 19) return "Selamat sore"
-        return "Selamat malam"
+        if (I18n.lang === "id")  // siang and sore have no separate English words
+            return h < 11 ? "Selamat pagi" : h < 15 ? "Selamat siang" : h < 19 ? "Selamat sore" : "Selamat malam"
+        return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"
     }
 }

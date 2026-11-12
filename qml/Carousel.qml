@@ -32,14 +32,14 @@ Column {
             IconButton {
                 iconName: "back"; size: 18; tint: Theme.dim
                 enabled: !list.atXBeginning
-                tip: "Geser kiri"
+                tip: I18n.t("Scroll left")
                 onClicked: list.flickTo(-1)
             }
             IconButton {
                 iconName: "back"; size: 18; tint: Theme.dim
                 rotation: 180
                 enabled: !list.atXEnd
-                tip: "Geser kanan"
+                tip: I18n.t("Scroll right")
                 onClicked: list.flickTo(1)
             }
         }

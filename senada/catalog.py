@@ -10,6 +10,7 @@ import threading
 import time
 
 from . import spotify_import, ytmusic
+from .i18n import tr, trn
 from .store import LocalStore
 
 CACHE_TTL = 600  # seconds a remote page stays fresh
@@ -20,6 +21,11 @@ class Catalog:
         self.store = store
         self._cache = {}
         self._lock = threading.Lock()
+
+    def clear(self):
+        """Forget fetched pages (their text follows the interface language)."""
+        with self._lock:
+            self._cache.clear()
 
     def _cached(self, key, fetch):
         now = time.monotonic()
@@ -39,23 +45,23 @@ class Catalog:
 
     def liked_page(self) -> dict:
         tracks = self.store.liked()
-        return {"kind": "liked", "id": "", "uri": "senada:liked:", "name": "Lagu yang Disukai",
-                "typeLabel": "Playlist", "subtitle": f"{len(tracks)} lagu • tersimpan di perangkat ini",
+        return {"kind": "liked", "id": "", "uri": "senada:liked:", "name": tr("Liked Songs"),
+                "typeLabel": tr("Playlist"), "subtitle": trn("{n} song", "{n} songs", len(tracks)) + " • " + tr("stored on this device"),
                 "tracks": tracks, "playUri": "senada:liked:"}
 
     def local_page(self, pid: str) -> dict:
         p = self.store.playlist(pid)
         if not p:
-            raise LookupError("Playlist ini sudah dihapus.")
+            raise LookupError(tr("This playlist was deleted."))
         tracks = p["tracks"]
         cover = next((t for t in tracks if t.get("imageSmall")), {})
         note = ""
         if not tracks:
-            note = "Playlist masih kosong. Klik kanan lagu mana pun → Tambah ke playlist."
+            note = tr("The playlist is empty. Right-click any song → Add to playlist.")
         elif p.get("source"):
-            note = "Diimpor dari " + p["source"]
+            note = tr("Imported from {source}", source=p["source"])
         return {"kind": "playlist", "id": pid, "uri": f"senada:playlist:{pid}", "name": p["name"],
-                "typeLabel": "Playlist Saya", "subtitle": "Disimpan di perangkat ini",
+                "typeLabel": tr("My playlist"), "subtitle": tr("Stored on this device"),
                 "description": p.get("description", ""), "local": True,
                 "imageSmall": cover.get("imageSmall", ""), "image": cover.get("image", ""),
                 "imageLarge": cover.get("imageLarge", ""), "tracks": tracks, "note": note,
@@ -74,7 +80,7 @@ class Catalog:
             return self._cached((kind, cid), lambda: ytmusic.album(cid))
         if kind == "artist":
             return self._cached((kind, cid), lambda: ytmusic.artist(cid))
-        raise LookupError(f"Jenis halaman tidak dikenal: {kind}")
+        raise LookupError(tr("Unknown kind of page: {kind}", kind=kind))
 
     def tracks_for(self, uri: str) -> list[dict]:
         """All tracks behind a senada:<kind>:<id> context URI."""

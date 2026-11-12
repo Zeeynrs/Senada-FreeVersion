@@ -38,7 +38,7 @@ Item {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 0
-                        Label { Layout.fillWidth: true; text: "Beranda"; font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
+                        Label { Layout.fillWidth: true; text: I18n.t("Home"); font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
                         Label {
                             Layout.fillWidth: true
                             text: Theme.greeting() + (library.me.name ? ", " + library.me.name.split(" ")[0] : "")
@@ -46,19 +46,19 @@ Item {
                             font.pixelSize: 14
                         }
                     }
-                    NButton { text: "Muat ulang"; iconName: "refresh"; onClicked: library.refreshAll() }
+                    NButton { text: I18n.t("Reload"); iconName: "refresh"; onClicked: library.refreshAll() }
                 }
                 Flow {
                     width: parent.width
                     spacing: 8
-                    Chip { iconName: "heart"; text: library.likedCount + " lagu disukai"; onClicked: Nav.go("liked") }
-                    Chip { iconName: "list"; text: library.ownPlaylists.length + " playlist"; onClicked: Nav.go("library") }
+                    Chip { iconName: "heart"; text: I18n.n("{n} liked song", "{n} liked songs", library.likedCount); onClicked: Nav.go("liked") }
+                    Chip { iconName: "list"; text: I18n.n("{n} playlist", "{n} playlists", library.ownPlaylists.length); onClicked: Nav.go("library") }
                     Chip {
                         iconName: "album"
-                        text: (library.playlists.length - library.ownPlaylists.length) + " tersimpan"
+                        text: I18n.t("{n} saved", { n: library.playlists.length - library.ownPlaylists.length })
                         onClicked: Nav.go("library")
                     }
-                    Chip { iconName: "clock"; text: library.recent.length + " baru diputar"; enabled: false }
+                    Chip { iconName: "clock"; text: I18n.t("{n} recently played", { n: library.recent.length }); enabled: false }
                 }
             }
 
@@ -88,13 +88,13 @@ Item {
                         Layout.fillWidth: true
                         spacing: 2
                         Label {
-                            text: page.resume ? (page.live ? "Sedang diputar" : "Terakhir diputar") : "Selamat datang di Senada"
+                            text: page.resume ? (page.live ? I18n.t("Now playing") : I18n.t("Last played")) : I18n.t("Welcome to Senada")
                             color: Theme.dim
                             font.pixelSize: 12
                         }
                         Label {
                             Layout.fillWidth: true
-                            text: page.resume ? page.resume.name : "Musik tanpa akun, tanpa iklan"
+                            text: page.resume ? page.resume.name : I18n.t("Music with no account and no ads")
                             font.pixelSize: 17
                             font.weight: Font.Bold
                             elide: Text.ElideRight
@@ -102,7 +102,7 @@ Item {
                         Label {
                             Layout.fillWidth: true
                             text: page.resume ? page.resume.artists + (page.resume.album ? " • " + page.resume.album : "")
-                                              : "Cari lagu, buka album, atau impor playlist Spotify."
+                                              : I18n.t("Search songs, open albums or import a Spotify playlist.")
                             color: Theme.dim
                             font.pixelSize: 13
                             elide: Text.ElideRight
@@ -145,12 +145,12 @@ Item {
                         size: 20
                         outlined: true
                         implicitWidth: 46
-                        tip: page.live ? "Putar/Jeda" : "Lanjutkan"
+                        tip: page.live ? I18n.t("Play/Pause") : I18n.t("Resume")
                         onClicked: page.live ? player.togglePlay() : player.playUris(library.recent.map(t => t.uri), 0)
                     }
                     NButton {
                         visible: !page.resume
-                        text: "Cari lagu"
+                        text: I18n.t("Search songs")
                         iconName: "search"
                         primary: true
                         onClicked: Nav.go("search")
@@ -162,7 +162,7 @@ Item {
             Column {
                 width: parent.width
                 spacing: 12
-                Label { text: "Aksi cepat"; font.pixelSize: 18; font.weight: Font.Bold }
+                Label { text: I18n.t("Quick actions"); font.pixelSize: 18; font.weight: Font.Bold }
                 GridLayout {
                     width: parent.width
                     columns: page.wide ? 3 : 1
@@ -170,22 +170,22 @@ Item {
                     rowSpacing: 10
                     QuickAction {
                         iconName: "play"
-                        title: "Lagu yang Disukai"
-                        subtitle: library.likedCount + " lagu"
+                        title: I18n.t("Liked Songs")
+                        subtitle: I18n.n("{n} song", "{n} songs", library.likedCount)
                         enabled: library.likedCount > 0
                         onClicked: player.playContext("senada:liked:", "")
                     }
                     QuickAction {
                         iconName: "shuffle"
-                        title: "Acak"
-                        subtitle: "Lagu yang disukai, urutan acak"
+                        title: I18n.t("Shuffle")
+                        subtitle: I18n.t("Liked songs in random order")
                         enabled: library.likedCount > 0
                         onClicked: player.shufflePlay("senada:liked:")
                     }
                     QuickAction {
                         iconName: "download"
-                        title: "Impor dari Spotify"
-                        subtitle: "Tempel link playlist atau album"
+                        title: I18n.t("Import from Spotify")
+                        subtitle: I18n.t("Paste a playlist or album link")
                         onClicked: Nav.go("library")
                     }
                 }
@@ -202,19 +202,20 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1
                     Layout.alignment: Qt.AlignTop
-                    title: "Disukai"
+                    title: I18n.t("Liked")
+                    showAllLink: true
                     tracks: page.liked
-                    emptyText: "Tekan ♡ di lagu mana pun untuk menyimpannya di sini."
+                    emptyText: I18n.t("Tap ♡ on any song to keep it here.")
                     onShowAll: Nav.go("liked")
                 }
                 TrackColumn {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1
                     Layout.alignment: Qt.AlignTop
-                    title: "Baru diputar"
+                    title: I18n.t("Recently played")
                     tracks: library.recent.slice(0, 6)
                     allTracks: library.recent
-                    emptyText: "Lagu yang kamu putar akan muncul di sini."
+                    emptyText: I18n.t("Songs you play show up here.")
                 }
             }
 
@@ -231,7 +232,7 @@ Item {
                         implicitWidth: 28; implicitHeight: 28
                     }
                     Label {
-                        text: page.home.loading ? "Memuat musik dari YouTube Music…" : (page.home.error || "")
+                        text: page.home.loading ? I18n.t("Loading music from YouTube Music…") : (page.home.error || "")
                         color: page.home.loading ? Theme.dim : Theme.danger
                         font.pixelSize: 14
                         wrapMode: Text.WordWrap
@@ -239,7 +240,7 @@ Item {
                 }
                 NButton {
                     visible: !page.home.loading && !!page.home.error
-                    text: "Coba lagi"
+                    text: I18n.t("Try again")
                     iconName: "refresh"
                     onClicked: library.refreshAll()
                 }
@@ -306,6 +307,7 @@ Item {
         property var tracks: []
         property var allTracks: tracks
         property string emptyText
+        property bool showAllLink: false
         signal showAll()
         spacing: 6
         Item {
@@ -320,8 +322,8 @@ Item {
             LinkLabel {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                visible: tcol.title === "Disukai" && tcol.tracks.length > 0
-                text: "Semua →"
+                visible: tcol.showAllLink && tcol.tracks.length > 0
+                text: I18n.t("All →")
                 font.weight: Font.Bold
                 onClicked: tcol.showAll()
             }
@@ -372,13 +374,13 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 6
                 Chip {
-                    text: "Putar semua"
+                    text: I18n.t("Play all")
                     iconName: "play"
                     onClicked: player.playUris(ts.tracks.map(x => x.uri), 0)
                 }
                 Chip {
                     visible: ts.tracks.length > ts.collapsed
-                    text: ts.expanded ? "Lebih sedikit" : "Semua (" + ts.tracks.length + ")"
+                    text: ts.expanded ? I18n.t("Show less") : I18n.t("All ({n})", { n: ts.tracks.length })
                     onClicked: ts.expanded = !ts.expanded
                 }
             }

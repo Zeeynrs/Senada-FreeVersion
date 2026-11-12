@@ -68,10 +68,10 @@ Rectangle {
         anchors.rightMargin: 11
         spacing: 2
 
-        NavEntry { text: "Beranda"; iconName: "home"; current: side.currentKey === "home"; onClicked: Nav.go("home") }
-        NavEntry { text: "Cari"; iconName: "search"; current: side.currentKey === "search"; onClicked: Nav.go("search") }
+        NavEntry { text: I18n.t("Home"); iconName: "home"; current: side.currentKey === "home"; onClicked: Nav.go("home") }
+        NavEntry { text: I18n.t("Search"); iconName: "search"; current: side.currentKey === "search"; onClicked: Nav.go("search") }
         NavEntry {
-            text: "Koleksimu"
+            text: I18n.t("Your Library")
             iconName: "library"
             trailing: side.libraryOpen ? "expand-more" : "chevron-right"
             current: side.currentKey === "library" && side.libraryFilter === "all"
@@ -92,15 +92,15 @@ Rectangle {
                 id: subCol
                 width: parent.width
                 spacing: 0
-                NavEntry { sub: true; text: "Lagu disukai"; current: side.currentKey === "liked:"; onClicked: Nav.go("liked") }
-                NavEntry { sub: true; text: "Album"; current: side.libraryFilter === "album"; onClicked: Nav.go("library", "album") }
-                NavEntry { sub: true; text: "Artis"; current: side.libraryFilter === "artist"; onClicked: Nav.go("library", "artist") }
-                NavEntry { sub: true; text: "Playlist"; current: side.libraryFilter === "playlist"; onClicked: Nav.go("library", "playlist") }
-                NavEntry { sub: true; text: "Impor"; current: side.libraryFilter === "imported"; onClicked: Nav.go("library", "imported") }
+                NavEntry { sub: true; text: I18n.t("Liked songs"); current: side.currentKey === "liked:"; onClicked: Nav.go("liked") }
+                NavEntry { sub: true; text: I18n.t("Albums"); current: side.libraryFilter === "album"; onClicked: Nav.go("library", "album") }
+                NavEntry { sub: true; text: I18n.t("Artists"); current: side.libraryFilter === "artist"; onClicked: Nav.go("library", "artist") }
+                NavEntry { sub: true; text: I18n.t("Playlists"); current: side.libraryFilter === "playlist"; onClicked: Nav.go("library", "playlist") }
+                NavEntry { sub: true; text: I18n.t("Imported"); current: side.libraryFilter === "imported"; onClicked: Nav.go("library", "imported") }
             }
         }
         NavEntry {
-            text: "Pengaturan"
+            text: I18n.t("Settings")
             iconName: "settings"
             trailing: "chevron-right"
             current: side.currentKey === "settings"
@@ -146,7 +146,7 @@ Rectangle {
             Layout.leftMargin: 8
             Label {
                 Layout.fillWidth: true
-                text: "TERSIMPAN"
+                text: I18n.t("SAVED")
                 color: Theme.faint
                 font.pixelSize: 11
                 font.weight: Font.Bold
@@ -156,7 +156,7 @@ Rectangle {
                 iconName: "add"
                 size: 16
                 tint: Theme.dim
-                tip: "Playlist baru"
+                tip: I18n.t("New playlist")
                 onClicked: Nav.newPlaylist([])
             }
         }
@@ -209,8 +209,8 @@ Rectangle {
                         }
                         Label {
                             Layout.fillWidth: true
-                            text: it.modelData.local ? (it.modelData.imported ? "Playlist impor" : "Playlist")
-                                 : it.modelData.kind === "album" ? "Album" : it.modelData.kind === "artist" ? "Artis" : "Playlist"
+                            text: it.modelData.local ? (it.modelData.imported ? I18n.t("Imported playlist") : I18n.t("Playlist"))
+                                 : it.modelData.kind === "album" ? I18n.t("Album") : it.modelData.kind === "artist" ? I18n.t("Artist") : I18n.t("Playlist")
                             color: Theme.dim
                             font.pixelSize: 11
                             elide: Text.ElideRight
@@ -220,9 +220,9 @@ Rectangle {
                 TapHandler { acceptedButtons: Qt.RightButton; onTapped: if (it.modelData.local) itMenu.popup() }
                 NMenu {
                     id: itMenu
-                    MenuItem { text: "Putar"; onTriggered: player.playContext(it.modelData.uri, "") }
-                    MenuItem { text: "Ganti nama…"; onTriggered: Nav.renamePlaylist(it.modelData.id, it.modelData.name) }
-                    MenuItem { text: "Hapus…"; onTriggered: Nav.deletePlaylist(it.modelData.id, it.modelData.name) }
+                    MenuItem { text: I18n.t("Play"); onTriggered: player.playContext(it.modelData.uri, "") }
+                    MenuItem { text: I18n.t("Rename…"); onTriggered: Nav.renamePlaylist(it.modelData.id, it.modelData.name) }
+                    MenuItem { text: I18n.t("Delete…"); onTriggered: Nav.deletePlaylist(it.modelData.id, it.modelData.name) }
                 }
             }
 
@@ -232,7 +232,7 @@ Rectangle {
                 leftPadding: 8
                 rightPadding: 8
                 topPadding: 4
-                text: "Playlist buatanmu dan album, artis, atau playlist yang kamu simpan (♡) muncul di sini."
+                text: I18n.t("Your playlists, and the albums, artists and playlists you save (♡), show up here.")
                 wrapMode: Text.WordWrap
                 color: Theme.faint
                 font.pixelSize: 12

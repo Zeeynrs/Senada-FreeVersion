@@ -12,6 +12,7 @@ from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from . import matching, spotify_import, ytmusic
 from .catalog import Catalog
+from .i18n import tr, trn
 from .store import LocalStore
 
 YT_LINK_RE = re.compile(r"(?:music\.)?youtube\.com/|youtu\.be/")
@@ -132,13 +133,13 @@ class Library(QObject):
             full = self.store.playlist(p["id"]) or {}
             cover = next((t for t in full.get("tracks", []) if t.get("imageSmall")), {})
             own.append({"kind": "playlist", "id": p["id"], "uri": f"senada:playlist:{p['id']}", "name": p["name"],
-                        "subtitle": f"Playlist Saya • {p['count']} lagu", "count": p["count"], "local": True,
+                        "subtitle": tr("My playlist") + " • " + trn("{n} song", "{n} songs", p["count"]), "count": p["count"], "local": True,
                         "imported": bool(p.get("source")),
                         "imageSmall": cover.get("imageSmall", ""), "image": cover.get("image", ""),
                         "imageLarge": cover.get("imageLarge", "")})
         saved = []
         for s in self.store.saved():
-            label = {"album": "Album", "playlist": "Playlist", "artist": "Artis"}.get(s["kind"], "")
+            label = {"album": tr("Album"), "playlist": tr("Playlist"), "artist": tr("Artist")}.get(s["kind"], "")
             sub = s.get("subtitle", "")
             saved.append({**s, "subtitle": " • ".join(x for x in (label, sub if sub != label else "") if x)})
         self._own = own
@@ -251,7 +252,7 @@ class Library(QObject):
             self._saved_rev += 1
             self.savedChanged.emit()
             self._refresh_playlists()
-            self.toast.emit("Disimpan ke Library" if now else "Dihapus dari Library")
+            self.toast.emit(tr("Saved to Library") if now else tr("Removed from Library"))
 
     # ---- own playlists ----------------------------------------------------------
 
@@ -259,7 +260,7 @@ class Library(QObject):
     def createPlaylist(self, name, tracks):
         pid = self.store.create_playlist(name, [dict(t) for t in tracks or []])
         self._refresh_playlists()
-        self.toast.emit(f"Playlist “{(name or '').strip() or 'Playlist baru'}” dibuat")
+        self.toast.emit(tr("Playlist “{name}” created", name=(name or "").strip() or tr("New playlist")))
         return pid
 
     @Slot(str, str)
@@ -271,14 +272,14 @@ class Library(QObject):
     def deletePlaylist(self, pid):
         if self.store.delete_playlist(pid):
             self._refresh_playlists()
-            self.toast.emit("Playlist dihapus")
+            self.toast.emit(tr("Playlist deleted"))
 
     @Slot(str, "QVariantList")
     def addToPlaylist(self, pid, tracks):
         added = self.store.add_to_playlist(pid, [dict(t) for t in tracks or []])
         self._refresh_playlists()
         name = next((p["name"] for p in self._own if p["id"] == pid), "playlist")
-        self.toast.emit(f"Ditambahkan ke “{name}”" if added else f"Sudah ada di “{name}”")
+        self.toast.emit(tr("Added to “{name}”", name=name) if added else tr("Already in “{name}”", name=name))
 
     @Slot(str, str)
     def removeFromPlaylist(self, pid, uri):
@@ -291,12 +292,13 @@ class Library(QObject):
         info = dict(info)
         tracks = [dict(t) for t in info.get("tracks") or []]
         if not tracks:
-            self.toast.emit("Tidak ada lagu untuk diimpor")
+            self.toast.emit(tr("No songs to import"))
             return
-        pid = self.store.create_playlist(info.get("name") or "Impor", tracks, source=info.get("source", ""),
+        name = info.get("name") or tr("Import")
+        pid = self.store.create_playlist(name, tracks, source=info.get("source", ""),
                                          description=info.get("description", ""))
         self._refresh_playlists()
-        self.toast.emit(f"{len(tracks)} lagu diimpor ke “{info.get('name') or 'Impor'}”")
+        self.toast.emit(trn("{n} song imported into “{name}”", "{n} songs imported into “{name}”", len(tracks), name=name))
         self.playlistCreated.emit(pid)
         self.matchTracks(tracks)
 
@@ -325,7 +327,7 @@ class Library(QObject):
         todo = [dict(t) for t in tracks or [] if not (t.get("uri") or "").startswith("yt:track:")]
         if not todo:
             return
-        self.toast.emit(f"Mencocokkan {len(todo)} lagu dengan YouTube Music…")
+        self.toast.emit(trn("Matching {n} song with YouTube Music…", "Matching {n} songs with YouTube Music…", len(todo)))
 
         def safe_match(t):
             try:
@@ -348,15 +350,15 @@ class Library(QObject):
         def done(result):
             patches, weak, missing = result
             self._store_patches(patches)
-            parts = [f"{len(patches) - weak} cocok"]
+            parts = [tr("{n} matched", n=len(patches) - weak)]
             if weak:
-                parts.append(f"{weak} kurang yakin")
+                parts.append(tr("{n} unsure", n=weak))
             if missing:
-                parts.append(f"{missing} tidak ketemu")
-            hint = " — cek lagu bertanda ? (klik kanan → Pilih versi lain)" if weak or missing else ""
-            self.toast.emit("Pencocokan selesai: " + ", ".join(parts) + hint)
+                parts.append(tr("{n} not found", n=missing))
+            hint = tr(" — check the songs marked ? (right-click → Pick another version)") if weak or missing else ""
+            self.toast.emit(tr("Matching done: {result}", result=", ".join(parts)) + hint)
 
-        self.worker.run(job, done, lambda e: self.toast.emit(f"Pencocokan gagal: {e}"))
+        self.worker.run(job, done, lambda e: self.toast.emit(tr("Matching failed: {error}", error=e)))
 
     @Slot("QVariantMap")
     def matchCandidates(self, track):
@@ -388,14 +390,14 @@ class Library(QObject):
         self._store_patches({track["uri"]: patch})
         if self.player is not None:
             self.player.replaceMatch(track["uri"], patch)
-        self.toast.emit(f"Versi “{cand.get('name', '')}” dipakai untuk lagu ini")
+        self.toast.emit(tr("Using “{name}” for this song", name=cand.get("name", "")))
 
     @Slot(str)
     def importSpotify(self, link):
         parsed = spotify_import.parse_link(link)
         if not parsed or parsed[0] == "track":
-            self.toast.emit("Tempel link playlist atau album Spotify (open.spotify.com/playlist/…)")
+            self.toast.emit(tr("Paste a Spotify playlist or album link (open.spotify.com/playlist/…)"))
             return
-        self.toast.emit("Membaca playlist Spotify…")
+        self.toast.emit(tr("Reading the Spotify playlist…"))
         self.worker.run(lambda: spotify_import.fetch(*parsed), self.importCollection,
                         lambda e: self.toast.emit(str(e)))

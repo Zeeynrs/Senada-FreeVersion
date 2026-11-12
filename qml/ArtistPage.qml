@@ -53,7 +53,7 @@ Item {
             }
             Label {
                 visible: (page.info.tracks || []).length > 0
-                text: "Populer"
+                text: I18n.t("Popular")
                 font.pixelSize: 22
                 font.weight: Font.Bold
                 leftPadding: 32
@@ -78,7 +78,7 @@ Item {
             CardGrid {
                 x: 20
                 width: parent.width - 40
-                title: "Diskografi"
+                title: I18n.t("Discography")
                 items: page.info.albums || []
                 rows: 2
             }

@@ -17,6 +17,7 @@ import urllib.error
 import urllib.request
 
 from . import net
+from .i18n import tr, trn
 from .config import CACHE_DIR, read_json, write_private
 
 logger = logging.getLogger("senada.spotify")
@@ -56,21 +57,21 @@ def _entity(kind: str, sid: str) -> tuple[dict, str]:
         with net.urlopen(req, timeout=10) as resp:
             html = resp.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
-        raise SpotifyImportError("Spotify tidak menemukan link ini (pastikan playlist-nya publik)."
-                                 if e.code == 404 else f"Spotify menolak permintaan (HTTP {e.code}).") from e
+        raise SpotifyImportError(tr("Spotify could not find this link (make sure the playlist is public).")
+                                 if e.code == 404 else tr("Spotify refused the request (HTTP {code}).", code=e.code)) from e
     except (urllib.error.URLError, TimeoutError, OSError) as e:
-        raise SpotifyImportError(f"Tidak bisa menghubungi Spotify: {getattr(e, 'reason', e)}") from e
+        raise SpotifyImportError(tr("Could not reach Spotify: {error}", error=getattr(e, "reason", e))) from e
     m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
     if not m:
-        raise SpotifyImportError("Format halaman Spotify berubah; impor belum bisa dibaca.")
+        raise SpotifyImportError(tr("The Spotify page format changed; the import cannot be read yet."))
     try:
         data = json.loads(m.group(1))
     except ValueError as e:
-        raise SpotifyImportError("Data Spotify tidak bisa dibaca.") from e
+        raise SpotifyImportError(tr("The Spotify data cannot be read.")) from e
     state = ((data.get("props") or {}).get("pageProps") or {}).get("state") or {}
     entity = (state.get("data") or {}).get("entity") or {}
     if not entity.get("name") and not entity.get("title"):
-        raise SpotifyImportError("Spotify tidak menemukan link ini (pastikan playlist-nya publik).")
+        raise SpotifyImportError(tr("Spotify could not find this link (make sure the playlist is public)."))
     token = ((state.get("settings") or {}).get("session") or {}).get("accessToken") or ""
     return entity, token
 
@@ -272,16 +273,16 @@ def fetch(kind: str, sid: str) -> dict:
         "id": cid,
         "uri": f"senada:{'album' if kind == 'album' else 'playlist'}:{cid}",
         "name": name,
-        "typeLabel": "Album Spotify" if kind == "album" else "Playlist Spotify",
+        "typeLabel": tr("Spotify album") if kind == "album" else tr("Spotify playlist"),
         "subtitle": subtitle or "Spotify",
         "description": re.sub(r"<[^>]+>", "", info.get("description") or ""),
         "imageSmall": cover.get("imageSmall", ""),
         "image": cover.get("image", ""),
         "imageLarge": cover.get("imageLarge", ""),
         "tracks": tracks,
-        "note": ("Playlist ini kosong atau tidak publik." if not tracks
-                 else f"Dibaca dari Spotify: {len(tracks)} lagu. Audio dicari otomatis di YouTube Music." if complete
-                 else f"Hanya {len(tracks)} lagu pertama yang bisa dibaca dari Spotify saat ini. "
-                      "Audio dicari otomatis di YouTube Music."),
+        "note": (tr("This playlist is empty or not public.") if not tracks
+                 else trn("Read from Spotify: {n} song.", "Read from Spotify: {n} songs.", len(tracks)) if complete
+                 else tr("Only the first {n} songs can be read from Spotify right now.", n=len(tracks)))
+                + ("" if not tracks else " " + tr("The audio is found on YouTube Music automatically.")),
         "source": f"https://open.spotify.com/{kind}/{sid}",
     }

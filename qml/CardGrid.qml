@@ -30,7 +30,7 @@ Column {
         }
         LinkLabel {
             visible: g.items.length > g.columns * g.rows
-            text: g.expanded ? "Lebih sedikit" : "Tampilkan semua"
+            text: g.expanded ? I18n.t("Show less") : I18n.t("Show all")
             anchors.right: parent.right
             anchors.rightMargin: 12
             anchors.verticalCenter: parent.verticalCenter

@@ -13,8 +13,8 @@ Item {
     readonly property bool hasResults: tracks.length + (results.albums || []).length
                                        + (results.artists || []).length + (results.playlists || []).length > 0
     readonly property var suggestions: [
-        "Top hits Indonesia", "Lo-fi santai", "Dangdut koplo", "Jazz malam",
-        "K-Pop", "Lagu galau", "Indie Indonesia", "Musik fokus"
+        "Top hits Indonesia", I18n.t("Chill lo-fi"), "Dangdut koplo", I18n.t("Late night jazz"),
+        "K-Pop", I18n.t("Sad songs"), I18n.t("Indonesian indie"), I18n.t("Focus music")
     ]
 
     Component.onCompleted: field.forceActiveFocus()
@@ -57,7 +57,7 @@ Item {
             width: flick.width - 56
             spacing: 22
 
-            Label { text: "Cari"; font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
+            Label { text: I18n.t("Search"); font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
 
             // search field
             Item {
@@ -69,7 +69,7 @@ Item {
                     height: 50
                     font.pixelSize: 15
                     iconName: "search"
-                    placeholderText: "Mau dengar apa? (atau tempel link Spotify/YouTube Music)"
+                    placeholderText: I18n.t("What do you want to hear? (or paste a Spotify/YouTube Music link)")
                     onTextChanged: debounce.restart()
                     Keys.onEscapePressed: text = ""
                 }
@@ -89,11 +89,11 @@ Item {
                 visible: page.hasResults
                 Repeater {
                     model: [
-                        { key: "all", label: "Semua" },
-                        { key: "tracks", label: "Lagu" },
-                        { key: "albums", label: "Album" },
-                        { key: "artists", label: "Artis" },
-                        { key: "playlists", label: "Playlist" }
+                        { key: "all", label: I18n.t("All") },
+                        { key: "tracks", label: I18n.t("Songs") },
+                        { key: "albums", label: I18n.t("Albums") },
+                        { key: "artists", label: I18n.t("Artists") },
+                        { key: "playlists", label: I18n.t("Playlists") }
                     ]
                     Chip {
                         text: modelData.label
@@ -109,7 +109,7 @@ Item {
                 visible: !page.hasResults && !page.searching
                 spacing: 14
                 Label {
-                    text: field.text.trim() ? "Tidak ada hasil." : "Coba salah satu, atau tempel link playlist Spotify publik."
+                    text: field.text.trim() ? I18n.t("No results.") : I18n.t("Try one of these, or paste a link to a public Spotify playlist.")
                     color: Theme.dim
                     font.pixelSize: 15
                 }
@@ -173,7 +173,7 @@ Item {
                         anchors.fill: parent
                         anchors.margins: 24
                         spacing: 6
-                        Label { text: "Hasil teratas"; color: Theme.dim; font.pixelSize: 12; font.weight: Font.Bold }
+                        Label { text: I18n.t("Top result"); color: Theme.dim; font.pixelSize: 12; font.weight: Font.Bold }
                         Cover {
                             Layout.topMargin: 8
                             Layout.preferredWidth: 104; Layout.preferredHeight: 104
@@ -199,7 +199,7 @@ Item {
                                 iconName: "play"
                                 size: 24
                                 filled: true
-                                tip: "Putar"
+                                tip: I18n.t("Play")
                                 onClicked: player.playUris(page.tracks.map(x => x.uri), 0)
                             }
                         }
@@ -208,7 +208,7 @@ Item {
                 Column {
                     Layout.fillWidth: true
                     spacing: 0
-                    Label { text: "Lagu"; font.pixelSize: 18; font.weight: Font.Bold; bottomPadding: 6 }
+                    Label { text: I18n.t("Songs"); font.pixelSize: 18; font.weight: Font.Bold; bottomPadding: 6 }
                     Repeater {
                         model: page.tracks.slice(0, 5)
                         TrackRow {
@@ -238,9 +238,9 @@ Item {
             }
 
             // shelves (Semua) or grids (single filter)
-            Carousel { width: parent.width; visible: page.filter === "all" && items.length > 0; title: "Artis"; items: page.results.artists || [] }
-            Carousel { width: parent.width; visible: page.filter === "all" && items.length > 0; title: "Album"; items: page.results.albums || [] }
-            Carousel { width: parent.width; visible: page.filter === "all" && items.length > 0; title: "Playlist"; items: page.results.playlists || [] }
+            Carousel { width: parent.width; visible: page.filter === "all" && items.length > 0; title: I18n.t("Artists"); items: page.results.artists || [] }
+            Carousel { width: parent.width; visible: page.filter === "all" && items.length > 0; title: I18n.t("Albums"); items: page.results.albums || [] }
+            Carousel { width: parent.width; visible: page.filter === "all" && items.length > 0; title: I18n.t("Playlists"); items: page.results.playlists || [] }
             CardGrid {
                 width: parent.width
                 visible: page.filter !== "all" && page.filter !== "tracks" && items.length > 0

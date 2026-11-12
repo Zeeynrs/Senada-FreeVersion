@@ -10,6 +10,7 @@ Item {
     property bool sidebarOpen: true
     property string panel: "lyrics"   // right panel: "lyrics" | "queue" | "" (closed)
     property var forwardStack: []     // pages left with "back", for "forward"
+    property var beforeSettings: null // page that was open when Settings opened
 
     readonly property string currentKey: stack.currentItem ? stack.currentItem.pageKey : ""
     readonly property string libraryFilter: currentKey === "library" ? stack.currentItem.filter : ""
@@ -38,10 +39,17 @@ Item {
             stack.currentItem.filter = itemId || "all"
             return
         }
+        // the Settings button (and Ctrl+,) closes Settings again when it is open
+        if (kind === "settings" && currentKey === "settings") {
+            closeSettings()
+            return
+        }
         const key = kind + ":" + itemId
         const standalone = kind === "liked" || topLevel.indexOf(kind) >= 0
         if (currentKey === key || currentKey === kind || (!standalone && !itemId))
             return
+        if (kind === "settings")
+            beforeSettings = entryOf(stack.currentItem)
         if (topLevel.indexOf(kind) >= 0 && stack.depth > 1)
             stack.pop(null, StackView.Immediate)
         if (kind === "playlist" || kind === "album" || kind === "liked")
@@ -54,6 +62,18 @@ Item {
             stack.push(libraryComp, { filter: itemId || "all" })
         else if (kind === "settings")
             stack.push(settingsComp)
+    }
+
+    function closeSettings() {
+        const back = beforeSettings
+        beforeSettings = null
+        if (back && back.kind !== "home" && back.kind !== "settings") {
+            // Settings sits right on top of Home: go down to it and reopen the page from before
+            stack.pop(null, StackView.Immediate)
+            navigate(back.kind, back.itemId)
+        } else {
+            stack.pop(null)
+        }
     }
 
     function goBack() {
@@ -141,8 +161,8 @@ Item {
         contentItem: ColumnLayout {
             spacing: 16
             Label {
-                text: playlistDialog.mode === "create" ? "Playlist baru"
-                    : playlistDialog.mode === "rename" ? "Ganti nama playlist" : "Hapus playlist?"
+                text: playlistDialog.mode === "create" ? I18n.t("New playlist")
+                    : playlistDialog.mode === "rename" ? I18n.t("Rename playlist") : I18n.t("Delete playlist?")
                 font.pixelSize: 20
                 font.weight: Font.Bold
             }
@@ -151,22 +171,22 @@ Item {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
                 color: Theme.dim
-                text: "“" + playlistDialog.currentName + "” akan dihapus dari perangkat ini. Lagu-lagunya tetap ada di YouTube Music."
+                text: I18n.t("“{name}” will be removed from this device. Its songs stay on YouTube Music.", { name: playlistDialog.currentName })
             }
             NTextField {
                 id: nameField
                 visible: playlistDialog.mode !== "delete"
                 Layout.fillWidth: true
-                placeholderText: "Nama playlist"
+                placeholderText: I18n.t("Playlist name")
                 onAccepted: playlistDialog.accept()
             }
             RowLayout {
                 Layout.alignment: Qt.AlignRight
                 spacing: 8
-                NButton { text: "Batal"; onClicked: playlistDialog.close() }
+                NButton { text: I18n.t("Cancel"); onClicked: playlistDialog.close() }
                 NButton {
                     primary: true
-                    text: playlistDialog.mode === "create" ? "Buat" : playlistDialog.mode === "rename" ? "Simpan" : "Hapus"
+                    text: playlistDialog.mode === "create" ? I18n.t("Create") : playlistDialog.mode === "rename" ? I18n.t("Save") : I18n.t("Delete")
                     enabled: playlistDialog.mode === "delete" || nameField.text.trim().length > 0
                     onClicked: playlistDialog.accept()
                 }
@@ -325,8 +345,8 @@ Item {
                 }
 
                 NButton {
-                    text: !updater.updating ? "Perbarui"
-                          : updater.releaseMode && updater.progress >= 0 ? updater.progress + "%" : "Memperbarui…"
+                    text: !updater.updating ? I18n.t("Update")
+                          : updater.releaseMode && updater.progress >= 0 ? updater.progress + "%" : I18n.t("Updating…")
                     primary: true
                     enabled: !updater.updating
                     onClicked: updater.applyUpdate()
@@ -335,7 +355,7 @@ Item {
                 IconButton {
                     iconName: "close"
                     size: 16
-                    tip: "Sembunyikan"
+                    tip: I18n.t("Hide")
                     onClicked: updater.dismissBanner()
                 }
             }

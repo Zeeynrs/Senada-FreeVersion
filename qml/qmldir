@@ -18,6 +18,7 @@ LinkLabel 1.0 LinkLabel.qml
 LyricsView 1.0 LyricsView.qml
 Main 1.0 Main.qml
 MatchPicker 1.0 MatchPicker.qml
+singleton I18n 1.0 I18n.qml
 singleton Nav 1.0 Nav.qml
 NButton 1.0 NButton.qml
 NMenu 1.0 NMenu.qml

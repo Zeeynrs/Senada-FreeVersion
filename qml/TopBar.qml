@@ -32,7 +32,7 @@ Rectangle {
             size: 18
             tint: Theme.dim
             active: top.sidebarOpen
-            tip: top.sidebarOpen ? "Sembunyikan sidebar (Ctrl+B)" : "Tampilkan sidebar (Ctrl+B)"
+            tip: top.sidebarOpen ? I18n.t("Hide sidebar (Ctrl+B)") : I18n.t("Show sidebar (Ctrl+B)")
             onClicked: top.toggleSidebar()
         }
         Item { Layout.preferredWidth: Math.max(0, (top.sidebarOpen ? Theme.sidebarWidth : 0) - 50) }
@@ -40,14 +40,14 @@ Rectangle {
             iconName: "back"
             size: 18
             enabled: top.canGoBack
-            tip: "Kembali (Alt+←)"
+            tip: I18n.t("Back (Alt+←)")
             onClicked: top.back()
         }
         IconButton {
             iconName: "forward"
             size: 18
             enabled: top.canGoForward
-            tip: "Maju (Alt+→)"
+            tip: I18n.t("Forward (Alt+→)")
             onClicked: top.forward()
         }
 
@@ -57,7 +57,7 @@ Rectangle {
             iconName: "search"
             size: 18
             tint: Theme.dim
-            tip: "Cari (Ctrl+F)"
+            tip: I18n.t("Search (Ctrl+F)")
             onClicked: Nav.go("search")
         }
         IconButton {
@@ -65,7 +65,7 @@ Rectangle {
             size: 18
             tint: Theme.dim
             active: top.panel !== ""
-            tip: top.panel !== "" ? "Tutup panel kanan" : "Buka panel lirik & antrean"
+            tip: top.panel !== "" ? I18n.t("Close right panel") : I18n.t("Open lyrics & queue panel")
             onClicked: top.togglePanel()
         }
     }

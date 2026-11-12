@@ -249,8 +249,8 @@ Item {
                     }
                     ToolTip.visible: styleMouse.containsMouse
                     ToolTip.text: (session && session.visualizerStyle === "wave")
-                                  ? "Gaya Visualizer: Gelombang (Klik untuk Batang)"
-                                  : "Gaya Visualizer: Batang (Klik untuk Gelombang)"
+                                  ? I18n.t("Visualizer style: wave (click for bars)")
+                                  : I18n.t("Visualizer style: bars (click for wave)")
                     ToolTip.delay: 400
                 }
 
@@ -346,7 +346,7 @@ Item {
                 Label {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    text: im.s.name || "Tidak ada yang diputar"
+                    text: im.s.name || I18n.t("Nothing is playing")
                     font.pixelSize: 26
                     font.weight: Font.Black
                     color: "#ffffff"
@@ -368,7 +368,7 @@ Item {
                         iconName: im.s.liked ? "heart" : "heart-outline"
                         size: 17
                         tint: im.s.liked ? Theme.like : Qt.rgba(1, 1, 1, 0.7)
-                        tip: im.s.liked ? "Hapus dari Lagu Disukai" : "Simpan ke Lagu Disukai"
+                        tip: im.s.liked ? I18n.t("Remove from Liked Songs") : I18n.t("Save to Liked Songs")
                         onClicked: player.toggleLike()
                     }
                 }
@@ -474,14 +474,14 @@ Item {
                     iconName: "shuffle"
                     size: 20
                     active: !!im.s.shuffle
-                    tip: "Acak"
+                    tip: I18n.t("Shuffle")
                     onClicked: player.toggleShuffle()
                 }
                 IconButton {
                     anchors.verticalCenter: parent.verticalCenter
                     iconName: "previous"
                     size: 22
-                    tip: "Sebelumnya (Ctrl+←)"
+                    tip: I18n.t("Previous (Ctrl+←)")
                     onClicked: player.previous()
                 }
 
@@ -514,7 +514,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     iconName: "next"
                     size: 22
-                    tip: "Berikutnya (Ctrl+→)"
+                    tip: I18n.t("Next (Ctrl+→)")
                     onClicked: player.next()
                 }
                 IconButton {
@@ -522,7 +522,7 @@ Item {
                     iconName: im.s.repeat === "track" ? "repeat-one" : "repeat"
                     size: 20
                     active: im.s.repeat !== undefined && im.s.repeat !== "off"
-                    tip: "Ulangi"
+                    tip: I18n.t("Repeat")
                     onClicked: player.cycleRepeat()
                 }
             }

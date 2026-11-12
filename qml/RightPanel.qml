@@ -26,7 +26,7 @@ Rectangle {
         height: 46
         spacing: 16
         Repeater {
-            model: [{ key: "lyrics", label: "LIRIK" }, { key: "queue", label: "ANTREAN" }]
+            model: [{ key: "lyrics", label: I18n.t("LYRICS") }, { key: "queue", label: I18n.t("QUEUE") }]
             Label {
                 required property var modelData
                 text: modelData.label
@@ -39,7 +39,7 @@ Rectangle {
             }
         }
         Item { Layout.fillWidth: true }
-        IconButton { iconName: "close"; size: 16; tint: Theme.dim; tip: "Tutup panel"; onClicked: rp.close() }
+        IconButton { iconName: "close"; size: 16; tint: Theme.dim; tip: I18n.t("Close panel"); onClicked: rp.close() }
     }
     Rectangle { anchors.top: head.bottom; x: 1; width: parent.width - 1; height: 1; color: Theme.line }
 
@@ -65,10 +65,10 @@ Rectangle {
                 wrapMode: Text.WordWrap
                 color: Theme.dim
                 font.pixelSize: 14
-                text: lyrics.status === "loading" ? "Mencari lirik…"
-                    : lyrics.status === "idle" ? "Putar lagu untuk melihat lirik."
-                    : lyrics.status === "error" ? "Lirik gagal dimuat. Periksa koneksi internet."
-                    : "Lirik untuk lagu ini belum tersedia."
+                text: lyrics.status === "loading" ? I18n.t("Looking for lyrics…")
+                    : lyrics.status === "idle" ? I18n.t("Play a song to see its lyrics.")
+                    : lyrics.status === "error" ? I18n.t("Lyrics could not be loaded. Check the internet connection.")
+                    : I18n.t("No lyrics for this song yet.")
             }
             ListView {
                 id: lines
@@ -133,11 +133,11 @@ Rectangle {
                 width: q.width
                 topPadding: 12
                 spacing: 4
-                SectionLabel { text: "SEDANG DIPUTAR" }
+                SectionLabel { text: I18n.t("NOW PLAYING") }
                 Label {
                     visible: !rp.s.hasTrack
                     leftPadding: 16
-                    text: "Belum ada yang diputar."
+                    text: I18n.t("Nothing playing yet.")
                     color: Theme.dim
                     font.pixelSize: 13
                 }
@@ -149,11 +149,11 @@ Rectangle {
                     onPlay: player.togglePlay()
                 }
                 Item { width: 1; height: 10 }
-                SectionLabel { text: "BERIKUTNYA"; visible: q.count > 0 }
+                SectionLabel { text: I18n.t("UP NEXT"); visible: q.count > 0 }
                 Label {
                     visible: q.count === 0
                     leftPadding: 16
-                    text: "Antrean kosong. Putar album atau playlist, atau pilih “Tambah ke antrean” di lagu mana pun."
+                    text: I18n.t("The queue is empty. Play an album or playlist, or choose “Add to queue” on any song.")
                     width: q.width - 16
                     wrapMode: Text.WordWrap
                     color: Theme.dim

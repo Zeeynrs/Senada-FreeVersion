@@ -16,6 +16,8 @@ ApplicationWindow {
     Binding { target: Theme; property: "mode"; value: session.themeMode }
     Binding { target: Theme; property: "glassMode"; value: session.glassMode }
     Binding { target: Theme; property: "glassOpacity"; value: session.glassOpacity }
+    Binding { target: I18n; property: "table"; value: session.translations }
+    Binding { target: I18n; property: "lang"; value: session.language }
 
     palette {
         window: Theme.bgSolid

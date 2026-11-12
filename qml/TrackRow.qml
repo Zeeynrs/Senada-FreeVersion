@@ -188,7 +188,7 @@ Item {
                         HoverHandler { id: unsureHover; cursorShape: Qt.PointingHandCursor }
                         TapHandler { onTapped: Nav.matchPicker(row.track) }
                         ToolTip.visible: unsureHover.hovered
-                        ToolTip.text: "Versi YouTube Music-nya mungkin kurang tepat — klik untuk memilih versi lain"
+                        ToolTip.text: I18n.t("The YouTube Music version may not be the right one — click to pick another")
                         ToolTip.delay: 300
                     }
                 }
@@ -248,7 +248,7 @@ Item {
                 iconName: "more"
                 size: 16
                 tint: row.dimInk
-                tip: "Opsi lagu"
+                tip: I18n.t("Song options")
                 opacity: hover.hovered || menu.opened || !row.compact ? 1 : 0
                 onClicked: menu.popup()
             }
@@ -258,7 +258,7 @@ Item {
                 iconName: row.liked ? "heart" : "heart-outline"
                 size: 16
                 tint: row.liked ? Theme.like : row.dimInk
-                tip: row.liked ? "Hapus dari Lagu Disukai" : "Simpan ke Lagu Disukai"
+                tip: row.liked ? I18n.t("Remove from Liked Songs") : I18n.t("Save to Liked Songs")
                 opacity: hover.hovered || (row.liked && !row.table) ? 1 : 0
                 onClicked: player.setLiked(row.track.uri, !row.liked)
             }
@@ -268,7 +268,7 @@ Item {
                 iconName: "queue-add"
                 size: 16
                 tint: row.dimInk
-                tip: "Tambah ke antrean"
+                tip: I18n.t("Add to queue")
                 opacity: hover.hovered ? 1 : 0
                 onClicked: player.addToQueue(row.track.uri)
             }
@@ -284,17 +284,17 @@ Item {
 
     NMenu {
         id: menu
-        MenuItem { text: "Putar"; onTriggered: row.play() }
-        MenuItem { text: "Putar radio dari lagu ini"; onTriggered: player.playRadio(row.track.uri) }
-        MenuItem { text: "Tambah ke antrean"; onTriggered: player.addToQueue(row.track.uri) }
+        MenuItem { text: I18n.t("Play"); onTriggered: row.play() }
+        MenuItem { text: I18n.t("Play radio from this song"); onTriggered: player.playRadio(row.track.uri) }
+        MenuItem { text: I18n.t("Add to queue"); onTriggered: player.addToQueue(row.track.uri) }
         MenuItem {
-            text: row.liked ? "Hapus dari Lagu Disukai" : "Simpan ke Lagu Disukai"
+            text: row.liked ? I18n.t("Remove from Liked Songs") : I18n.t("Save to Liked Songs")
             onTriggered: player.setLiked(row.track.uri, !row.liked)
         }
         NMenu {
             id: addMenu
-            title: "Tambah ke playlist"
-            MenuItem { text: "+ Playlist baru…"; onTriggered: Nav.newPlaylist([row.track]) }
+            title: I18n.t("Add to playlist")
+            MenuItem { text: I18n.t("+ New playlist…"); onTriggered: Nav.newPlaylist([row.track]) }
             MenuSeparator {}
             Instantiator {
                 model: library.ownPlaylists
@@ -309,19 +309,19 @@ Item {
         MenuItem {
             visible: row.imported
             height: visible ? implicitHeight : 0
-            text: "Pilih versi lain…"
+            text: I18n.t("Pick another version…")
             onTriggered: Nav.matchPicker(row.track)
         }
         MenuItem {
             visible: row.removable
             height: visible ? implicitHeight : 0
-            text: "Hapus dari playlist ini"
+            text: I18n.t("Remove from this playlist")
             onTriggered: row.remove()
         }
-        MenuItem { text: "Buka album"; enabled: !!row.track.albumId; onTriggered: Nav.go("album", row.track.albumId) }
-        MenuItem { text: "Buka artis"; enabled: !!row.track.artistId; onTriggered: Nav.go("artist", row.track.artistId) }
+        MenuItem { text: I18n.t("Go to album"); enabled: !!row.track.albumId; onTriggered: Nav.go("album", row.track.albumId) }
+        MenuItem { text: I18n.t("Go to artist"); enabled: !!row.track.artistId; onTriggered: Nav.go("artist", row.track.artistId) }
         MenuItem {
-            text: "Salin link lagu"
+            text: I18n.t("Copy song link")
             onTriggered: session.copy(row.isYouTube ? "https://music.youtube.com/watch?v=" + row.track.id
                                                     : "https://open.spotify.com/track/" + row.track.id)
         }

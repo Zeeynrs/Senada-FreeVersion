@@ -58,19 +58,19 @@ Item {
         Item { visible: th.showCover; Layout.preferredWidth: 38 }
         Head {
             Layout.fillWidth: true; Layout.preferredWidth: 0; Layout.horizontalStretchFactor: 4; Layout.minimumWidth: 100
-            key: "name"; text: "Judul"
+            key: "name"; text: I18n.t("Title")
         }
         Head {
             visible: th.wide
             Layout.fillWidth: true; Layout.preferredWidth: 0; Layout.horizontalStretchFactor: 3
-            key: "artists"; text: "Artis"
+            key: "artists"; text: I18n.t("Artist")
         }
         Head {
             visible: th.wide && th.showAlbum && th.width - 2 * th.inset > 760
             Layout.fillWidth: true; Layout.preferredWidth: 0; Layout.horizontalStretchFactor: 3
-            key: "album"; text: "Album"
+            key: "album"; text: I18n.t("Album")
         }
-        Head { Layout.preferredWidth: 44; key: "durationMs"; text: "Durasi"; align: Qt.AlignRight }
+        Head { Layout.preferredWidth: 44; key: "durationMs"; text: I18n.t("Length"); align: Qt.AlignRight }
         Item { Layout.preferredWidth: 64 }
     }
 }

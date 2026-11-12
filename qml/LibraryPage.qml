@@ -34,16 +34,17 @@ Item {
                 width: parent.width
                 Column {
                     Layout.fillWidth: true
-                    Label { text: "Koleksi"; font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
+                    Label { text: I18n.t("Library"); font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
                     Label {
-                        text: library.ownPlaylists.length + " playlist • " + (library.playlists.length - library.ownPlaylists.length)
-                              + " tersimpan • semuanya di perangkat ini"
+                        text: I18n.n("{n} playlist", "{n} playlists", library.ownPlaylists.length) + " • "
+                              + I18n.t("{n} saved", { n: library.playlists.length - library.ownPlaylists.length }) + " • "
+                              + I18n.t("all on this device")
                         color: Theme.dim
                         font.pixelSize: 14
                     }
                 }
-                NButton { text: "Playlist baru"; iconName: "queue-add"; primary: true; onClicked: Nav.newPlaylist([]) }
-                NButton { text: "Impor Spotify"; iconName: "download"; onClicked: importBox.visible = !importBox.visible }
+                NButton { text: I18n.t("New playlist"); iconName: "queue-add"; primary: true; onClicked: Nav.newPlaylist([]) }
+                NButton { text: I18n.t("Import Spotify"); iconName: "download"; onClicked: importBox.visible = !importBox.visible }
             }
 
             // inline Spotify import
@@ -64,12 +65,12 @@ Item {
                         id: importField
                         Layout.fillWidth: true
                         iconName: "download"
-                        placeholderText: "Tempel link playlist/album publik Spotify (open.spotify.com/playlist/…)"
+                        placeholderText: I18n.t("Paste a link to a public Spotify playlist/album (open.spotify.com/playlist/…)")
                         onAccepted: importBtn.clicked()
                     }
                     NButton {
                         id: importBtn
-                        text: "Impor"
+                        text: I18n.t("Import")
                         primary: true
                         enabled: importField.text.trim().length > 0
                         onClicked: { library.importSpotify(importField.text.trim()); importField.text = ""; importBox.visible = false }
@@ -81,11 +82,11 @@ Item {
                 spacing: 8
                 Repeater {
                     model: [
-                        { key: "all", label: "Semua" },
-                        { key: "playlist", label: "Playlist" },
-                        { key: "album", label: "Album" },
-                        { key: "artist", label: "Artis" },
-                        { key: "imported", label: "Impor" }
+                        { key: "all", label: I18n.t("All") },
+                        { key: "playlist", label: I18n.t("Playlists") },
+                        { key: "album", label: I18n.t("Albums") },
+                        { key: "artist", label: I18n.t("Artists") },
+                        { key: "imported", label: I18n.t("Imported") }
                     ]
                     Chip {
                         text: modelData.label
@@ -136,15 +137,15 @@ Item {
                                     iconName: "play"
                                     size: 20
                                     filled: true
-                                    tip: "Putar lagu yang disukai"
+                                    tip: I18n.t("Play liked songs")
                                     onClicked: player.playContext("senada:liked:", "")
                                 }
                             }
                             Item { width: 1; height: 8 }
-                            Label { width: parent.width; text: "Lagu yang Disukai"; elide: Text.ElideRight; font.pixelSize: 14; font.weight: Font.Bold }
+                            Label { width: parent.width; text: I18n.t("Liked Songs"); elide: Text.ElideRight; font.pixelSize: 14; font.weight: Font.Bold }
                             Label {
                                 width: parent.width
-                                text: "Playlist • " + (library.likedRevision, library.likedCount) + " lagu"
+                                text: I18n.t("Playlist") + " • " + I18n.n("{n} song", "{n} songs", (library.likedRevision, library.likedCount))
                                 color: Theme.dim
                                 font.pixelSize: 12
                             }
@@ -164,8 +165,8 @@ Item {
             Label {
                 visible: page.items.length === 0 && page.filter !== "all"
                 x: 12
-                text: page.filter === "playlist" || page.filter === "imported" ? "Belum ada playlist di sini. Klik “Playlist baru” atau “Impor Spotify”."
-                                            : "Belum ada yang disimpan. Tekan ♡ di halaman album, playlist, atau artis."
+                text: page.filter === "playlist" || page.filter === "imported" ? I18n.t("No playlists here yet. Click “New playlist” or “Import Spotify”.")
+                                            : I18n.t("Nothing saved yet. Tap ♡ on an album, playlist or artist page.")
                 color: Theme.dim
                 font.pixelSize: 15
             }

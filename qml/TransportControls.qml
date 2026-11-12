@@ -11,13 +11,13 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         iconName: "shuffle"; size: tc.size - 2
         active: !!tc.s.shuffle
-        tip: "Acak"
+        tip: I18n.t("Shuffle")
         onClicked: player.toggleShuffle()
     }
     IconButton {
         anchors.verticalCenter: parent.verticalCenter
         iconName: "previous"; size: tc.size + 2
-        tip: "Sebelumnya (Ctrl+←)"
+        tip: I18n.t("Previous (Ctrl+←)")
         onClicked: player.previous()
     }
     IconButton {
@@ -25,13 +25,13 @@ Row {
         iconName: tc.s.isPlaying ? "pause" : "play"
         size: tc.size + 4
         filled: true
-        tip: "Putar/Jeda (Spasi)"
+        tip: I18n.t("Play/Pause (Space)")
         onClicked: player.togglePlay()
     }
     IconButton {
         anchors.verticalCenter: parent.verticalCenter
         iconName: "next"; size: tc.size + 2
-        tip: "Berikutnya (Ctrl+→)"
+        tip: I18n.t("Next (Ctrl+→)")
         onClicked: player.next()
     }
     IconButton {
@@ -39,7 +39,7 @@ Row {
         iconName: tc.s.repeat === "track" ? "repeat-one" : "repeat"
         size: tc.size - 2
         active: tc.s.repeat !== undefined && tc.s.repeat !== "off"
-        tip: "Ulangi"
+        tip: I18n.t("Repeat")
         onClicked: player.cycleRepeat()
     }
 }

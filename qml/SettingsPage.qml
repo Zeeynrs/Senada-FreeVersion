@@ -59,20 +59,43 @@ Item {
             width: flick.width - 56
             spacing: 16
 
-            Label { text: "Pengaturan"; font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
+            Label { text: I18n.t("Settings"); font.pixelSize: 34; font.weight: Font.Black; font.letterSpacing: -0.6 }
 
             Section {
-                title: "Tema"
+                title: I18n.t("Language")
                 SettingRow {
-                    label: "Mode warna"
-                    hint: "Ikuti sistem memakai tema terang/gelap dari Windows, KDE, atau GNOME. Warna utama otomatis putih di tema gelap dan hitam di tema terang."
+                    label: I18n.t("Interface language")
+                    hint: I18n.t("Changes right away. Home shelves from YouTube Music follow it too.")
+                    Row {
+                        spacing: 6
+                        Repeater {
+                            // each language is named in its own language
+                            model: [
+                                { key: "en", label: "English" },
+                                { key: "id", label: "Bahasa Indonesia" }
+                            ]
+                            Chip {
+                                text: modelData.label
+                                checked: session.language === modelData.key
+                                onClicked: session.language = modelData.key
+                            }
+                        }
+                    }
+                }
+            }
+
+            Section {
+                title: I18n.t("Theme")
+                SettingRow {
+                    label: I18n.t("Color mode")
+                    hint: I18n.t("Follow system uses the light/dark theme of Windows, KDE or GNOME. The main color is white in the dark theme and black in the light theme.")
                     Row {
                         spacing: 6
                         Repeater {
                             model: [
-                                { key: "system", label: "Ikuti sistem" },
-                                { key: "dark", label: "Gelap" },
-                                { key: "light", label: "Terang" }
+                                { key: "system", label: I18n.t("Follow system") },
+                                { key: "dark", label: I18n.t("Dark") },
+                                { key: "light", label: I18n.t("Light") }
                             ]
                             Chip {
                                 text: modelData.label
@@ -83,19 +106,19 @@ Item {
                     }
                 }
                 SettingRow {
-                    label: "Efek kaca"
+                    label: I18n.t("Glass effect")
                     hint: session.glassMode === "desktop"
-                          ? "Jendela tembus pandang. Blur di belakangnya dibuat sistem: acrylic di Windows 11, blur Hyprland, atau efek blur KDE. Tanpa compositor, latarnya bisa jadi hitam."
+                          ? I18n.t("See-through window. The blur behind it comes from the system: acrylic on Windows 11, blur on Windows 10, Hyprland blur or the KDE blur effect. Without a compositor the background can turn black.")
                           : session.glassMode === "cover"
-                          ? "Panel tembus pandang di atas sampul lagu yang diburamkan. Jalan di semua sistem."
-                          : "Panel tidak tembus pandang."
+                          ? I18n.t("See-through panels over the blurred cover of the song. Works on every system.")
+                          : I18n.t("Panels are not see-through.")
                     Row {
                         spacing: 6
                         Repeater {
                             model: [
-                                { key: "off", label: "Mati" },
-                                { key: "cover", label: "Sampul album" },
-                                { key: "desktop", label: "Transparan" }
+                                { key: "off", label: I18n.t("Off") },
+                                { key: "cover", label: I18n.t("Album cover") },
+                                { key: "desktop", label: I18n.t("Transparent") }
                             ]
                             Chip {
                                 text: modelData.label
@@ -107,8 +130,8 @@ Item {
                 }
                 SettingRow {
                     visible: session.glassMode !== "off"
-                    label: "Ketebalan kaca"
-                    hint: "Geser ke kiri supaya lebih tembus pandang, ke kanan supaya lebih pekat."
+                    label: I18n.t("Glass thickness")
+                    hint: I18n.t("Slide left for more see-through, right for more solid.")
                     NSlider {
                         Layout.preferredWidth: 200
                         from: 0.3; to: 0.9
@@ -126,17 +149,17 @@ Item {
             }
 
             Section {
-                title: "Profil & Library"
+                title: I18n.t("Profile & Library")
                 Label {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     color: Theme.dim
                     font.pixelSize: 13
-                    text: "Senada tidak butuh akun. Musik diambil dari YouTube Music; lagu disukai, playlist, dan riwayat disimpan di perangkat ini (" + session.libraryPath + ")."
+                    text: I18n.t("Senada needs no account. Music comes from YouTube Music; liked songs, playlists and history are stored on this device ({path}).", { path: session.libraryPath })
                 }
                 SettingRow {
-                    label: "Nama tampilan"
-                    hint: "Dipakai untuk sapaan di Beranda."
+                    label: I18n.t("Display name")
+                    hint: I18n.t("Used for the greeting on Home.")
                     NTextField {
                         Layout.preferredWidth: 220
                         text: session.displayName
@@ -144,8 +167,8 @@ Item {
                     }
                 }
                 SettingRow {
-                    label: "Impor dari Spotify"
-                    hint: "Tempel link playlist atau album publik Spotify. Tanpa login; seluruh isi playlist ikut diimpor."
+                    label: I18n.t("Import from Spotify")
+                    hint: I18n.t("Paste a link to a public Spotify playlist or album. No login; the whole playlist is imported.")
                 }
                 RowLayout {
                     Layout.fillWidth: true
@@ -157,7 +180,7 @@ Item {
                         onAccepted: if (text.trim()) { library.importSpotify(text.trim()); text = "" }
                     }
                     NButton {
-                        text: "Impor"
+                        text: I18n.t("Import")
                         iconName: "download"
                         enabled: importField.text.trim().length > 0
                         onClicked: { library.importSpotify(importField.text.trim()); importField.text = "" }
@@ -166,10 +189,10 @@ Item {
             }
 
             Section {
-                title: "Pembaruan Aplikasi (GitHub)"
+                title: I18n.t("App updates (GitHub)")
                 SettingRow {
-                    label: "Status"
-                    hint: updater.currentLabel + " • Diperiksa: " + updater.lastChecked
+                    label: I18n.t("Status")
+                    hint: updater.currentLabel + " • " + I18n.t("Checked: {time}", { time: updater.lastChecked })
                     Rectangle {
                         implicitWidth: 10; implicitHeight: 10; radius: 5
                         color: updater.updating || updater.checking ? Theme.warn
@@ -204,14 +227,14 @@ Item {
                 RowLayout {
                     spacing: 10
                     NButton {
-                        text: updater.checking ? "Memeriksa…" : "Periksa Pembaruan"
+                        text: updater.checking ? I18n.t("Checking…") : I18n.t("Check for updates")
                         iconName: "refresh"
                         enabled: !updater.checking && !updater.updating
                         onClicked: updater.check(false)
                     }
                     NButton {
                         visible: !updater.releaseMode || updater.updateAvailable || updater.updating
-                        text: updater.updating ? "Memperbarui…" : (updater.updateAvailable ? "Perbarui & Mulai Ulang" : "Sinkronkan Ulang")
+                        text: updater.updating ? I18n.t("Updating…") : (updater.updateAvailable ? I18n.t("Update & restart") : I18n.t("Sync again"))
                         iconName: "download"
                         primary: updater.updateAvailable
                         enabled: !updater.updating && !updater.checking
@@ -221,19 +244,19 @@ Item {
             }
 
             Section {
-                title: "Mesin Audio & Streaming (MPV)"
+                title: I18n.t("Audio engine & streaming (MPV)")
                 SettingRow {
-                    label: "Status Mesin"
-                    hint: "Pemutar audio lokal bebas iklan & tanpa syarat Spotify Premium"
+                    label: I18n.t("Engine status")
+                    hint: I18n.t("Local audio player, ad-free and without Spotify Premium")
                     Rectangle {
                         implicitWidth: 10; implicitHeight: 10; radius: 5
                         color: Theme.ok
                     }
-                    Label { text: "Aktif (Lokal / MPV)"; color: Theme.dim; font.pixelSize: 14 }
+                    Label { text: I18n.t("Active (local / MPV)"); color: Theme.dim; font.pixelSize: 14 }
                 }
                 SettingRow {
-                    label: "Nama perangkat"
-                    hint: "Nama tampilan perangkat audio lokal ini."
+                    label: I18n.t("Device name")
+                    hint: I18n.t("Display name of this local audio device.")
                     NTextField {
                         Layout.preferredWidth: 220
                         text: session.deviceName
@@ -241,12 +264,12 @@ Item {
                     }
                 }
                 SettingRow {
-                    label: "Kualitas audio"
-                    hint: "Kualitas streaming audio YouTube Music."
+                    label: I18n.t("Audio quality")
+                    hint: I18n.t("Streaming quality of YouTube Music audio.")
                     ComboBox {
                         id: bitrateBox
                         Layout.preferredWidth: 200
-                        model: ["Otomatis (Terbaik)", "Tinggi (160 kbps Opus)", "Sedang (128 kbps)"]
+                        model: [I18n.t("Automatic (best)"), I18n.t("High (160 kbps Opus)"), I18n.t("Medium (128 kbps)")]
                         displayText: currentText
                         background: Rectangle {
                             implicitHeight: 38
@@ -268,16 +291,16 @@ Item {
                     wrapMode: Text.WordWrap
                     color: Theme.dim
                     font.pixelSize: 12
-                    text: "Senada memutar musik tanpa memerlukan Spotify Premium dan tanpa iklan menggunakan backend lokal MPV & YouTube Music resolver."
+                    text: I18n.t("Senada plays music without Spotify Premium and without ads, using a local MPV backend and a YouTube Music resolver.")
                 }
             }
 
             Section {
-                title: "Tampilan"
+                title: I18n.t("Display")
                 SettingRow {
-                    label: "Visualizer"
-                    hint: visualizer.available ? "Spektrum lingkaran di sekeliling cover pada tampilan penuh (memakai cava)."
-                                               : "Spektrum lingkaran di tampilan penuh (pasang cava untuk deteksi audio langsung)."
+                    label: I18n.t("Visualizer")
+                    hint: visualizer.available ? I18n.t("Circular spectrum around the cover in full view (uses cava).")
+                                               : I18n.t("Circular spectrum in full view (install cava to follow the audio live).")
                     Switch {
                         checked: session.visualizerEnabled
                         onToggled: session.visualizerEnabled = checked
@@ -286,22 +309,22 @@ Item {
             }
 
             Section {
-                title: "Pintasan keyboard"
+                title: I18n.t("Keyboard shortcuts")
                 GridLayout {
                     columns: 2
                     columnSpacing: 24
                     rowSpacing: 6
                     Repeater {
                         model: [
-                            "Spasi", "Putar / jeda",
-                            "Ctrl + → / ←", "Lagu berikutnya / sebelumnya",
-                            "Ctrl + ↑ / ↓", "Volume naik / turun",
-                            "Ctrl + F", "Cari",
-                            "Ctrl + L", "Tampilan penuh + lirik",
-                            "Alt + ← / Esc", "Kembali / tutup tampilan penuh",
-                            "Alt + →", "Maju",
-                            "Ctrl + B", "Tampilkan / sembunyikan sidebar",
-                            "Ctrl + ,", "Pengaturan"
+                            I18n.t("Space"), I18n.t("Play / pause"),
+                            "Ctrl + → / ←", I18n.t("Next / previous song"),
+                            "Ctrl + ↑ / ↓", I18n.t("Volume up / down"),
+                            "Ctrl + F", I18n.t("Search"),
+                            "Ctrl + L", I18n.t("Full view + lyrics"),
+                            "Alt + ← / Esc", I18n.t("Back / close full view"),
+                            "Alt + →", I18n.t("Forward"),
+                            "Ctrl + B", I18n.t("Show / hide sidebar"),
+                            "Ctrl + ,", I18n.t("Open / close Settings")
                         ]
                         Label {
                             text: modelData

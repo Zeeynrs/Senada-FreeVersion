@@ -20,6 +20,7 @@ from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtNetwork import QLocalSocket
 
 from .config import BIN_DIR, CACHE_DIR, IS_WINDOWS, NO_WINDOW
+from .i18n import tr
 
 logger = logging.getLogger("senada.engine")
 
@@ -95,7 +96,7 @@ class AudioEngine(QObject):
 
         mpv_bin = find_tool("mpv")
         if not mpv_bin:
-            self._fail("mpv tidak ditemukan. Pasang mpv (Windows: taruh mpv.exe di folder bin/ Senada atau di PATH).")
+            self._fail(tr("mpv was not found. Install mpv (Windows: put mpv.exe in Senada's bin/ folder or on PATH)."))
             return
         cmd = [
             mpv_bin,
@@ -122,7 +123,7 @@ class AudioEngine(QObject):
             self.proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                          stdin=subprocess.DEVNULL, creationflags=NO_WINDOW)
         except OSError as e:
-            self._fail(f"Gagal menjalankan mpv: {e}")
+            self._fail(tr("Could not start mpv: {error}", error=e))
             return
         self._tries = 0
         self._retry.start()
@@ -139,7 +140,7 @@ class AudioEngine(QObject):
         if self.proc is not None and self.proc.poll() is None and self._tries < CONNECT_TRIES:
             self._retry.start()  # mpv hasn't opened its IPC endpoint yet
         elif self._tries >= CONNECT_TRIES:
-            self._fail("Koneksi audio engine gagal.")
+            self._fail(tr("Could not connect to the audio engine."))
 
     def _on_connected(self):
         for cmd in (["observe_property", 1, "time-pos"],

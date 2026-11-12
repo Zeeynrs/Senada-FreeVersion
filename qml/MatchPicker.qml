@@ -19,10 +19,10 @@ Popup {
     }
 
     function typeLabel(t) {
-        if (t === "MUSIC_VIDEO_TYPE_ATV") return "Lagu resmi"
-        if (t === "MUSIC_VIDEO_TYPE_OMV") return "Video musik"
-        if (t === "MUSIC_VIDEO_TYPE_UGC") return "Unggahan pengguna"
-        return "Video"
+        if (t === "MUSIC_VIDEO_TYPE_ATV") return I18n.t("Official song")
+        if (t === "MUSIC_VIDEO_TYPE_OMV") return I18n.t("Music video")
+        if (t === "MUSIC_VIDEO_TYPE_UGC") return I18n.t("User upload")
+        return I18n.t("Video")
     }
     function scoreColor(s) {
         return s >= library.matchThreshold ? Theme.ok : s >= 45 ? Theme.warn : Theme.danger
@@ -56,7 +56,7 @@ Popup {
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 2
-                Label { text: "Pilih versi yang benar"; font.pixelSize: 20; font.weight: Font.Bold }
+                Label { text: I18n.t("Pick the right version"); font.pixelSize: 20; font.weight: Font.Bold }
                 Label {
                     Layout.fillWidth: true
                     text: (picker.track.name || "") + " — " + (picker.track.artists || "")
@@ -66,7 +66,7 @@ Popup {
                     elide: Text.ElideRight
                 }
             }
-            IconButton { iconName: "close"; size: 18; tip: "Tutup"; onClicked: picker.close() }
+            IconButton { iconName: "close"; size: 18; tip: I18n.t("Close"); onClicked: picker.close() }
         }
 
         Label {
@@ -74,7 +74,7 @@ Popup {
             wrapMode: Text.WordWrap
             color: Theme.faint
             font.pixelSize: 12
-            text: "Skor menggabungkan kemiripan judul, artis, durasi, dan jenis unggahan. Versi live, cover, karaoke, atau remix diberi skor rendah kecuali memang yang dicari."
+            text: I18n.t("The score combines how close the title, artist, length and kind of upload are. Live, cover, karaoke or remix versions score low unless that is what is wanted.")
         }
 
         Item {
@@ -85,7 +85,7 @@ Popup {
             Label {
                 anchors.centerIn: parent
                 visible: !picker.loading && picker.candidates.length === 0
-                text: "Tidak ada kandidat. Periksa koneksi internet."
+                text: I18n.t("No candidates. Check the internet connection.")
                 color: Theme.dim
             }
 
@@ -138,7 +138,7 @@ Popup {
                                 text: (row.modelData.artists || "") + "  •  " + picker.typeLabel(row.modelData.videoType)
                                       + (row.modelData.durationMs ? "  •  " + Theme.fmt(row.modelData.durationMs)
                                          + (row.modelData.deltaMs !== null && row.modelData.deltaMs !== undefined && Math.abs(row.modelData.deltaMs) >= 1000
-                                            ? " (" + (row.modelData.deltaMs > 0 ? "+" : "−") + Math.round(Math.abs(row.modelData.deltaMs) / 1000) + " dtk)" : "")
+                                            ? " (" + (row.modelData.deltaMs > 0 ? "+" : "−") + I18n.t("{n} s", { n: Math.round(Math.abs(row.modelData.deltaMs) / 1000) }) + ")" : "")
                                          : "")
                                       + ((row.modelData.tags || []).length ? "  •  " + row.modelData.tags.join(", ") : "")
                             }
@@ -158,11 +158,11 @@ Popup {
                         }
                         IconButton {
                             iconName: "play"; size: 16; tint: Theme.dim
-                            tip: "Coba dengarkan versi ini"
+                            tip: I18n.t("Listen to this version")
                             onClicked: player.playUris(["yt:track:" + row.modelData.id], 0)
                         }
                         NButton {
-                            text: row.modelData.current ? "Dipakai" : "Pakai"
+                            text: row.modelData.current ? I18n.t("In use") : I18n.t("Use")
                             primary: !row.modelData.current
                             enabled: !row.modelData.current
                             onClicked: {

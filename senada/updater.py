@@ -18,11 +18,12 @@ from pathlib import Path
 from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
 
 from . import __version__, net
+from .i18n import tr
 from .config import CACHE_DIR, FROZEN, IS_WINDOWS, NO_WINDOW, ROOT
 
 REPO = "Zeeynrs/Senada-FreeVersion"
 RELEASES_API = f"https://api.github.com/repos/{REPO}/releases/latest"
-NOT_GIT_HINT = "Senada dipasang lewat paket sistem. Gunakan manajer paket atau ./install.sh untuk memperbarui."
+NOT_GIT_HINT = "Senada was installed from a system package. Use the package manager or ./install.sh to update it."
 CHECK_INTERVAL_MS = 180_000  # 3 minutes (git checkout)
 RELEASE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000  # 6 hours (installer build; GitHub API allows 60/hour)
 UPDATES_DIR = CACHE_DIR / "updates"
@@ -81,7 +82,7 @@ def _git(*args: str, timeout: int = 15) -> str:
     )
     if res.returncode != 0:
         err = (res.stderr or res.stdout or "").strip()
-        raise RuntimeError(err or f"git {' '.join(args)} gagal")
+        raise RuntimeError(err or tr("git {command} failed", command=" ".join(args)))
     return res.stdout.strip()
 
 
@@ -122,7 +123,7 @@ class Updater(QObject):
         self._remote_msg = ""
         self._commits_behind = 0
         self._changelog = ""
-        self._last_checked = "Belum diperiksa"
+        self._last_checked = ""  # time of the last check, "" before the first
         self._notified_hash = ""
         self._dismissed_hash = ""
 
@@ -141,11 +142,11 @@ class Updater(QObject):
     def _read_local_head(self):
         if self._release_mode:
             self._current_hash = f"v{__version__}"
-            self._current_msg = "Dipasang lewat installer Windows"
+            self._current_msg = "Installed with the Windows installer"  # translated when shown
             return
         if not self._is_git_repo:
-            self._current_hash = "paket sistem"
-            self._current_msg = "Dipasang lewat paket"
+            self._current_hash = "system package"  # translated when shown
+            self._current_msg = "Installed from a package"
             return
         try:
             self._current_hash = _git("rev-parse", "--short", "HEAD", timeout=3)
@@ -180,7 +181,7 @@ class Updater(QObject):
 
     @Property(str, notify=changed)
     def currentMessage(self):
-        return self._current_msg
+        return tr(self._current_msg)
 
     @Property(str, notify=changed)
     def remoteHash(self):
@@ -196,7 +197,7 @@ class Updater(QObject):
 
     @Property(str, notify=changed)
     def lastChecked(self):
-        return self._last_checked
+        return self._last_checked or tr("Not checked yet")
 
     @Property(bool, constant=True)
     def releaseMode(self):
@@ -209,22 +210,23 @@ class Updater(QObject):
     @Property(str, notify=changed)
     def bannerTitle(self):
         if self._release_mode:
-            return f"Senada {self._remote_hash} tersedia"
-        return f"Update GitHub tersedia ({self._commits_behind} commit)"
+            return tr("Senada {version} is available", version=self._remote_hash)
+        return tr("GitHub update available ({n} commits)", n=self._commits_behind)
 
     @Property(str, notify=changed)
     def badgeText(self):
         if self._updating:
-            return self.statusText if self._release_mode else "Memperbarui…"
+            return self.statusText if self._release_mode else tr("Updating…")
         if self._release_mode:
-            return f"Perbarui ke {self._remote_hash}"
-        return f"Perbarui ({self._commits_behind})"
+            return tr("Update to {version}", version=self._remote_hash)
+        return tr("Update ({n})", n=self._commits_behind)
 
     @Property(str, notify=changed)
     def currentLabel(self):
         if self._release_mode:
-            return f"Versi saat ini: {self._current_hash}"
-        return "Commit saat ini: " + self._current_hash + (f" — {self._current_msg}" if self._current_msg else "")
+            return tr("Current version: {version}", version=self._current_hash)
+        return (tr("Current commit: {commit}", commit=tr(self._current_hash))
+                + (f" — {tr(self._current_msg)}" if self._current_msg else ""))
 
     @Slot(int)
     def _set_progress(self, pct: int):
@@ -236,19 +238,19 @@ class Updater(QObject):
     def statusText(self):
         if self._release_mode:
             if self._updating:
-                return f"Mengunduh pembaruan… {self._progress}%" if self._progress >= 0 else "Mengunduh pembaruan…"
+                return tr("Downloading update… {pct}%", pct=self._progress) if self._progress >= 0 else tr("Downloading update…")
             if self._checking:
-                return "Memeriksa rilis terbaru di GitHub…"
+                return tr("Checking GitHub for the latest release…")
             if self._commits_behind > 0:
-                return f"Versi baru tersedia: {self._remote_hash}"
-            return f"Sudah versi terbaru ({self._current_hash})"
+                return tr("New version available: {version}", version=self._remote_hash)
+            return tr("Up to date ({version})", version=tr(self._current_hash))
         if self._updating:
-            return "Mengunduh & memasang pembaruan…"
+            return tr("Downloading & installing the update…")
         if self._checking:
-            return "Memeriksa commit terbaru di GitHub…"
+            return tr("Checking GitHub for the latest commit…")
         if self._commits_behind > 0:
-            return f"Tersedia {self._commits_behind} commit baru ({self._remote_hash})"
-        return f"Sudah versi terbaru ({self._current_hash})"
+            return tr("{n} new commits available ({commit})", n=self._commits_behind, commit=self._remote_hash)
+        return tr("Up to date ({version})", version=tr(self._current_hash))
 
     @Slot()
     def dismissBanner(self):
@@ -263,7 +265,7 @@ class Updater(QObject):
             return
         if not self._is_git_repo:
             if not silent:
-                self.toast.emit(NOT_GIT_HINT)
+                self.toast.emit(tr(NOT_GIT_HINT))
             return
         if self._checking or self._updating:
             return
@@ -308,22 +310,22 @@ class Updater(QObject):
             if self._commits_behind > 0:
                 if self._remote_hash != self._notified_hash:
                     self._notified_hash = self._remote_hash
-                    msg = f"Update GitHub tersedia ({self._commits_behind} commit): {self._remote_msg}"
+                    msg = tr("GitHub update available ({n} commits)", n=self._commits_behind) + f": {self._remote_msg}"
                     self.toast.emit(msg)
                     _send_desktop_notification(
-                        "Pembaruan Senada Tersedia",
-                        f"{self._remote_msg}\n({self._commits_behind} commit baru di GitHub)",
+                        tr("Senada update available"),
+                        f"{self._remote_msg}\n" + tr("({n} new commits on GitHub)", n=self._commits_behind),
                     )
                 elif not silent:
-                    self.toast.emit(f"Tersedia {self._commits_behind} commit baru: {self._remote_msg}")
+                    self.toast.emit(tr("{n} new commits available: {message}", n=self._commits_behind, message=self._remote_msg))
             elif not silent:
-                self.toast.emit("Senada sudah berada di commit terbaru")
+                self.toast.emit(tr("Senada is on the latest commit"))
 
         def on_err(err):
             self._checking = False
             self.changed.emit()
             if not silent:
-                self.toast.emit(f"Gagal memeriksa update: {err}")
+                self.toast.emit(tr("Could not check for updates: {error}", error=err))
 
         self.worker.run(job, on_ok, on_err)
 
@@ -333,13 +335,13 @@ class Updater(QObject):
             self._apply_release()
             return
         if not self._is_git_repo:
-            self.toast.emit(NOT_GIT_HINT)
+            self.toast.emit(tr(NOT_GIT_HINT))
             return
         if self._updating:
             return
         self._updating = True
         self.changed.emit()
-        self.toast.emit("Mengunduh commit terbaru dari GitHub…")
+        self.toast.emit(tr("Downloading the latest commit from GitHub…"))
 
         def job():
             branch = _git("rev-parse", "--abbrev-ref", "HEAD", timeout=5) or "main"
@@ -399,17 +401,17 @@ class Updater(QObject):
             self._commits_behind = 0
             self._changelog = ""
             self.changed.emit()
-            self.toast.emit(f"Berhasil diperbarui ke {res['hash']}! Memulai ulang Senada…")
+            self.toast.emit(tr("Updated to {commit}! Restarting Senada…", commit=res["hash"]))
             _send_desktop_notification(
-                "Senada Berhasil Diperbarui",
-                f"Berjalan di commit {res['hash']}: {res['msg']}",
+                tr("Senada updated"),
+                tr("Running commit {commit}: {message}", commit=res["hash"], message=res["msg"]),
             )
             QTimer.singleShot(900, self.restartRequested.emit)
 
         def on_err(err):
             self._updating = False
             self.changed.emit()
-            self.toast.emit(f"Gagal memperbarui: {err}")
+            self.toast.emit(tr("Could not update: {error}", error=err))
 
         self.worker.run(job, on_ok, on_err)
 
@@ -433,15 +435,15 @@ class Updater(QObject):
             self.changed.emit()
             if newer and (rel["tag"] != self._notified_hash or not silent):
                 self._notified_hash = rel["tag"]
-                self.toast.emit(f"Senada {rel['tag']} tersedia — klik Perbarui untuk memasangnya")
+                self.toast.emit(tr("Senada {version} is available — click Update to install it", version=rel["tag"]))
             elif not newer and not silent:
-                self.toast.emit(f"Senada sudah versi terbaru ({self._current_hash})")
+                self.toast.emit(tr("Senada is up to date ({version})", version=self._current_hash))
 
         def on_err(err):
             self._checking = False
             self.changed.emit()
             if not silent:
-                self.toast.emit(f"Gagal memeriksa update: {err}")
+                self.toast.emit(tr("Could not check for updates: {error}", error=err))
 
         self.worker.run(_latest_release, on_ok, on_err)
 
@@ -456,7 +458,7 @@ class Updater(QObject):
         self._updating = True
         self._progress = 0
         self.changed.emit()
-        self.toast.emit(f"Mengunduh Senada {rel['tag']}…")
+        self.toast.emit(tr("Downloading Senada {version}…", version=rel["tag"]))
 
         def job():
             UPDATES_DIR.mkdir(parents=True, exist_ok=True)
@@ -474,11 +476,11 @@ class Updater(QObject):
                         self._progressFromThread.emit(min(99, done * 100 // total))
             if total and done != total:
                 part.unlink(missing_ok=True)
-                raise RuntimeError("unduhan installer tidak lengkap")
+                raise RuntimeError(tr("the installer download is incomplete"))
             digest = asset.get("digest") or ""  # "sha256:<hex>", published by GitHub for release assets
             if digest.startswith("sha256:") and digest[7:].lower() != sha.hexdigest():
                 part.unlink(missing_ok=True)
-                raise RuntimeError("checksum installer tidak cocok")
+                raise RuntimeError(tr("the installer checksum does not match"))
             part.replace(dest)
             return dest
 
@@ -490,13 +492,13 @@ class Updater(QObject):
             except OSError as e:
                 on_err(e)
                 return
-            self.toast.emit(f"Memasang Senada {rel['tag']}… Senada akan terbuka lagi setelah selesai.")
+            self.toast.emit(tr("Installing Senada {version}… Senada opens again when it is done.", version=rel["tag"]))
             QTimer.singleShot(800, self.quitRequested.emit)
 
         def on_err(err):
             self._updating = False
             self._progress = -1
             self.changed.emit()
-            self.toast.emit(f"Gagal memperbarui: {err}")
+            self.toast.emit(tr("Could not update: {error}", error=err))
 
         self.worker.run(job, on_ok, on_err)

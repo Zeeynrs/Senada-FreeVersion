@@ -13,7 +13,7 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-from . import net
+from . import i18n, net
 
 API_URL = "https://music.youtube.com/youtubei/v1/"
 CLIENT_NAME = "WEB_REMIX"
@@ -49,12 +49,13 @@ _visitor_lock = threading.Lock()
 
 
 def region() -> tuple[str, str]:
-    """(hl, gl) from the desktop locale, e.g. id_ID.UTF-8 -> ("id", "ID")."""
+    """(hl, gl): YouTube Music answers in Senada's interface language; the country (which
+    music it suggests) comes from the desktop locale, e.g. id_ID.UTF-8 -> "ID"."""
     for var in ("LC_ALL", "LC_MESSAGES", "LANG"):
-        m = re.match(r"([a-z]{2})_([A-Z]{2})", os.environ.get(var, ""))
+        m = re.match(r"[a-z]{2}_([A-Z]{2})", os.environ.get(var, ""))
         if m:
-            return m.group(1), m.group(2)
-    return "id", "ID"
+            return i18n.language(), m.group(1)
+    return i18n.language(), "ID"
 
 
 def _post(endpoint: str, body: dict, timeout: float = 12) -> dict:
@@ -82,9 +83,9 @@ def _post(endpoint: str, body: dict, timeout: float = 12) -> dict:
     except urllib.error.HTTPError as e:
         raise YTMusicError(f"YouTube Music menolak permintaan (HTTP {e.code})") from e
     except (urllib.error.URLError, TimeoutError, OSError) as e:
-        raise YTMusicError(f"Tidak bisa menghubungi YouTube Music: {getattr(e, 'reason', e)}") from e
+        raise YTMusicError(i18n.tr("Could not reach YouTube Music: {error}", error=getattr(e, "reason", e))) from e
     except ValueError as e:
-        raise YTMusicError("Balasan YouTube Music tidak bisa dibaca") from e
+        raise YTMusicError(i18n.tr("The YouTube Music reply cannot be read")) from e
 
 
 # ---- small JSON helpers ------------------------------------------------------
@@ -375,7 +376,7 @@ def home() -> list[dict]:
             except YTMusicError:
                 results[k] = []
     if not any(results.values()):
-        raise YTMusicError("Beranda YouTube Music tidak bisa dimuat. Periksa koneksi internet.")
+        raise YTMusicError(i18n.tr("YouTube Music home could not be loaded. Check the internet connection."))
     seen, out = set(), []
     for key in ("home", "explore", "charts"):
         for s in results[key]:
@@ -556,9 +557,9 @@ def artist(channel_id: str) -> dict:
         else:
             sections.append({"title": _shelf_title(carousel), "cards": cards, "tracks": []})
     monthly = _text(h.get("monthlyListenerCount"))
-    card = make_card("artist", channel_id, name, "Artis", images)
+    card = make_card("artist", channel_id, name, i18n.tr("Artist"), images)
     play_uri = f"senada:playlist:{songs_playlist}" if songs_playlist else card["uri"]
-    return {**card, "typeLabel": "Artis", "genres": monthly, "tracks": tracks, "albums": albums,
+    return {**card, "typeLabel": i18n.tr("Artist"), "genres": monthly, "tracks": tracks, "albums": albums,
             "sections": sections, "playUri": play_uri, "songsPlaylist": songs_playlist}
 
 

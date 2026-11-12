@@ -72,6 +72,13 @@ def main():
     player = Player(worker, audio_engine, resolver, settings, store, catalog)
     library = Library(store, catalog, worker, session, player, resolver)
     library.toast.connect(session.toast)
+
+    def on_language():  # text made in Python follows too: pages, Home shelves, update status
+        catalog.clear()
+        library.refreshAll()
+        updater.changed.emit()
+
+    session.languageChanged.connect(on_language)
     lyrics = Lyrics(player, worker)
     visualizer = Visualizer()
     updater = Updater(worker)
@@ -102,7 +109,7 @@ def main():
         ctx.setContextProperty(name, obj)
     engine.load(str(ROOT / "qml" / "Main.qml"))
     if not engine.rootObjects():
-        sys.exit("Senada: gagal memuat antarmuka (lihat pesan QML di atas)")
+        sys.exit("Senada: the interface could not be loaded (see the QML messages above)")
 
     window = engine.rootObjects()[0]
     session.set_window(window)
@@ -110,7 +117,7 @@ def main():
         from .mpris import Mpris
         mpris = Mpris(player, lambda: (window.show(), window.raise_(), window.requestActivate()), app.quit)
     except Exception as e:  # MPRIS is optional: no dbus-python or no session bus
-        print(f"MPRIS tidak aktif: {e}", file=sys.stderr)
+        print(f"MPRIS is off: {e}", file=sys.stderr)
         mpris = None
 
     library.refreshAll()

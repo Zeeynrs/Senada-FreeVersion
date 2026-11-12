@@ -11,7 +11,7 @@ ListView {
     Component.onCompleted: player.refreshQueue()
 
     header: Label {
-        text: "Berikutnya"
+        text: I18n.t("Up next")
         font.pixelSize: 22
         font.weight: Font.Bold
         leftPadding: 12
@@ -26,7 +26,7 @@ ListView {
     Label {
         anchors.centerIn: parent
         visible: q.count === 0
-        text: "Antrean kosong"
+        text: I18n.t("The queue is empty")
         color: Qt.rgba(1, 1, 1, 0.6)
         font.pixelSize: 16
     }

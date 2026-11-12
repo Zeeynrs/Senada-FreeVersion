@@ -60,7 +60,7 @@ Rectangle {
                     id: titleLabel
                     width: Math.max(0, Math.min(implicitWidth, titleRow.width - 32))
                     anchors.verticalCenter: parent.verticalCenter
-                    text: bar.hasTrack ? bar.s.name : "Belum ada yang diputar"
+                    text: bar.hasTrack ? bar.s.name : I18n.t("Nothing playing yet")
                     elide: Text.ElideRight
                     font.pixelSize: 14
                     font.weight: Font.DemiBold
@@ -75,14 +75,14 @@ Rectangle {
                     iconName: bar.s.liked ? "heart" : "heart-outline"
                     size: 16
                     tint: bar.s.liked ? Theme.like : Theme.dim
-                    tip: bar.s.liked ? "Hapus dari Lagu Disukai" : "Simpan ke Lagu Disukai"
+                    tip: bar.s.liked ? I18n.t("Remove from Liked Songs") : I18n.t("Save to Liked Songs")
                     onClicked: player.toggleLike()
                 }
             }
             LinkLabel {
                 Layout.fillWidth: true
                 font.pixelSize: 12
-                text: bar.hasTrack ? bar.s.artists : "Pilih lagu untuk mulai"
+                text: bar.hasTrack ? bar.s.artists : I18n.t("Pick a song to start")
                 onClicked: if (bar.s.artistId) Nav.go("artist", bar.s.artistId)
             }
         }
@@ -102,13 +102,13 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 iconName: "shuffle"; size: 18; tint: Theme.dim
                 active: !!bar.s.shuffle
-                tip: "Acak"
+                tip: I18n.t("Shuffle")
                 onClicked: player.toggleShuffle()
             }
             IconButton {
                 anchors.verticalCenter: parent.verticalCenter
                 iconName: "previous"; size: 22
-                tip: "Sebelumnya (Ctrl+←)"
+                tip: I18n.t("Previous (Ctrl+←)")
                 onClicked: player.previous()
             }
             IconButton {
@@ -117,13 +117,13 @@ Rectangle {
                 size: 22
                 filled: true
                 enabled: bar.hasTrack || player.queue.length > 0
-                tip: "Putar/Jeda (Spasi)"
+                tip: I18n.t("Play/Pause (Space)")
                 onClicked: player.togglePlay()
             }
             IconButton {
                 anchors.verticalCenter: parent.verticalCenter
                 iconName: "next"; size: 22
-                tip: "Berikutnya (Ctrl+→)"
+                tip: I18n.t("Next (Ctrl+→)")
                 onClicked: player.next()
             }
             IconButton {
@@ -131,7 +131,7 @@ Rectangle {
                 iconName: bar.s.repeat === "track" ? "repeat-one" : "repeat"
                 size: 18; tint: Theme.dim
                 active: bar.s.repeat !== undefined && bar.s.repeat !== "off"
-                tip: "Ulangi"
+                tip: I18n.t("Repeat")
                 onClicked: player.cycleRepeat()
             }
         }
@@ -229,14 +229,14 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             iconName: "lyrics"; size: 18; tint: Theme.dim
             active: bar.panel === "lyrics"
-            tip: "Lirik"
+            tip: I18n.t("Lyrics")
             onClicked: bar.showPanel("lyrics")
         }
         IconButton {
             anchors.verticalCenter: parent.verticalCenter
             iconName: "queue"; size: 18; tint: Theme.dim
             active: bar.panel === "queue"
-            tip: "Antrean"
+            tip: I18n.t("Queue")
             onClicked: bar.showPanel("queue")
         }
         IconButton {
@@ -244,7 +244,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             visible: bar.roomy
             iconName: "devices"; size: 18; tint: Theme.dim
-            tip: "Perangkat"
+            tip: I18n.t("Devices")
             active: !!bar.s.deviceId && bar.s.deviceId !== "local"
             onClicked: devices.opened ? devices.close() : devices.open()
             DevicesPopup {
@@ -257,7 +257,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             iconName: bar.volume === 0 ? "volume-off" : "volume"
             size: 18; tint: Theme.dim
-            tip: bar.volume === 0 ? "Bunyikan" : "Bisukan"
+            tip: bar.volume === 0 ? I18n.t("Unmute") : I18n.t("Mute")
             onClicked: {
                 if (bar.volume > 0) { bar.lastVolume = bar.volume; player.setVolume(0) }
                 else player.setVolume(bar.lastVolume || 50)
@@ -280,7 +280,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             iconName: "expand"; size: 18; tint: Theme.dim
             enabled: bar.hasTrack
-            tip: "Layar penuh (Ctrl+L)"
+            tip: I18n.t("Full screen (Ctrl+L)")
             onClicked: bar.openImmersive()
         }
     }

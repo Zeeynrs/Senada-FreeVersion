@@ -69,7 +69,7 @@ Item {
                     }
                 }
                 ToolTip.visible: hovered
-                ToolTip.text: card.saved ? "Hapus dari Koleksi" : "Simpan ke Koleksi"
+                ToolTip.text: card.saved ? I18n.t("Remove from Library") : I18n.t("Save to Library")
                 ToolTip.delay: 500
             }
 
@@ -98,7 +98,7 @@ Item {
                     }
                 }
                 ToolTip.visible: hovered
-                ToolTip.text: "Putar"
+                ToolTip.text: I18n.t("Play")
                 ToolTip.delay: 500
             }
         }

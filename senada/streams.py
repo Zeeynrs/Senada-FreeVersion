@@ -77,7 +77,7 @@ class StreamResolver:
             if url:
                 return url
             if running.is_set():
-                raise StreamError("yt-dlp tidak menemukan stream audio")
+                raise StreamError("yt-dlp found no audio stream")
         try:
             url, available = self._fetch(video_id)
             expires = re.search(r"[?&/]expire[=/](\d{9,})", url)
@@ -101,8 +101,8 @@ class StreamResolver:
         from .engine import find_tool
         ytdlp = find_tool("yt-dlp")
         if not ytdlp:
-            raise StreamError("yt-dlp tidak ditemukan")
-        started, problem = time.monotonic(), "yt-dlp tidak menemukan stream audio"
+            raise StreamError("yt-dlp was not found")
+        started, problem = time.monotonic(), "yt-dlp found no audio stream"
         for extra in PLAYER_ARGS:
             try:
                 found = self._run(ytdlp, extra, video_id)
@@ -121,7 +121,7 @@ class StreamResolver:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
                                     text=True, encoding="utf-8", errors="replace", creationflags=NO_WINDOW)
         except OSError as e:
-            raise StreamError(f"yt-dlp tidak bisa dijalankan: {e}") from e
+            raise StreamError(f"yt-dlp could not be started: {e}") from e
         watchdog = threading.Timer(TIMEOUT, proc.kill)
         watchdog.daemon = True
         watchdog.start()
@@ -142,7 +142,7 @@ class StreamResolver:
             # yt-dlp needs a moment to exit; that must not delay playback
             threading.Thread(target=self._reap, args=(proc, watchdog), daemon=True).start()
         if not found.get("url"):
-            raise StreamError((said[-1] if said else "yt-dlp tidak menemukan stream audio")[:200])
+            raise StreamError((said[-1] if said else "yt-dlp found no audio stream")[:200])
         try:
             available = float(found.get("available_at") or 0)
         except (TypeError, ValueError):

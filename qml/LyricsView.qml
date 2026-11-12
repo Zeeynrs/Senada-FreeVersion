@@ -59,8 +59,8 @@ Item {
         BusyIndicator { anchors.horizontalCenter: parent.horizontalCenter; running: lyrics.status === "loading"; visible: running }
         Label {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: ({ "loading": "Memuat lirik…", "none": "Lirik tidak ditemukan untuk lagu ini",
-                     "error": "Gagal memuat lirik", "idle": "Putar lagu untuk melihat lirik" })[lyrics.status] || ""
+            text: ({ "loading": I18n.t("Loading lyrics…"), "none": I18n.t("No lyrics found for this song"),
+                     "error": I18n.t("Could not load lyrics"), "idle": I18n.t("Play a song to see its lyrics") })[lyrics.status] || ""
             color: Qt.rgba(1, 1, 1, 0.6)
             font.pixelSize: 18
         }

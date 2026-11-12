@@ -9,6 +9,7 @@ import os
 from PySide6.QtCore import Property, QObject, Qt, QUrl, Signal, Slot
 from PySide6.QtGui import QDesktopServices, QGuiApplication
 
+from . import i18n
 from .config import LIBRARY_FILE
 
 
@@ -28,6 +29,7 @@ def _os_user_name() -> str:
 
 class Session(QObject):
     changed = Signal()
+    languageChanged = Signal()
     toast = Signal(str)
 
     def __init__(self, settings, worker, parent=None):
@@ -35,7 +37,25 @@ class Session(QObject):
         self.settings = settings
         self.worker = worker
         worker.error.connect(self.toast)
+        i18n.set_language(settings["language"])
         self._apply_theme()
+
+    # ---- language ------------------------------------------------------------
+
+    @Property(str, notify=languageChanged)
+    def language(self):
+        return i18n.language()
+
+    @language.setter
+    def language(self, value):
+        if value in i18n.LANGUAGES and value != i18n.language():
+            self.settings["language"] = i18n.set_language(value)
+            self.languageChanged.emit()
+
+    @Property("QVariantMap", notify=languageChanged)
+    def translations(self):
+        """English text -> current language, for the QML I18n singleton."""
+        return i18n.table()
 
     # ---- theme -------------------------------------------------------------
 
@@ -123,7 +143,7 @@ class Session(QObject):
     @Slot(str)
     def copy(self, text):
         QGuiApplication.clipboard().setText(text)
-        self.toast.emit("Disalin ke clipboard")
+        self.toast.emit(i18n.tr("Copied to clipboard"))
 
     @Slot(str)
     def openUrl(self, url):

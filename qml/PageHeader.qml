@@ -65,7 +65,7 @@ Item {
 
             Label {
                 visible: text !== ""
-                text: (h.info.typeLabel || (h.round ? "Artis" : "")).toUpperCase()
+                text: (h.info.typeLabel || (h.round ? I18n.t("Artist") : "")).toUpperCase()
                 color: Theme.dim
                 font.pixelSize: 12
                 font.weight: Font.Bold
@@ -73,7 +73,7 @@ Item {
             }
             Label {
                 Layout.fillWidth: true
-                text: h.loading && !h.info.name ? "Memuat…" : (h.info.name || "")
+                text: h.loading && !h.info.name ? I18n.t("Loading…") : (h.info.name || "")
                 font.pixelSize: Math.max(30, Math.min(56, h.width / 16))
                 font.weight: Font.Black
                 font.letterSpacing: -0.8
@@ -95,7 +95,7 @@ Item {
             }
             Label {
                 text: h.info.kind === "playlist"
-                      ? (h.info.subtitle || "") + (h.info.tracks ? " • " + h.info.tracks.length + " lagu" : "")
+                      ? (h.info.subtitle || "") + (h.info.tracks ? " • " + I18n.n("{n} song", "{n} songs", h.info.tracks.length) : "")
                       : h.info.kind === "artist" ? "" : (h.info.subtitle || "")
                 visible: text !== ""
                 font.pixelSize: 13
@@ -134,7 +134,7 @@ Item {
                             }
                             Label {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: playPill.pausable ? "Jeda" : "Putar"
+                                text: playPill.pausable ? I18n.t("Pause") : I18n.t("Play")
                                 font.pixelSize: 14
                                 font.weight: Font.DemiBold
                                 color: Theme.primaryText
@@ -144,7 +144,7 @@ Item {
                 }
                 SquareButton {
                     iconName: "shuffle"
-                    tip: "Putar acak"
+                    tip: I18n.t("Shuffle play")
                     enabled: !h.loading
                     onClicked: h.shuffleAll()
                 }
@@ -152,13 +152,13 @@ Item {
                     visible: h.canSave && !h.loading
                     iconName: h.saved ? "heart" : "heart-outline"
                     tint: h.saved ? Theme.like : Theme.text
-                    tip: h.saved ? "Hapus dari Koleksi" : "Simpan ke Koleksi"
+                    tip: h.saved ? I18n.t("Remove from Library") : I18n.t("Save to Library")
                     onClicked: h.saveToggled()
                 }
                 NButton {
                     anchors.verticalCenter: parent.verticalCenter
                     visible: h.canImport && !h.loading
-                    text: "Impor ke Koleksi"
+                    text: I18n.t("Import to Library")
                     iconName: "download"
                     onClicked: h.importRequested()
                 }
@@ -167,12 +167,12 @@ Item {
                     visible: h.isLocal && !h.loading
                     iconName: "more"
                     size: 18
-                    tip: "Opsi playlist"
+                    tip: I18n.t("Playlist options")
                     onClicked: moreMenu.popup()
                     NMenu {
                         id: moreMenu
-                        MenuItem { text: "Ganti nama…"; onTriggered: h.renameRequested() }
-                        MenuItem { text: "Hapus playlist…"; onTriggered: h.deleteRequested() }
+                        MenuItem { text: I18n.t("Rename…"); onTriggered: h.renameRequested() }
+                        MenuItem { text: I18n.t("Delete playlist…"); onTriggered: h.deleteRequested() }
                     }
                 }
                 BusyIndicator {

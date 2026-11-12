@@ -13,7 +13,7 @@ Row {
     IconButton {
         anchors.verticalCenter: parent.verticalCenter
         iconName: vc.volume === 0 ? "volume-off" : "volume"
-        tip: "Bisukan"
+        tip: I18n.t("Mute")
         onClicked: {
             if (vc.volume > 0) {
                 vc.lastVolume = vc.volume

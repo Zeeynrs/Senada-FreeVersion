@@ -9,6 +9,7 @@ from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
 from PySide6.QtGui import QImage
 
 from . import net, ytmusic
+from .i18n import tr
 from .engine import AudioEngine
 from .resolver import AudioResolver
 from .streams import StreamError, StreamResolver, watch_url
@@ -169,7 +170,7 @@ class Player(QObject):
         token, video_id = self._started
         if self._fallback_token == self._play_token:
             if token == self._play_token:  # the fallback failed too
-                self.worker.error.emit(f"Gagal memutar audio: {self._state.get('name', '')}")
+                self.worker.error.emit(tr("Could not play audio: {error}", error=self._state.get("name", "")))
             return
         self._fallback_token = self._play_token
         if token == self._play_token and video_id:  # else the pending lookup starts it as a fallback
@@ -344,12 +345,12 @@ class Player(QObject):
                     url = watch_url(info["v"])  # slower: mpv's yt-dlp hook looks the stream up
                 self.engine.play(url)
             else:
-                self.worker.error.emit(f"Tidak ketemu di YouTube Music: {track.get('name')} — coba klik kanan → Pilih versi lain")
+                self.worker.error.emit(tr("Not found on YouTube Music: {name} — try right-click → Pick another version", name=track.get("name")))
                 self.next()
 
         def on_fail(e):
             if token == self._play_token:
-                self.worker.error.emit(f"Gagal memutar audio: {e}")
+                self.worker.error.emit(tr("Could not play audio: {error}", error=e))
 
         self.worker.run(lambda: self._resolve(track), on_resolved, on_fail)
 
@@ -419,7 +420,7 @@ class Player(QObject):
 
     def _start_queue(self, tracks: list, index: int = 0, context_uri: str = ""):
         if not tracks:
-            self.worker.error.emit("Tidak ada lagu yang bisa diputar")
+            self.worker.error.emit(tr("No songs that can be played"))
             return
         self._queue = list(tracks)
         self._state["contextUri"] = context_uri
@@ -506,7 +507,7 @@ class Player(QObject):
             if t:
                 self._queue.append(t)
                 self.queueChanged.emit()
-                self.worker.error.emit("Ditambahkan ke antrean")
+                self.worker.error.emit(tr("Added to queue"))
 
         self.worker.run(lambda: self._lookup(uri), on_done, lambda e: self.worker.error.emit(str(e)))
 
@@ -530,7 +531,7 @@ class Player(QObject):
             self.stateChanged.emit()
         if self.store.set_liked(track, liked):
             self.likedChanged.emit(uri, liked)
-            self.worker.error.emit("Disimpan ke Lagu yang Disukai" if liked else "Dihapus dari Lagu yang Disukai")
+            self.worker.error.emit(tr("Saved to Liked Songs") if liked else tr("Removed from Liked Songs"))
 
     # ---- devices & queue --------------------------------------------------
 

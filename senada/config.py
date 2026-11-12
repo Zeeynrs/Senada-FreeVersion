@@ -32,6 +32,7 @@ LIBRARY_FILE = CONFIG_DIR / "library.json"
 AUDIO_CACHE = CACHE_DIR / "audio"
 
 DEFAULTS = {
+    "language": "en",  # "en" or "id" (see i18n.py)
     "display_name": "",
     "theme": "system",  # "system", "dark", "light"
     "glass": "off",  # "off", "cover" (blurred album art behind), "desktop" (see-through window)
