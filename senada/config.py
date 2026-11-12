@@ -8,8 +8,14 @@ from pathlib import Path
 
 APP_ID = "senada"
 IS_WINDOWS = sys.platform == "win32"
-ROOT = Path(__file__).resolve().parent.parent
-BIN_DIR = ROOT / "bin"  # optional bundled tools (mpv, yt-dlp), mainly for Windows
+FROZEN = getattr(sys, "frozen", False)  # running from the PyInstaller build (Windows installer)
+if FROZEN:
+    ROOT = Path(getattr(sys, "_MEIPASS", Path(sys.executable).resolve().parent))  # qml/, data/
+    APP_DIR = Path(sys.executable).resolve().parent  # folder holding Senada.exe
+else:
+    ROOT = Path(__file__).resolve().parent.parent
+    APP_DIR = ROOT
+BIN_DIR = APP_DIR / "bin"  # optional bundled tools (mpv, yt-dlp), mainly for Windows
 
 if IS_WINDOWS:
     # %APPDATA%\Senada for settings and the library, %LOCALAPPDATA%\Senada\Cache for caches

@@ -169,8 +169,7 @@ Item {
                 title: "Pembaruan Aplikasi (GitHub)"
                 SettingRow {
                     label: "Status"
-                    hint: "Commit saat ini: " + updater.currentHash + (updater.currentMessage ? " — " + updater.currentMessage : "")
-                          + " • Diperiksa: " + updater.lastChecked
+                    hint: updater.currentLabel + " • Diperiksa: " + updater.lastChecked
                     Rectangle {
                         implicitWidth: 10; implicitHeight: 10; radius: 5
                         color: updater.updating || updater.checking ? Theme.warn
@@ -211,6 +210,7 @@ Item {
                         onClicked: updater.check(false)
                     }
                     NButton {
+                        visible: !updater.releaseMode || updater.updateAvailable || updater.updating
                         text: updater.updating ? "Memperbarui…" : (updater.updateAvailable ? "Perbarui & Mulai Ulang" : "Sinkronkan Ulang")
                         iconName: "download"
                         primary: updater.updateAvailable

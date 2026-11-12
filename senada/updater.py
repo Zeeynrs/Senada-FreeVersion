@@ -1,16 +1,72 @@
-"""GitHub update checker and one-click self-updater."""
+"""GitHub update checker and one-click self-updater.
 
+A git checkout follows the commits on GitHub (fetch + fast-forward). The Windows installer
+build follows GitHub Releases instead: it downloads the newer Senada-Setup-<version>.exe,
+runs it silently and quits; the installer replaces the files and starts Senada again.
+"""
+
+import hashlib
+import json
+import re
 import shutil
 import subprocess
+import urllib.error
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 
 from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
 
-from .config import CACHE_DIR, IS_WINDOWS, NO_WINDOW
+from . import __version__
+from .config import CACHE_DIR, FROZEN, IS_WINDOWS, NO_WINDOW, ROOT
 
-ROOT = Path(__file__).resolve().parent.parent
-CHECK_INTERVAL_MS = 180_000  # 3 minutes
+REPO = "Zeeynrs/Senada-FreeVersion"
+RELEASES_API = f"https://api.github.com/repos/{REPO}/releases/latest"
+NOT_GIT_HINT = "Senada dipasang lewat paket sistem. Gunakan manajer paket atau ./install.sh untuk memperbarui."
+CHECK_INTERVAL_MS = 180_000  # 3 minutes (git checkout)
+RELEASE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000  # 6 hours (installer build; GitHub API allows 60/hour)
+UPDATES_DIR = CACHE_DIR / "updates"
+SETUP_ASSET = re.compile(r"Senada-Setup-[\w.\-]+\.exe", re.I)
+
+
+def version_tuple(version: str) -> tuple[int, ...]:
+    """'v1.2.10' -> (1, 2, 10); anything that isn't a number is ignored."""
+    return tuple(int(n) for n in re.findall(r"\d+", version)[:4])
+
+
+def pick_setup_asset(assets: list[dict]) -> dict | None:
+    return next((a for a in assets if SETUP_ASSET.fullmatch(a.get("name", ""))), None)
+
+
+def _http(url: str, timeout: int = 20):
+    req = urllib.request.Request(url, headers={"User-Agent": f"Senada/{__version__}",
+                                               "Accept": "application/vnd.github+json"})
+    return urllib.request.urlopen(req, timeout=timeout)
+
+
+def _latest_release() -> dict:
+    try:
+        with _http(RELEASES_API) as res:
+            data = json.load(res)
+    except urllib.error.HTTPError as e:
+        if e.code != 404:
+            raise
+        data = {}  # nothing released yet
+
+    tag = data.get("tag_name") or ""
+    return {
+        "tag": tag,
+        "name": data.get("name") or tag,
+        "notes": (data.get("body") or "").strip(),
+        "asset": pick_setup_asset(data.get("assets") or []),
+    }
+
+
+def _launch_installer(path: Path) -> None:
+    """Start the installer detached so it outlives Senada; /RELAUNCH=1 makes it reopen Senada."""
+    flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP if IS_WINDOWS else 0
+    subprocess.Popen([str(path), "/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CLOSEAPPLICATIONS",
+                      "/RELAUNCH=1"], close_fds=True, creationflags=flags)
 
 
 def _git(*args: str, timeout: int = 15) -> str:
@@ -46,10 +102,18 @@ class Updater(QObject):
     changed = Signal()
     toast = Signal(str)
     restartRequested = Signal()
+    quitRequested = Signal()  # the installer takes over and starts Senada again itself
+    _progressFromThread = Signal(int)
 
-    def __init__(self, worker, parent=None):
+    def __init__(self, worker, parent=None, release_mode: bool | None = None):
         super().__init__(parent)
         self.worker = worker
+        # installer builds update from GitHub Releases, git checkouts from commits
+        self._release_mode = (FROZEN and IS_WINDOWS) if release_mode is None else release_mode
+        self._release: dict | None = None
+        self._progress = -1  # download progress in %, -1 when unknown
+        self._progressFromThread.connect(self._set_progress)
+        self.launch_installer = _launch_installer  # replaced in tests
         self._checking = False
         self._updating = False
         self._current_hash = ""
@@ -62,17 +126,23 @@ class Updater(QObject):
         self._notified_hash = ""
         self._dismissed_hash = ""
 
-        self._is_git_repo = (ROOT / ".git").exists()
+        self._is_git_repo = not self._release_mode and (ROOT / ".git").exists()
         self._read_local_head()
 
         self._timer = QTimer(self)
-        self._timer.setInterval(CHECK_INTERVAL_MS)
+        self._timer.setInterval(RELEASE_CHECK_INTERVAL_MS if self._release_mode else CHECK_INTERVAL_MS)
         self._timer.timeout.connect(lambda: self.check(True))
-        if self._is_git_repo:
+        if self._is_git_repo or self._release_mode:
             self._timer.start()
             QTimer.singleShot(2500, lambda: self.check(True))
+        if self._release_mode:  # installers downloaded for earlier updates are no longer needed
+            shutil.rmtree(UPDATES_DIR, ignore_errors=True)
 
     def _read_local_head(self):
+        if self._release_mode:
+            self._current_hash = f"v{__version__}"
+            self._current_msg = "Dipasang lewat installer Windows"
+            return
         if not self._is_git_repo:
             self._current_hash = "paket sistem"
             self._current_msg = "Dipasang lewat paket"
@@ -128,8 +198,50 @@ class Updater(QObject):
     def lastChecked(self):
         return self._last_checked
 
+    @Property(bool, constant=True)
+    def releaseMode(self):
+        return self._release_mode
+
+    @Property(int, notify=changed)
+    def progress(self):
+        return self._progress
+
+    @Property(str, notify=changed)
+    def bannerTitle(self):
+        if self._release_mode:
+            return f"Senada {self._remote_hash} tersedia"
+        return f"Update GitHub tersedia ({self._commits_behind} commit)"
+
+    @Property(str, notify=changed)
+    def badgeText(self):
+        if self._updating:
+            return self.statusText if self._release_mode else "Memperbarui…"
+        if self._release_mode:
+            return f"Perbarui ke {self._remote_hash}"
+        return f"Perbarui ({self._commits_behind})"
+
+    @Property(str, notify=changed)
+    def currentLabel(self):
+        if self._release_mode:
+            return f"Versi saat ini: {self._current_hash}"
+        return "Commit saat ini: " + self._current_hash + (f" — {self._current_msg}" if self._current_msg else "")
+
+    @Slot(int)
+    def _set_progress(self, pct: int):
+        if pct != self._progress:
+            self._progress = pct
+            self.changed.emit()
+
     @Property(str, notify=changed)
     def statusText(self):
+        if self._release_mode:
+            if self._updating:
+                return f"Mengunduh pembaruan… {self._progress}%" if self._progress >= 0 else "Mengunduh pembaruan…"
+            if self._checking:
+                return "Memeriksa rilis terbaru di GitHub…"
+            if self._commits_behind > 0:
+                return f"Versi baru tersedia: {self._remote_hash}"
+            return f"Sudah versi terbaru ({self._current_hash})"
         if self._updating:
             return "Mengunduh & memasang pembaruan…"
         if self._checking:
@@ -146,9 +258,12 @@ class Updater(QObject):
     @Slot()
     @Slot(bool)
     def check(self, silent: bool = False):
+        if self._release_mode:
+            self._check_release(silent)
+            return
         if not self._is_git_repo:
             if not silent:
-                self.toast.emit("Senada dipasang lewat paket sistem. Gunakan manajer paket atau ./install.sh untuk memperbarui.")
+                self.toast.emit(NOT_GIT_HINT)
             return
         if self._checking or self._updating:
             return
@@ -214,8 +329,11 @@ class Updater(QObject):
 
     @Slot()
     def applyUpdate(self):
+        if self._release_mode:
+            self._apply_release()
+            return
         if not self._is_git_repo:
-            self.toast.emit("Senada dipasang lewat paket sistem. Gunakan manajer paket atau ./install.sh untuk memperbarui.")
+            self.toast.emit(NOT_GIT_HINT)
             return
         if self._updating:
             return
@@ -290,6 +408,94 @@ class Updater(QObject):
 
         def on_err(err):
             self._updating = False
+            self.changed.emit()
+            self.toast.emit(f"Gagal memperbarui: {err}")
+
+        self.worker.run(job, on_ok, on_err)
+
+    # ---- installer builds: GitHub Releases ----------------------------------------
+
+    def _check_release(self, silent: bool):
+        if self._checking or self._updating:
+            return
+        self._checking = True
+        self.changed.emit()
+
+        def on_ok(rel):
+            self._checking = False
+            self._last_checked = datetime.now().strftime("%H:%M")
+            newer = rel["asset"] is not None and version_tuple(rel["tag"]) > version_tuple(__version__)
+            self._release = rel if newer else None
+            self._remote_hash = rel["tag"]
+            self._remote_msg = rel["name"]
+            self._commits_behind = 1 if newer else 0
+            self._changelog = rel["notes"][:3000] if newer else ""
+            self.changed.emit()
+            if newer and (rel["tag"] != self._notified_hash or not silent):
+                self._notified_hash = rel["tag"]
+                self.toast.emit(f"Senada {rel['tag']} tersedia — klik Perbarui untuk memasangnya")
+            elif not newer and not silent:
+                self.toast.emit(f"Senada sudah versi terbaru ({self._current_hash})")
+
+        def on_err(err):
+            self._checking = False
+            self.changed.emit()
+            if not silent:
+                self.toast.emit(f"Gagal memeriksa update: {err}")
+
+        self.worker.run(_latest_release, on_ok, on_err)
+
+    def _apply_release(self):
+        if self._updating:
+            return
+        rel = self._release
+        if not rel:  # nothing known yet: look first, the user can click again
+            self.check(False)
+            return
+        asset = rel["asset"]
+        self._updating = True
+        self._progress = 0
+        self.changed.emit()
+        self.toast.emit(f"Mengunduh Senada {rel['tag']}…")
+
+        def job():
+            UPDATES_DIR.mkdir(parents=True, exist_ok=True)
+            dest = UPDATES_DIR / asset["name"]
+            part = dest.with_name(dest.name + ".part")
+            total = int(asset.get("size") or 0)
+            sha = hashlib.sha256()
+            done = 0
+            with _http(asset["browser_download_url"], timeout=60) as res, open(part, "wb") as f:
+                while chunk := res.read(256 * 1024):
+                    f.write(chunk)
+                    sha.update(chunk)
+                    done += len(chunk)
+                    if total:
+                        self._progressFromThread.emit(min(99, done * 100 // total))
+            if total and done != total:
+                part.unlink(missing_ok=True)
+                raise RuntimeError("unduhan installer tidak lengkap")
+            digest = asset.get("digest") or ""  # "sha256:<hex>", published by GitHub for release assets
+            if digest.startswith("sha256:") and digest[7:].lower() != sha.hexdigest():
+                part.unlink(missing_ok=True)
+                raise RuntimeError("checksum installer tidak cocok")
+            part.replace(dest)
+            return dest
+
+        def on_ok(path):
+            self._progress = 100
+            self.changed.emit()
+            try:
+                self.launch_installer(path)
+            except OSError as e:
+                on_err(e)
+                return
+            self.toast.emit(f"Memasang Senada {rel['tag']}… Senada akan terbuka lagi setelah selesai.")
+            QTimer.singleShot(800, self.quitRequested.emit)
+
+        def on_err(err):
+            self._updating = False
+            self._progress = -1
             self.changed.emit()
             self.toast.emit(f"Gagal memperbarui: {err}")
 

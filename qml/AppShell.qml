@@ -310,7 +310,7 @@ Item {
                     spacing: 1
                     Label {
                         Layout.fillWidth: true
-                        text: "Update GitHub tersedia (" + updater.commitsBehind + " commit)"
+                        text: updater.bannerTitle
                         font.pixelSize: 13
                         font.weight: Font.Bold
                         elide: Text.ElideRight
@@ -325,7 +325,8 @@ Item {
                 }
 
                 NButton {
-                    text: updater.updating ? "Memperbarui…" : "Perbarui"
+                    text: !updater.updating ? "Perbarui"
+                          : updater.releaseMode && updater.progress >= 0 ? updater.progress + "%" : "Memperbarui…"
                     primary: true
                     enabled: !updater.updating
                     onClicked: updater.applyUpdate()

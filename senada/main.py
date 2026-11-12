@@ -10,7 +10,7 @@ from PySide6.QtQuick import QQuickWindow
 from PySide6.QtQuickControls2 import QQuickStyle
 
 from .catalog import Catalog
-from .config import BIN_DIR, IS_WINDOWS, Settings
+from .config import BIN_DIR, FROZEN, IS_WINDOWS, ROOT, Settings
 from .engine import AudioEngine
 from .resolver import AudioResolver
 from .library import Library
@@ -21,8 +21,6 @@ from .store import LocalStore
 from .updater import Updater
 from .visualizer import Visualizer
 from .worker import Async
-
-ROOT = Path(__file__).resolve().parent.parent
 
 
 def _ensure_user_bins_in_path():
@@ -51,7 +49,7 @@ def main():
     app.setApplicationName("Senada")
     app.setOrganizationName("senada")
     app.setDesktopFileName("senada")  # Wayland app_id, for Hyprland window rules
-    app.setWindowIcon(QIcon(str(ROOT / "data" / "senada.svg")))
+    app.setWindowIcon(QIcon(str(ROOT / "data" / "senada.png")))
     app.setFont(QFont(["Google Sans Flex", "Google Sans", "Segoe UI Variable Text", "Segoe UI",
                        "Noto Sans", "sans-serif"], 10))
     QQuickStyle.setStyle("Basic")
@@ -82,6 +80,7 @@ def main():
         app.quit()
 
     updater.restartRequested.connect(request_restart)
+    updater.quitRequested.connect(app.quit)
 
     def on_quit():
         audio_engine.quit()
@@ -115,7 +114,10 @@ def main():
 
     ret = app.exec()
     if restarting:
-        args = [sys.executable, str(ROOT / "run.py"), *sys.argv[1:]]
+        if FROZEN:  # Senada.exe restarts itself
+            args = [sys.executable, *sys.argv[1:]]
+        else:
+            args = [sys.executable, str(ROOT / "run.py"), *sys.argv[1:]]
         if IS_WINDOWS:  # execv on Windows spawns a child and returns, so start it detached and exit
             import subprocess
             subprocess.Popen(args, close_fds=True)

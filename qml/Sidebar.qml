@@ -128,7 +128,7 @@ Rectangle {
                 Icon { Layout.leftMargin: 10; glyph: "download"; size: 18; color: Theme.text }
                 Label {
                     Layout.fillWidth: true
-                    text: updater.updating ? "Memperbarui…" : "Perbarui (" + updater.commitsBehind + ")"
+                    text: updater.badgeText
                     font.pixelSize: 13
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight

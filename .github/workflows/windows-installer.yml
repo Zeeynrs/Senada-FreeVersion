@@ -1,0 +1,58 @@
+name: Windows installer
+
+# Builds Senada-Setup-<version>.exe. Pushing a tag v<version> (matching senada/__init__.py)
+# also publishes it on the GitHub release for that tag.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check tag matches __version__
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $v = [regex]::Match((Get-Content senada/__init__.py -Raw), '__version__\s*=\s*"([^"]+)"').Groups[1].Value
+          if ("v$v" -ne "${{ github.ref_name }}") { throw "Tag ${{ github.ref_name }} != __version__ $v" }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+
+      - name: Build installer
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # avoids GitHub API rate limits when looking up mpv
+          # optional code signing: add these repository secrets to sign Senada.exe and the installer
+          SENADA_SIGN_PFX_BASE64: ${{ secrets.SENADA_SIGN_PFX_BASE64 }}
+          SENADA_SIGN_PASSWORD: ${{ secrets.SENADA_SIGN_PASSWORD }}
+        run: ./packaging/windows/build.ps1 -Python python
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Senada-Setup
+          path: packaging/windows/dist/Senada-Setup-*.exe
+
+      - name: Publish to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $exe = (Get-ChildItem packaging/windows/dist/Senada-Setup-*.exe).FullName
+          gh release view "${{ github.ref_name }}" *> $null
+          if ($LASTEXITCODE -eq 0) { gh release upload "${{ github.ref_name }}" $exe --clobber }
+          else { gh release create "${{ github.ref_name }}" $exe --title "Senada ${{ github.ref_name }}" --generate-notes }
