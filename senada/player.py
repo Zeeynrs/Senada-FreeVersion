@@ -57,6 +57,7 @@ class Player(QObject):
     trackChanged = Signal()
     likedChanged = Signal(str, bool)
     historyChanged = Signal()
+    trackMatched = Signal(str, "QVariantMap")  # uri, {imageSmall, image, imageLarge, matchScore}
 
     def __init__(self, worker, engine: AudioEngine, resolver: AudioResolver, settings, store, catalog, parent=None):
         super().__init__(parent)
@@ -87,6 +88,7 @@ class Player(QObject):
         self._queue_index = -1
         self._track_cache = {}  # uri -> track_dict
         self._play_token = 0  # bumps on every track change; stale stream lookups are dropped
+        self._prefetched = ""  # uri already being resolved ahead of time
         self._devices = [{
             "id": "local",
             "name": "Senada (Lokal)",
@@ -166,16 +168,14 @@ class Player(QObject):
             nxt_idx = 0
         if 0 <= nxt_idx < len(self._queue):
             nxt_track = self._queue[nxt_idx]
-            self.worker.run(
-                lambda: self.resolver.resolve(
-                    nxt_track.get("uri", ""),
-                    nxt_track.get("name", ""),
-                    nxt_track.get("artists", ""),
-                    nxt_track.get("durationMs", 0)
-                ),
-                lambda _: None,
-                lambda e: None
-            )
+            uri = nxt_track.get("uri", "")
+            # position updates arrive many times a second: only start one lookup per track
+            if not uri or uri == self._prefetched or uri.startswith("yt:track:"):
+                return
+            self._prefetched = uri
+            self.worker.run(lambda: self.resolver.match(nxt_track),
+                            lambda info: self._apply_match(nxt_track, info),
+                            lambda e: None)
 
     # ---- controls -------------------------------------------------------
 
@@ -289,22 +289,18 @@ class Player(QObject):
 
         self._on_track_changed(track)
 
-        # Resolve stream URL and play
+        # Resolve stream URL and play (imported tracks are matched to a YouTube Music upload first)
         def do_resolve():
-            return self.resolver.resolve(
-                track.get("uri", ""),
-                track.get("name", ""),
-                track.get("artists", ""),
-                track.get("durationMs", 0)
-            )
+            return self.resolver.match(track)
 
-        def on_resolved(stream_url):
+        def on_resolved(info):
             if token != self._play_token:
                 return  # the user already moved on to another track
-            if stream_url:
-                self.engine.play(stream_url)
+            if info and info.get("v"):
+                self._apply_match(track, info)
+                self.engine.play(f"https://music.youtube.com/watch?v={info['v']}")
             else:
-                self.worker.error.emit(f"Audio tidak ditemukan: {track.get('name')}")
+                self.worker.error.emit(f"Tidak ketemu di YouTube Music: {track.get('name')} — coba klik kanan → Pilih versi lain")
                 self.next()
 
         def on_fail(e):
@@ -312,6 +308,35 @@ class Player(QObject):
                 self.worker.error.emit(f"Gagal memutar audio: {e}")
 
         self.worker.run(do_resolve, on_resolved, on_fail)
+
+    def _apply_match(self, track: dict, info: dict | None):
+        """Give an imported (metadata-only) track the cover and confidence of its match."""
+        uri = track.get("uri", "")
+        if not info or uri.startswith("yt:track:"):
+            return
+        patch = {k: info.get(k) for k in ("imageSmall", "image", "imageLarge") if info.get(k)}
+        patch["matchScore"] = info.get("s", 0)
+        for t in [self._track_cache.get(uri)] + [q for q in self._queue if q.get("uri") == uri]:
+            if t is not None:
+                t.update(patch)
+        if self._state.get("uri") == uri:
+            first_cover = not self._state.get("imageSmall") and patch.get("imageSmall")
+            self._state.update(patch)
+            self.stateChanged.emit()
+            if first_cover:
+                self._on_cover(patch["imageSmall"])
+        self.trackMatched.emit(uri, patch)
+
+    def replaceMatch(self, uri: str, patch: dict):
+        """A different upload was picked for this track: update it and restart it if it is playing."""
+        for t in [self._track_cache.get(uri)] + [q for q in self._queue if q.get("uri") == uri]:
+            if t is not None:
+                t.update(patch)
+        if self._state.get("uri") == uri and 0 <= self._queue_index < len(self._queue):
+            self._play_index(self._queue_index)
+
+    def _on_cover(self, art: str):
+        self.worker.run(lambda: download(art), lambda data: self._set_accent(accent_from_image(data)), lambda e: None)
 
     def _on_track_changed(self, track: dict):
         if not track.get("uri"):

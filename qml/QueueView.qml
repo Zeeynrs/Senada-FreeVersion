@@ -3,6 +3,7 @@ import QtQuick.Controls
 
 ListView {
     id: q
+    SmoothScroll { flickable: q }
     clip: true
     model: player.queue
     spacing: 2

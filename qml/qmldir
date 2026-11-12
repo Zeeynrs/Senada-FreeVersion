@@ -20,6 +20,7 @@ LibraryPage 1.0 LibraryPage.qml
 LinkLabel 1.0 LinkLabel.qml
 LyricsView 1.0 LyricsView.qml
 Main 1.0 Main.qml
+MatchPicker 1.0 MatchPicker.qml
 singleton Nav 1.0 Nav.qml
 NButton 1.0 NButton.qml
 NMenu 1.0 NMenu.qml
@@ -32,6 +33,7 @@ Scallop 1.0 Scallop.qml
 SearchPage 1.0 SearchPage.qml
 SeekBar 1.0 SeekBar.qml
 SettingsPage 1.0 SettingsPage.qml
+SmoothScroll 1.0 SmoothScroll.qml
 singleton Theme 1.0 Theme.qml
 Toast 1.0 Toast.qml
 TopBar 1.0 TopBar.qml

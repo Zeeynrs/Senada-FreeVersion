@@ -6,10 +6,11 @@ saved albums/playlists and history are stored locally.
 
 import re
 import urllib.parse
+from concurrent.futures import ThreadPoolExecutor
 
 from PySide6.QtCore import Property, QObject, Signal, Slot
 
-from . import spotify_import, ytmusic
+from . import matching, spotify_import, ytmusic
 from .catalog import Catalog
 from .store import LocalStore
 
@@ -47,10 +48,12 @@ class Library(QObject):
     loaded = Signal(str, "QVariantMap")  # page key, data
     searchFinished = Signal(str, "QVariantMap")  # query, results
     playlistCreated = Signal(str)  # new playlist id (e.g. after an import)
+    matchCandidatesReady = Signal(str, "QVariantList")  # uri, scored YouTube Music candidates
     toast = Signal(str)
 
-    def __init__(self, store: LocalStore, catalog: Catalog, worker, session, player=None, parent=None):
+    def __init__(self, store: LocalStore, catalog: Catalog, worker, session, player=None, resolver=None, parent=None):
         super().__init__(parent)
+        self.resolver = resolver
         self.store = store
         self.catalog = catalog
         self.worker = worker
@@ -66,6 +69,7 @@ class Library(QObject):
         if player is not None:
             player.likedChanged.connect(lambda *_: self._bump_liked())
             player.historyChanged.connect(self._refresh_recent)
+            player.trackMatched.connect(self._on_track_matched)
         self._refresh_playlists()
 
     # ---- properties --------------------------------------------------------
@@ -91,6 +95,11 @@ class Library(QObject):
     def recent(self):
         """Recently played tracks (kept apart from `home` so a track change doesn't rebuild the shelves)."""
         return self._recent
+
+    @Property(int, constant=True)
+    def matchThreshold(self):
+        """Imported tracks matched below this score get a "check me" badge."""
+        return matching.ACCEPT
 
     @Property(int, notify=likedChanged)
     def likedRevision(self):
@@ -281,6 +290,97 @@ class Library(QObject):
         self._refresh_playlists()
         self.toast.emit(f"{len(tracks)} lagu diimpor ke “{info.get('name') or 'Impor'}”")
         self.playlistCreated.emit(pid)
+        self.matchTracks(tracks)
+
+    # ---- matching imported tracks to YouTube Music --------------------------------
+
+    def _store_patches(self, patches: dict):
+        if patches and self.store.patch_tracks(patches):
+            self._refresh_playlists()
+            self._refresh_recent()
+            self._bump_liked()
+
+    def _on_track_matched(self, uri, patch):
+        self._store_patches({uri: dict(patch)})
+
+    @staticmethod
+    def _patch_from(info: dict) -> dict:
+        patch = {k: info.get(k) for k in ("imageSmall", "image", "imageLarge") if info.get(k)}
+        patch["matchScore"] = info.get("s", 0)
+        return patch
+
+    @Slot("QVariantList")
+    def matchTracks(self, tracks):
+        """Match metadata-only tracks (Spotify imports) in the background and fill in their covers."""
+        if self.resolver is None:
+            return
+        todo = [dict(t) for t in tracks or [] if not (t.get("uri") or "").startswith("yt:track:")]
+        if not todo:
+            return
+        self.toast.emit(f"Mencocokkan {len(todo)} lagu dengan YouTube Music…")
+
+        def safe_match(t):
+            try:
+                return self.resolver.match(t)
+            except Exception:  # one bad lookup must not stop the batch
+                return None
+
+        def job():
+            with ThreadPoolExecutor(max_workers=4, thread_name_prefix="senada-match") as pool:
+                results = list(pool.map(safe_match, todo))
+            patches, weak, missing = {}, 0, 0
+            for t, info in zip(todo, results):
+                if not info:
+                    missing += 1
+                    continue
+                patches[t["uri"]] = self._patch_from(info)
+                weak += info.get("s", 0) < matching.ACCEPT
+            return patches, weak, missing
+
+        def done(result):
+            patches, weak, missing = result
+            self._store_patches(patches)
+            parts = [f"{len(patches) - weak} cocok"]
+            if weak:
+                parts.append(f"{weak} kurang yakin")
+            if missing:
+                parts.append(f"{missing} tidak ketemu")
+            hint = " — cek lagu bertanda ? (klik kanan → Pilih versi lain)" if weak or missing else ""
+            self.toast.emit("Pencocokan selesai: " + ", ".join(parts) + hint)
+
+        self.worker.run(job, done, lambda e: self.toast.emit(f"Pencocokan gagal: {e}"))
+
+    @Slot("QVariantMap")
+    def matchCandidates(self, track):
+        """Every YouTube Music candidate for a track, scored (for the "Pilih versi lain…" picker)."""
+        track = dict(track)
+        uri = track.get("uri", "")
+
+        def job():
+            current = (self.resolver.cached(uri) or {}).get("v") if self.resolver else None
+            out = []
+            for c in (self.resolver.candidates(track, thorough=True) if self.resolver else [])[:12]:
+                m = c.pop("match")
+                out.append({**c, "score": m["score"], "tags": m["tags"], "current": c["id"] == current,
+                            "deltaMs": (c.get("durationMs") or 0) - (track.get("durationMs") or 0)
+                            if c.get("durationMs") and track.get("durationMs") else None})
+            return out
+
+        self.worker.run(job, lambda cands: self.matchCandidatesReady.emit(uri, cands),
+                        lambda e: self.matchCandidatesReady.emit(uri, []))
+
+    @Slot("QVariantMap", "QVariantMap")
+    def chooseMatch(self, track, cand):
+        """Use this YouTube Music upload for the track from now on."""
+        if self.resolver is None:
+            return
+        track, cand = dict(track), dict(cand)
+        info = self.resolver.choose(track, cand)
+        patch = self._patch_from(info)
+        self._store_patches({track["uri"]: patch})
+        if self.player is not None:
+            self.player.replaceMatch(track["uri"], patch)
+        self.toast.emit(f"Versi “{cand.get('name', '')}” dipakai untuk lagu ini")
 
     @Slot(str)
     def importSpotify(self, link):

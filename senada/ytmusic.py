@@ -23,6 +23,7 @@ FILTER_SONGS = "EgWKAQIIAWoQEAMQBBAJEAoQBRAREBAQFA%3D%3D"
 FILTER_ALBUMS = "EgWKAQIYAWoQEAMQBBAJEAoQBRAREBAQFQ%3D%3D"
 FILTER_ARTISTS = "EgWKAQIgAWoQEAMQBBAJEAoQBRAREBAQFQ%3D%3D"
 FILTER_PLAYLISTS = "EgeKAQQoADgBahAQAxAEEAkQChAFEBEQEBAV"
+FILTER_VIDEOS = "EgWKAQIQAWoQEAMQBBAJEAoQBRAREBAQFQ%3D%3D"
 
 PAGE_KINDS = {
     "MUSIC_PAGE_TYPE_ALBUM": "album",
@@ -168,9 +169,10 @@ def _explicit(renderer) -> bool:
 # ---- normalised objects -------------------------------------------------------
 
 def make_track(video_id, name, artists, artist_id="", album="", album_id="",
-               images=("", "", ""), duration=0, explicit=False) -> dict:
+               images=("", "", ""), duration=0, explicit=False, video_type="") -> dict:
     small, medium, large = images
     return {
+        "videoType": video_type,  # ATV = official song, OMV = music video, UGC = user upload
         "uri": f"yt:track:{video_id}",
         "id": video_id,
         "name": name,
@@ -242,11 +244,14 @@ def _list_item(r: dict, context: dict | None = None) -> tuple[str, dict] | None:
     images = _images(_thumbs_of(r))
 
     video_id = _get(r, "playlistItemData", "videoId")
-    if not video_id:
-        for run in _runs(cols[0]):
-            video_id = _get(run, "navigationEndpoint", "watchEndpoint", "videoId")
-            if video_id:
-                break
+    video_type = ""
+    for run in _runs(cols[0]):
+        watch = _get(run, "navigationEndpoint", "watchEndpoint") or {}
+        video_type = _get(watch, "watchEndpointMusicSupportedConfigs", "watchEndpointMusicConfig", "musicVideoType", default="")
+        if not video_id:
+            video_id = watch.get("videoId")
+        if video_id:
+            break
     if not video_id and not r.get("navigationEndpoint"):
         video_id = _get(r, "overlay", "musicItemThumbnailOverlayRenderer", "content", "musicPlayButtonRenderer",
                         "playNavigationEndpoint", "watchEndpoint", "videoId")
@@ -263,6 +268,7 @@ def _list_item(r: dict, context: dict | None = None) -> tuple[str, dict] | None:
             images=images if images[0] else context.get("images", ("", "", "")),
             duration=meta["durationMs"],
             explicit=_explicit(r),
+            video_type=video_type,
         )
 
     kind, bid = _browse(r)
@@ -282,8 +288,10 @@ def _two_row(r: dict) -> tuple[str, dict] | None:
     video_id = _get(nav, "watchEndpoint", "videoId")
     if video_id:
         meta = _meta_from_runs(_runs(r.get("subtitle")))
+        video_type = _get(nav, "watchEndpoint", "watchEndpointMusicSupportedConfigs", "watchEndpointMusicConfig",
+                          "musicVideoType", default="")
         return "track", make_track(video_id, title, meta["artists"], meta["artistId"],
-                                   meta["album"], meta["albumId"], images, meta["durationMs"], _explicit(r))
+                                   meta["album"], meta["albumId"], images, meta["durationMs"], _explicit(r), video_type)
     kind, bid = _browse(nav)
     if not kind:
         return None
@@ -388,6 +396,12 @@ def _search_shelf(query: str, params: str) -> tuple[list, list]:
             tracks += t
             cards += c
     return tracks, cards
+
+
+def search_tracks(query: str, videos: bool = False) -> list[dict]:
+    """Songs (official audio) or videos matching a query; used to match imported tracks."""
+    tracks, _ = _search_shelf(query, FILTER_VIDEOS if videos else FILTER_SONGS)
+    return tracks
 
 
 def search(query: str) -> dict:

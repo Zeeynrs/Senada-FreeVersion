@@ -54,6 +54,12 @@ Item {
         function onPlaylistCreated(pid) { shell.navigate("playlist", pid) }
     }
 
+    Connections {
+        target: Nav
+        function onMatchPicker(track) { matchPicker.openFor(track) }
+    }
+    MatchPicker { id: matchPicker }
+
     // create / rename / delete an own playlist
     Popup {
         id: playlistDialog

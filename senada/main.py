@@ -58,7 +58,7 @@ def main():
     audio_engine = AudioEngine()
     resolver = AudioResolver()
     player = Player(worker, audio_engine, resolver, settings, store, catalog)
-    library = Library(store, catalog, worker, session, player)
+    library = Library(store, catalog, worker, session, player, resolver)
     library.toast.connect(session.toast)
     lyrics = Lyrics(player, worker)
     visualizer = Visualizer()
