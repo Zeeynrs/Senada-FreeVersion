@@ -101,7 +101,9 @@ A free desktop music player for **Windows & Linux**, powered by the YouTube Musi
 - Light and dark themes that follow Windows, KDE or GNOME, or that you pick yourself.
 - 12 accent colors: Mint, Indigo, Sky, Aurora, Sunset, Ocean, Forest, Berry, Amber, Rose, Carbon and Chrome.
 - Collapsible sidebar, a side panel for lyrics or the queue, and track lists you can sort by column.
-- **Full-screen player**: round cover inside a circular visualizer (*cava*), equalizer, tempo & pitch, queue and lyrics — or a spinning **vinyl record** with a tonearm and the lyrics fanned out around it (*Settings → Appearance*).
+- **Full-screen player** in six styles (*Settings → Appearance*): round cover inside a circular visualizer (*cava*), a spinning **vinyl record** with a tonearm, a **cassette**, a magazine **poster**, an old valve **radio** or a **Walkman**, each with its own lyrics, queue and equalizer.
+- **Equalizer** (six bands and presets) and **tempo** with or without keeping the pitch, applied to the sound as it plays.
+- **Seek bar styles**: a line, a wave, a waveform or dots.
 - **Mini player** ("dynamic island") while Senada is minimized.
 - **Glass effect** (optional): *Album cover* (every system) or *Transparent* (acrylic on Windows 11, blur on Hyprland / KDE).
 - Settings with search, and a **What's new** page with the version on your computer and the changes in each release.
@@ -109,6 +111,7 @@ A free desktop music player for **Windows & Linux**, powered by the YouTube Musi
 **Fits your desktop**
 - Windows: one-click installer with automatic updates.
 - Linux: MPRIS (`playerctl`, media keys, Hyprlock, Waybar), Wayland / Hyprland and X11.
+- **Discord Rich Presence** (optional, *Settings → Discord*): "Listening to Senada" with the song, cover and a progress bar on your profile.
 
 </details>
 
@@ -357,7 +360,9 @@ On GitHub Actions, add the `SENADA_SIGN_PFX_BASE64` and `SENADA_SIGN_PASSWORD` s
 - Tema terang dan gelap yang mengikuti Windows, KDE, atau GNOME, atau dipilih sendiri.
 - 12 warna aksen: Mint, Indigo, Langit, Aurora, Senja, Samudra, Hutan, Beri, Amber, Mawar, Karbon, dan Krom.
 - Sidebar yang bisa disembunyikan, panel samping untuk lirik atau antrean, dan daftar lagu yang bisa diurutkan per kolom.
-- **Player layar penuh**: sampul bulat di tengah visualizer melingkar (*cava*), equalizer, tempo & pitch, antrean, dan lirik — atau **piringan hitam** yang berputar dengan lengan jarum dan lirik yang menyebar di sekelilingnya (*Pengaturan → Tampilan*).
+- **Player layar penuh** dengan enam gaya (*Pengaturan → Tampilan*): sampul bulat di tengah visualizer melingkar (*cava*), **piringan hitam** yang berputar dengan lengan jarum, **kaset**, **poster** majalah, **radio** tabung lawas, atau **Walkman**, masing-masing dengan lirik, antrean, dan equalizer sendiri.
+- **Equalizer** (enam pita dan preset) dan **tempo** dengan atau tanpa mempertahankan nada, langsung diterapkan ke suara.
+- **Gaya bilah progres**: garis, gelombang, bentuk gelombang, atau titik-titik.
 - **Pemutar mini** ("dynamic island") saat Senada diminimalkan.
 - **Efek kaca** (opsional): *Sampul album* (semua sistem) atau *Transparan* (acrylic di Windows 11, blur di Hyprland / KDE).
 - Pengaturan dengan kolom cari, dan halaman **Apa yang baru** berisi versi di komputermu serta perubahan di setiap rilis.
@@ -365,6 +370,7 @@ On GitHub Actions, add the `SENADA_SIGN_PFX_BASE64` and `SENADA_SIGN_PASSWORD` s
 **Menyatu dengan desktop**
 - Windows: installer sekali klik dengan pembaruan otomatis.
 - Linux: MPRIS (`playerctl`, tombol media, Hyprlock, Waybar), Wayland / Hyprland dan X11.
+- **Discord Rich Presence** (opsional, *Pengaturan → Discord*): "Listening to Senada" beserta lagu, sampul, dan bilah progres di profilmu.
 
 </details>
 

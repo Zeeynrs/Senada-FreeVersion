@@ -10,6 +10,12 @@ CHANGELOG = [
     {
         "version": "next",
         "date": "",
+        "en": {"new": [], "fixed": []},
+        "id": {"new": [], "fixed": []},
+    },
+    {
+        "version": "1.0.8",
+        "date": "2026-11-14",
         "en": {
             "new": [
                 "Cassette full view: the tape winds from the left reel to the right one as the song plays and the reels turn "
