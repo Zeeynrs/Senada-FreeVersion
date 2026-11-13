@@ -10,7 +10,7 @@ from PySide6.QtCore import Property, QObject, Qt, QUrl, Signal, Slot
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QRegion, QWindow
 
 from . import i18n, island
-from .config import LIBRARY_FILE
+from .config import LIBRARY_FILE, LOG_DIR
 
 
 def _os_user_name() -> str:
@@ -148,6 +148,15 @@ class Session(QObject):
     @Slot(str)
     def openUrl(self, url):
         QDesktopServices.openUrl(QUrl(url))
+
+    @Property(str, constant=True)
+    def logPath(self):
+        return str(LOG_DIR)
+
+    @Slot()
+    def openLogFolder(self):
+        LOG_DIR.mkdir(parents=True, exist_ok=True)
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(LOG_DIR)))
 
     # ---- mini player ("dynamic island") -------------------------------------------
 

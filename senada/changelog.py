@@ -22,6 +22,10 @@ CHANGELOG = [
                 "4 times a second instead of 16 and pauses the little equalizer next to the playing song (about a third less CPU).",
                 "The audio engine (mpv) now always ends together with Senada, also after a crash or a forced close; "
                 "before, it could stay behind in the background.",
+                "When pressing play stayed silent with no message (seen on Windows), Senada now says why: "
+                "if the audio engine (mpv) stopped it is reported and started again on the next play, "
+                "and a song lookup that hangs is really stopped after 30 seconds instead of waiting forever.",
+                "Senada keeps a log (Settings → About → Logs) so a song that won't play can be looked into.",
             ],
         },
         "id": {
@@ -36,6 +40,10 @@ CHANGELOG = [
                 "(bukan 16) dan equalizer kecil di samping lagu yang diputar berhenti bergerak (CPU sekitar sepertiga lebih hemat).",
                 "Mesin audio (mpv) kini selalu ikut berhenti bersama Senada, juga setelah crash atau ditutup paksa; "
                 "sebelumnya bisa tertinggal berjalan di latar belakang.",
+                "Saat tombol putar ditekan tapi tidak ada suara dan tidak ada pesan (terjadi di Windows), Senada kini memberi tahu sebabnya: "
+                "kalau mesin audio (mpv) berhenti, itu dilaporkan dan mpv dinyalakan lagi saat putar ditekan, "
+                "dan pencarian lagu yang macet benar-benar dihentikan setelah 30 detik, tidak menunggu selamanya.",
+                "Senada kini menyimpan log (Pengaturan → Tentang → Log) supaya lagu yang tidak mau diputar bisa diselidiki.",
             ],
         },
     },

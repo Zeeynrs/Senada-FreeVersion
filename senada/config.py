@@ -30,6 +30,8 @@ NO_WINDOW = subprocess.CREATE_NO_WINDOW if IS_WINDOWS else 0
 SETTINGS_FILE = CONFIG_DIR / "settings.json"
 LIBRARY_FILE = CONFIG_DIR / "library.json"
 AUDIO_CACHE = CACHE_DIR / "audio"
+# senada.log and mpv.log: what happened, for when something does not work (%LOCALAPPDATA%\Senada\logs)
+LOG_DIR = CACHE_DIR.parent / "logs" if IS_WINDOWS else CACHE_DIR / "logs"
 
 DEFAULTS = {
     "language": "en",  # "en" or "id" (see i18n.py)

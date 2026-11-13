@@ -9,6 +9,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuick import QQuickWindow, QSGRendererInterface
 from PySide6.QtQuickControls2 import QQuickStyle
 
+from . import logs
 from .catalog import Catalog
 from .config import BIN_DIR, FROZEN, IS_WINDOWS, ROOT, Settings
 from .engine import AudioEngine
@@ -34,6 +35,7 @@ def _ensure_user_bins_in_path():
 
 
 def main():
+    logs.setup()
     _ensure_user_bins_in_path()
     if not IS_WINDOWS and os.environ.get("WAYLAND_DISPLAY"):
         os.environ.setdefault("QT_QPA_PLATFORM", "wayland;xcb")

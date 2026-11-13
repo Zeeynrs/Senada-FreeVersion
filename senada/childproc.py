@@ -90,3 +90,30 @@ def popen_tied(cmd, **kwargs):
         except (OSError, AttributeError, ValueError):
             keep = None
     return proc, keep
+
+
+def release(keep):
+    """Let go of what popen_tied returned for a process that has ended."""
+    if keep and sys.platform == "win32":
+        try:
+            ctypes.WinDLL("kernel32").CloseHandle(ctypes.c_void_p(keep))
+        except (OSError, AttributeError):
+            pass
+
+
+def kill_tree(proc):
+    """Stop `proc` and the processes it started. yt-dlp.exe is a self-unpacking program that
+    runs the real yt-dlp as its child; killing only the outer one leaves the child running
+    with our end of its output still open, so a reader waiting on that output never returns."""
+    if proc.poll() is not None:
+        return
+    if sys.platform == "win32":
+        try:
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)], capture_output=True,
+                           timeout=10, creationflags=subprocess.CREATE_NO_WINDOW)
+        except (OSError, subprocess.SubprocessError):
+            pass
+    try:
+        proc.kill()
+    except OSError:
+        pass

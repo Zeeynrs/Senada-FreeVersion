@@ -1119,6 +1119,17 @@ Popup {
                 label: I18n.t("License")
                 hint: "GNU GPL v3"
             }
+            Divider {}
+            SettingRow {
+                label: I18n.t("Logs")
+                hint: I18n.t("If music does not play or something else goes wrong, these files show what happened. Attach them when you report a problem.")
+                      + "\n" + session.logPath
+                NButton {
+                    text: I18n.t("Open folder")
+                    iconName: "library"
+                    onClicked: session.openLogFolder()
+                }
+            }
         }
     }
 }

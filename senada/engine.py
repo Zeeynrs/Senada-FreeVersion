@@ -19,14 +19,16 @@ from pathlib import Path
 from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtNetwork import QLocalSocket
 
-from .childproc import popen_tied
-from .config import BIN_DIR, CACHE_DIR, IS_WINDOWS, NO_WINDOW
+from .childproc import popen_tied, release
+from .config import BIN_DIR, CACHE_DIR, IS_WINDOWS, LOG_DIR, NO_WINDOW
 from .i18n import tr
+from .logs import MPV_LOG_FILE
 
 logger = logging.getLogger("senada.engine")
 
 CONNECT_TRIES = 60       # x 100 ms while mpv starts up
 MAX_PENDING = 50         # commands kept while not connected yet
+MAX_RESTARTS = 3         # mpv started again after it stopped by itself, before giving up
 
 
 def find_tool(name: str) -> str | None:
@@ -73,6 +75,9 @@ class AudioEngine(QObject):
         self._pos_step = 0       # emit the position only after it moved this many ms (0: every update)
         self._emitted_pos = -1
         self._job = None         # Windows job object that ends mpv together with Senada
+        self._quitting = False
+        self._exit_reported = False  # the user was told this mpv stopped
+        self._restarts = 0
         self._duration_ms = 0
         self._queued = ""    # url appended to mpv's playlist, played by mpv itself when the current file ends
         self._advanced = ""  # queued url mpv has already moved on to; the next play() of it is a no-op
@@ -81,6 +86,7 @@ class AudioEngine(QObject):
         self.sock.connected.connect(self._on_connected)
         self.sock.readyRead.connect(self._on_ready_read)
         self.sock.errorOccurred.connect(self._on_socket_error)
+        self.sock.disconnected.connect(lambda: QTimer.singleShot(300, self._check_mpv))
         self._retry = QTimer(self)
         self._retry.setInterval(100)
         self._retry.setSingleShot(True)
@@ -123,6 +129,10 @@ class AudioEngine(QObject):
         if ytdlp:
             script_opts.append(f"ytdl_hook-ytdl_path={ytdlp}")
         cmd.append("--script-opts=" + ",".join(script_opts))
+        if LOG_DIR.is_dir():
+            cmd.append(f"--log-file={MPV_LOG_FILE}")  # rewritten each start
+        logger.info("starting mpv: %s (yt-dlp: %s)", mpv_bin, ytdlp)
+        self._exit_reported = False
         try:
             # tied to Senada: mpv ends with it even after a crash or a kill
             self.proc, self._job = popen_tied(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -142,12 +152,52 @@ class AudioEngine(QObject):
     def _on_socket_error(self, _err):
         if self.sock.state() == QLocalSocket.LocalSocketState.ConnectedState:
             return
-        if self.proc is not None and self.proc.poll() is None and self._tries < CONNECT_TRIES:
+        self._check_mpv()
+
+    def _check_mpv(self):
+        """Not connected (any more): wait for mpv to open its IPC endpoint, or say that it stopped."""
+        # (during errorOccurred the socket may not be back to "unconnected" yet: only skip when connected)
+        if self._quitting or self.proc is None or self.sock.state() == QLocalSocket.LocalSocketState.ConnectedState:
+            return
+        code = self.proc.poll()
+        if code is not None:
+            self._on_mpv_exit(code)
+        elif self._tries < CONNECT_TRIES:
             self._retry.start()  # mpv hasn't opened its IPC endpoint yet
-        elif self._tries >= CONNECT_TRIES:
+        else:
+            logger.error("mpv runs but its IPC endpoint %s never opened", self.ipc_path)
             self._fail(tr("Could not connect to the audio engine."))
 
+    def _on_mpv_exit(self, code):
+        """mpv stopped by itself (crashed, or was closed): tell the user once; the next command
+        starts it again (see _ensure_running)."""
+        if self._exit_reported:
+            return
+        self._exit_reported = True
+        self._retry.stop()
+        logger.error("mpv stopped with exit code %s (its log: %s)", code, MPV_LOG_FILE)
+        self._idle, self._is_playing = True, False
+        self.stateChanged.emit(False)
+        self._fail(tr("The audio engine (mpv) stopped unexpectedly (code {code}). Press play to try again. "
+                      "Details: {path}", code=code, path=str(LOG_DIR)))
+
+    def _ensure_running(self):
+        """Start mpv again when it stopped by itself, so pressing play brings the sound back."""
+        if self._quitting or self.proc is None or self.proc.poll() is None or self._restarts >= MAX_RESTARTS:
+            return
+        self._restarts += 1
+        logger.warning("mpv had stopped (exit code %s): starting it again", self.proc.returncode)
+        self._retry.stop()
+        self.sock.abort()
+        self._pending.clear()  # meant for the mpv that is gone
+        release(self._job)
+        self._job = None
+        self._advanced = self._queued = ""
+        self._start_mpv()
+
     def _on_connected(self):
+        logger.info("connected to mpv")
+        self._restarts = 0
         for cmd in (["observe_property", 1, "time-pos"],
                     ["observe_property", 2, "pause"],
                     ["observe_property", 3, "duration"],
@@ -185,6 +235,7 @@ class AudioEngine(QObject):
     # ---- protocol -------------------------------------------------------------------
 
     def _send_command(self, cmd_args):
+        self._ensure_running()
         line = (json.dumps({"command": cmd_args}) + "\n").encode("utf-8")
         if self.sock.state() == QLocalSocket.LocalSocketState.ConnectedState:
             self.sock.write(line)
@@ -234,6 +285,7 @@ class AudioEngine(QObject):
                 if reason == "eof":
                     self.trackEnded.emit()
             elif reason == "error":
+                logger.info("mpv could not play the file (%s)", msg.get("file_error", "unknown error"))
                 self._advanced = self._queued = ""
                 self.loadFailed.emit()
 
@@ -259,6 +311,8 @@ class AudioEngine(QObject):
         self._advanced = self._queued = ""  # "replace" drops the rest of mpv's playlist
         self._duration_ms = 0
         self._last_pos_ms = 0
+        # not the stream address itself: it is long and carries this network's IP address
+        logger.info("play %s", "direct stream" if "googlevideo.com/" in url else url)
         self._send_command(["loadfile", url, "replace"])
         self._send_command(["set_property", "pause", False])
 
@@ -294,6 +348,7 @@ class AudioEngine(QObject):
         self.stateChanged.emit(False)
 
     def quit(self):
+        self._quitting = True
         if self.proc is None:
             return
         try:

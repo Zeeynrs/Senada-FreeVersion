@@ -20,6 +20,7 @@ import subprocess
 import threading
 import time
 
+from .childproc import kill_tree
 from .config import NO_WINDOW
 
 logger = logging.getLogger("senada.streams")
@@ -131,7 +132,7 @@ class StreamResolver:
                                     text=True, encoding="utf-8", errors="replace", creationflags=NO_WINDOW)
         except OSError as e:
             raise StreamError(f"yt-dlp could not be started: {e}") from e
-        watchdog = threading.Timer(TIMEOUT, proc.kill)
+        watchdog = threading.Timer(TIMEOUT, self._stop_stuck, args=(proc, video_id))
         watchdog.daemon = True
         watchdog.start()
         found, said = {}, []
@@ -157,6 +158,11 @@ class StreamResolver:
         except (TypeError, ValueError):
             available = 0.0
         return found["url"], available
+
+    @staticmethod
+    def _stop_stuck(proc, video_id):
+        logger.warning("yt-dlp took over %ss for %s: stopped", TIMEOUT, video_id)
+        kill_tree(proc)
 
     @staticmethod
     def _reap(proc, watchdog):

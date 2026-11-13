@@ -301,6 +301,12 @@ ID = {
     "mpv was not found. Install mpv (Windows: put mpv.exe in Senada's bin/ folder or on PATH).": "mpv tidak ditemukan. Pasang mpv (Windows: taruh mpv.exe di folder bin/ Senada atau di PATH).",
     "Could not start mpv: {error}": "Gagal menjalankan mpv: {error}",
     "Could not connect to the audio engine.": "Koneksi audio engine gagal.",
+    "The audio engine (mpv) stopped unexpectedly (code {code}). Press play to try again. Details: {path}":
+        "Mesin audio (mpv) berhenti tiba-tiba (kode {code}). Tekan putar untuk mencoba lagi. Detail: {path}",
+    "Logs": "Log",
+    "If music does not play or something else goes wrong, these files show what happened. Attach them when you report a problem.":
+        "Kalau musik tidak mau diputar atau ada yang tidak beres, file ini mencatat apa yang terjadi. Lampirkan saat melaporkan masalah.",
+    "Open folder": "Buka folder",
     "Could not reach YouTube Music: {error}": "Tidak bisa menghubungi YouTube Music: {error}",
     "The YouTube Music reply cannot be read": "Balasan YouTube Music tidak bisa dibaca",
     "YouTube Music home could not be loaded. Check the internet connection.": "Beranda YouTube Music tidak bisa dimuat. Periksa koneksi internet.",
