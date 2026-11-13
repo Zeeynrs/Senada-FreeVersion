@@ -10,6 +10,7 @@ Cover 1.0 Cover.qml
 DevicesPopup 1.0 DevicesPopup.qml
 DownloadButton 1.0 DownloadButton.qml
 EqualizerView 1.0 EqualizerView.qml
+FullViewPreview 1.0 FullViewPreview.qml
 HomePage 1.0 HomePage.qml
 Icon 1.0 Icon.qml
 LogoMark 1.0 LogoMark.qml

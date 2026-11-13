@@ -485,12 +485,169 @@ Item {
     Component { id: queueComp; QueueView {} }
     Component { id: eqComp; EqualizerView {} }
 
+    // ---- nothing open on the right (cover-only): the song itself fills the space -------------
+    // title, artist and the controls, centred between the record (with its tonearm) and the edge
+    Item {
+        id: spotlight
+        readonly property real areaLeft: vp.cx + vp.discR * 1.3
+        readonly property real areaRight: vp.width - 48
+        x: areaLeft
+        width: Math.max(0, areaRight - areaLeft)
+        y: vp.topSpace
+        height: vp.areaH + vp.bottomSpace * 0.5
+        opacity: vp.showPanel ? 0 : 1
+        visible: opacity > 0
+        enabled: !vp.showPanel
+        Behavior on opacity { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+        readonly property var next: player && player.queue.length > 0 ? player.queue[0] : null
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            width: Math.min(parent.width, 640)
+            spacing: 6
+            transform: Translate {
+                y: vp.showPanel ? 24 : 0
+                Behavior on y { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+            }
+
+            Label {
+                Layout.alignment: Qt.AlignHCenter
+                text: I18n.t("NOW PLAYING")
+                color: Qt.rgba(1, 1, 1, 0.55)
+                font.pixelSize: 12
+                font.weight: Font.Bold
+                font.letterSpacing: 2.4
+            }
+            Label {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                horizontalAlignment: Text.AlignHCenter
+                text: vp.s.name || I18n.t("Nothing is playing")
+                color: "#ffffff"
+                font.pixelSize: Math.round(Math.max(34, Math.min(72, spotlight.width * 0.075)))
+                font.weight: Font.Black
+                font.letterSpacing: -0.5
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+            }
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: 8
+                LinkLabel {
+                    Layout.maximumWidth: spotlight.width - 90
+                    text: vp.s.artists || ""
+                    font.pixelSize: 20
+                    color: Qt.rgba(1, 1, 1, 0.8)
+                    elide: Text.ElideRight
+                    onClicked: if (vp.s.artistId) { vp.closeRequested(); Nav.go("artist", vp.s.artistId) }
+                }
+                IconButton {
+                    visible: !!vp.s.hasTrack
+                    implicitWidth: 32
+                    iconName: vp.s.liked ? "heart" : "heart-outline"
+                    size: 18
+                    tint: vp.s.liked ? Theme.like : Qt.rgba(1, 1, 1, 0.75)
+                    tip: vp.s.liked ? I18n.t("Remove from Liked Songs") : I18n.t("Save to Liked Songs")
+                    onClicked: player.toggleLike()
+                }
+                DownloadButton {
+                    visible: !!vp.s.hasTrack
+                    track: vp.s
+                    size: 17
+                    tint: Qt.rgba(1, 1, 1, 0.75)
+                }
+            }
+            Label {
+                visible: !!vp.s.album
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+                text: vp.s.album || ""
+                color: Qt.rgba(1, 1, 1, 0.45)
+                font.pixelSize: 14
+                elide: Text.ElideRight
+                HoverHandler { cursorShape: vp.s.albumId ? Qt.PointingHandCursor : Qt.ArrowCursor }
+                TapHandler { onTapped: if (vp.s.albumId) { vp.closeRequested(); Nav.go("album", vp.s.albumId) } }
+            }
+
+            ImmersiveSeek {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 28
+                Layout.fillWidth: false
+                Layout.preferredWidth: Math.min(520, spotlight.width * 0.85)
+            }
+            ImmersiveTransport {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 6
+                playSize: 66
+                spacing: 26
+            }
+            ImmersiveVolume {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 10
+                Layout.fillWidth: false
+                Layout.preferredWidth: Math.min(280, spotlight.width * 0.5)
+            }
+
+            // what comes after this song
+            Rectangle {
+                visible: !!spotlight.next
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 26
+                Layout.maximumWidth: spotlight.width
+                implicitWidth: nextRow.implicitWidth + 24
+                implicitHeight: 48
+                radius: 24
+                color: nextHover.hovered ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(1, 1, 1, 0.08)
+                border.color: Qt.rgba(1, 1, 1, 0.1)
+                Behavior on color { ColorAnimation { duration: 140 } }
+                HoverHandler { id: nextHover; cursorShape: Qt.PointingHandCursor }
+                TapHandler { onTapped: player.next() }
+                ToolTip.visible: nextHover.hovered
+                ToolTip.text: I18n.t("Next (Ctrl+→)")
+                ToolTip.delay: 500
+                RowLayout {
+                    id: nextRow
+                    anchors.centerIn: parent
+                    width: Math.min(implicitWidth, parent.Layout.maximumWidth - 24)
+                    spacing: 10
+                    Cover {
+                        Layout.preferredWidth: 32
+                        Layout.preferredHeight: 32
+                        radius: 16
+                        source: spotlight.next ? (spotlight.next.imageSmall || "") : ""
+                        simple: true
+                    }
+                    Label {
+                        text: I18n.t("Up next")
+                        color: Qt.rgba(1, 1, 1, 0.5)
+                        font.pixelSize: 13
+                    }
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.maximumWidth: 360
+                        text: spotlight.next ? (spotlight.next.name || "") + (spotlight.next.artists ? "  ·  " + spotlight.next.artists : "") : ""
+                        color: Qt.rgba(1, 1, 1, 0.85)
+                        font.pixelSize: 13
+                        font.weight: Font.DemiBold
+                        elide: Text.ElideRight
+                    }
+                }
+            }
+        }
+    }
+
     // ---- controls along the bottom ---------------------------------------------------------
     Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         height: vp.bottomSpace
+        // the spotlight above carries them while nothing is open on the right
+        opacity: vp.showPanel ? 1 : 0
+        visible: opacity > 0
+        enabled: vp.showPanel
+        Behavior on opacity { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
 
         Rectangle {
             anchors.fill: parent

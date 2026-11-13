@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 
 // Settings as a dialog over the app: sections (with search) on the left, the chosen
@@ -366,6 +367,69 @@ Popup {
         }
     }
 
+    // a full view style with a small drawing of it, picked like the theme cards
+    component ViewStyleCard: AbstractButton {
+        id: vc
+        property string viewStyle
+        property string label
+        readonly property bool selected: session.immersiveStyle === viewStyle
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        implicitHeight: preview.height + 28
+        hoverEnabled: true
+        focusPolicy: Qt.NoFocus
+        onClicked: session.immersiveStyle = viewStyle
+
+        contentItem: Item {}
+        background: Item {
+            Item {
+                id: preview
+                width: parent.width
+                height: Math.round(width * 0.5)
+                // rounded corners for the drawing
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    maskEnabled: true
+                    maskSource: previewMask
+                    maskThresholdMin: 0.5
+                    maskSpreadAtMin: 1.0
+                }
+                FullViewPreview { anchors.fill: parent; style: vc.viewStyle }
+            }
+            Rectangle {
+                id: previewMask
+                width: preview.width
+                height: preview.height
+                radius: 10
+                visible: false
+                layer.enabled: true
+            }
+            Rectangle {
+                width: preview.width
+                height: preview.height
+                radius: 10
+                color: "transparent"
+                border.width: vc.selected ? 2 : 1
+                border.color: vc.selected ? Theme.primary : vc.hovered ? Theme.lineStrong : Theme.line
+            }
+            Rectangle {
+                visible: vc.selected
+                x: preview.width - width - 8
+                y: 8
+                width: 20; height: 20; radius: 10
+                color: Theme.primary
+                Icon { anchors.centerIn: parent; glyph: "check"; size: 14; color: Theme.primaryText }
+            }
+            Label {
+                y: preview.height + 8
+                text: vc.label
+                font.pixelSize: 13
+                font.weight: vc.selected ? Font.Bold : Font.Normal
+                color: vc.selected || vc.hovered ? Theme.text : Theme.dim
+            }
+        }
+    }
+
     contentItem: Item {
         // ---- left: search + sections + profile ------------------------------------------
         ColumnLayout {
@@ -690,18 +754,17 @@ Popup {
                 }
             }
             Divider {}
-            SettingRow {
+            SettingBlock {
                 label: I18n.t("Full view style")
                 hint: session.immersiveStyle === "vinyl"
                       ? I18n.t("A spinning record on the left edge with a tonearm that follows the song (drag it to seek); the lyrics fan out around the record.")
                       : I18n.t("The round cover in the middle of a circular visualizer, the lyrics next to it.")
-                NCombo {
-                    model: [
-                        { key: "visualizer", label: I18n.t("Visualizer") },
-                        { key: "vinyl", label: I18n.t("Vinyl record") }
-                    ]
-                    value: session.immersiveStyle
-                    onPicked: (key) => session.immersiveStyle = key
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 14
+                    ViewStyleCard { viewStyle: "visualizer"; label: I18n.t("Visualizer") }
+                    ViewStyleCard { viewStyle: "vinyl"; label: I18n.t("Vinyl record") }
+                    Item { Layout.fillWidth: true; Layout.preferredWidth: 1 }  // same card size as the theme cards
                 }
             }
             SettingRow {
