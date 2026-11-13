@@ -10,8 +10,8 @@ CHANGELOG = [
     {
         "version": "next",
         "date": "",
-        "en": {"new": [], "fixed": []},
-        "id": {"new": [], "fixed": []},
+        "en": {"new": [], "fixed": ["Closing Senada no longer fills its log (Settings → About → Logs) with errors."]},
+        "id": {"new": [], "fixed": ["Menutup Senada tidak lagi memenuhi log-nya (Pengaturan → Tentang → Log) dengan pesan error."]},
     },
     {
         "version": "1.0.8",
