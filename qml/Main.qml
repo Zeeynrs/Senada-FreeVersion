@@ -46,7 +46,11 @@ ApplicationWindow {
     Behavior on liveAccent { ColorAnimation { duration: 900; easing.type: Easing.InOutQuad } }
     Binding { target: Theme; property: "accent"; value: win.liveAccent }
 
-    onActiveChanged: player.setFastPolling(active)
+    // full-rate position updates only while someone can look at them: the focused window or
+    // the mini player (it shows the ring, the time and the lyrics)
+    readonly property bool watched: active || miniMode
+    onWatchedChanged: player.setFastPolling(watched)
+    Component.onCompleted: player.setFastPolling(watched)
 
     // ---- mini player ("dynamic island") while minimized ----------------------------------
     property bool miniMode: false

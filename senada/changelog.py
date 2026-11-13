@@ -18,6 +18,10 @@ CHANGELOG = [
             "fixed": [
                 "Media keys, playerctl and bar widgets lost track of songs whose YouTube id has a “-” in it.",
                 "The mini player's lyrics open at the line being sung.",
+                "Lighter in the background: while Senada is not the window in use it updates the playing position "
+                "4 times a second instead of 16 and pauses the little equalizer next to the playing song (about a third less CPU).",
+                "The audio engine (mpv) now always ends together with Senada, also after a crash or a forced close; "
+                "before, it could stay behind in the background.",
             ],
         },
         "id": {
@@ -28,6 +32,10 @@ CHANGELOG = [
             "fixed": [
                 "Tombol media, playerctl, dan widget bar kehilangan info lagu yang ID YouTube-nya mengandung “-”.",
                 "Lirik di pemutar mini langsung terbuka di baris yang sedang dinyanyikan.",
+                "Lebih ringan di latar belakang: saat Senada tidak sedang dipakai, posisi lagu diperbarui 4 kali per detik "
+                "(bukan 16) dan equalizer kecil di samping lagu yang diputar berhenti bergerak (CPU sekitar sepertiga lebih hemat).",
+                "Mesin audio (mpv) kini selalu ikut berhenti bersama Senada, juga setelah crash atau ditutup paksa; "
+                "sebelumnya bisa tertinggal berjalan di latar belakang.",
             ],
         },
     },

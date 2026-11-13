@@ -19,6 +19,7 @@ from pathlib import Path
 from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtNetwork import QLocalSocket
 
+from .childproc import popen_tied
 from .config import BIN_DIR, CACHE_DIR, IS_WINDOWS, NO_WINDOW
 from .i18n import tr
 
@@ -69,6 +70,9 @@ class AudioEngine(QObject):
         self._paused = False
         self._idle = True  # mpv with nothing loaded reports pause=false, which isn't "playing"
         self._last_pos_ms = 0
+        self._pos_step = 0       # emit the position only after it moved this many ms (0: every update)
+        self._emitted_pos = -1
+        self._job = None         # Windows job object that ends mpv together with Senada
         self._duration_ms = 0
         self._queued = ""    # url appended to mpv's playlist, played by mpv itself when the current file ends
         self._advanced = ""  # queued url mpv has already moved on to; the next play() of it is a no-op
@@ -120,8 +124,9 @@ class AudioEngine(QObject):
             script_opts.append(f"ytdl_hook-ytdl_path={ytdlp}")
         cmd.append("--script-opts=" + ",".join(script_opts))
         try:
-            self.proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                         stdin=subprocess.DEVNULL, creationflags=NO_WINDOW)
+            # tied to Senada: mpv ends with it even after a crash or a kill
+            self.proc, self._job = popen_tied(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                              stdin=subprocess.DEVNULL, creationflags=NO_WINDOW)
         except OSError as e:
             self._fail(tr("Could not start mpv: {error}", error=e))
             return
@@ -158,6 +163,25 @@ class AudioEngine(QObject):
         # emitted later so the player has connected its slots by then
         QTimer.singleShot(0, lambda: self.errorOccurred.emit(msg))
 
+    # ---- position updates ------------------------------------------------------------
+
+    def set_position_step(self, ms: int):
+        """mpv reports the position ~16 times a second. While nobody is looking at Senada,
+        passing on only every `ms` milliseconds is enough (lyrics, MPRIS) and saves the
+        work every update causes in the interface. 0 passes on every update."""
+        self._pos_step = max(0, int(ms))
+        if self._pos_step == 0 and self._emitted_pos != self._last_pos_ms:
+            self._emitted_pos = self._last_pos_ms  # catch up at once when the window comes back
+            self.positionChanged.emit(self._last_pos_ms)
+
+    def _on_time_pos(self, ms: int):
+        self._last_pos_ms = ms
+        # seeks and new tracks jump by more than the step, so they still come through at once
+        if self._pos_step and self._emitted_pos >= 0 and abs(ms - self._emitted_pos) < self._pos_step:
+            return
+        self._emitted_pos = ms
+        self.positionChanged.emit(ms)
+
     # ---- protocol -------------------------------------------------------------------
 
     def _send_command(self, cmd_args):
@@ -185,9 +209,7 @@ class AudioEngine(QObject):
             name = msg.get("name")
             data = msg.get("data")
             if name == "time-pos" and data is not None:
-                ms = int(data * 1000)
-                self._last_pos_ms = ms
-                self.positionChanged.emit(ms)
+                self._on_time_pos(int(data * 1000))
             elif name == "pause":
                 self._paused = bool(data)
                 self._update_playing()

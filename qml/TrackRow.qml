@@ -92,8 +92,10 @@ Item {
                         color: row.hiInk
                         anchors.bottom: parent.bottom
                         height: 5
+                        // only while Senada is the focused window: an endless animation makes
+                        // Qt redraw the window all the time, also when nobody sees it
                         SequentialAnimation on height {
-                            running: row.playing
+                            running: row.playing && row.Window.active
                             loops: Animation.Infinite
                             NumberAnimation { to: 14 - index * 3; duration: 260 + index * 90; easing.type: Easing.InOutSine }
                             NumberAnimation { to: 4 + index * 2; duration: 300 + index * 70; easing.type: Easing.InOutSine }

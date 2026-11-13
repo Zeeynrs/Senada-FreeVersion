@@ -17,6 +17,7 @@ from .streams import StreamError, StreamResolver, is_blocked, watch_url
 logger = logging.getLogger("senada.player")
 
 DEFAULT_ACCENT = "#d9d9d9"  # neutral until the album art gives a colour
+BACKGROUND_POSITION_MS = 250  # position updates while Senada is not in view (4 per second)
 MAX_FAIL_STREAK = 3  # songs in a row that would not play before playback stops instead of skipping on
 
 
@@ -298,8 +299,11 @@ class Player(QObject):
         self.stateChanged.emit()
 
     @Slot(bool)
-    def setFastPolling(self, _):
-        pass
+    def setFastPolling(self, fast):
+        """Every position update while Senada is in view, a few per second otherwise."""
+        step = getattr(self.engine, "set_position_step", None)
+        if step:
+            step(0 if fast else BACKGROUND_POSITION_MS)
 
     @Slot()
     def refresh(self):

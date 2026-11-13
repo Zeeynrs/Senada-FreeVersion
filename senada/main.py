@@ -57,7 +57,11 @@ def main():
     app.setFont(QFont(["Google Sans Flex", "Google Sans", "Segoe UI Variable Text", "Segoe UI",
                        "Noto Sans", "sans-serif"], 10))
     QQuickStyle.setStyle("Basic")
-    signal.signal(signal.SIGINT, lambda *_: app.quit())
+    # Ctrl+C, and the system asking Senada to close (logout, `kill`, closed terminal):
+    # quit the normal way so mpv and the visualizer are stopped too
+    for sig in ("SIGINT", "SIGTERM", "SIGHUP"):
+        if hasattr(signal, sig) and not (IS_WINDOWS and sig != "SIGINT"):
+            signal.signal(getattr(signal, sig), lambda *_: app.quit())
     keepalive = QTimer()  # lets Python handle Ctrl+C while Qt's loop runs
     keepalive.timeout.connect(lambda: None)
     keepalive.start(500)
