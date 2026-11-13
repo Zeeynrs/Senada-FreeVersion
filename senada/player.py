@@ -12,11 +12,12 @@ from . import net, ytmusic
 from .i18n import tr
 from .engine import AudioEngine
 from .resolver import AudioResolver
-from .streams import StreamError, StreamResolver, watch_url
+from .streams import StreamError, StreamResolver, is_blocked, watch_url
 
 logger = logging.getLogger("senada.player")
 
 DEFAULT_ACCENT = "#d9d9d9"  # neutral until the album art gives a colour
+MAX_FAIL_STREAK = 3  # songs in a row that would not play before playback stops instead of skipping on
 
 
 def download(url: str) -> bytes:
@@ -96,6 +97,8 @@ class Player(QObject):
         self._prefetched = ""  # uri already being resolved ahead of time
         self._started = (0, "")  # (play token, video id) of the file last handed to the engine
         self._fallback_token = -1  # play token whose direct stream failed: mpv's yt-dlp hook plays it
+        self._recovering = -1  # play token for which another upload is being (or was) tried
+        self._fail_streak = 0  # songs in a row that could not be played
         self._devices = [{
             "id": "local",
             "name": "Senada (Lokal)",
@@ -155,6 +158,8 @@ class Player(QObject):
             self.stateChanged.emit()
 
     def _on_engine_state(self, is_playing: bool):
+        if is_playing:
+            self._fail_streak = 0
         if self._state.get("isPlaying") != is_playing:
             self._state["isPlaying"] = is_playing
             self.stateChanged.emit()
@@ -166,11 +171,16 @@ class Player(QObject):
             self.next()
 
     def _on_load_failed(self):
-        """The stream did not open or broke off: play the track through mpv's own yt-dlp hook instead."""
+        """The stream did not open or broke off: play the track through mpv's own yt-dlp hook instead,
+        and when that fails too, another upload of the same song (or move on to the next song)."""
         token, video_id = self._started
         if self._fallback_token == self._play_token:
             if token == self._play_token:  # the fallback failed too
-                self.worker.error.emit(tr("Could not play audio: {error}", error=self._state.get("name", "")))
+                track = self._current_track()
+                if self._recovering == token or not track:
+                    self._give_up(track or self._state, token, "unplayable")
+                else:
+                    self._recover(track, token, video_id)
             return
         self._fallback_token = self._play_token
         if token == self._play_token and video_id:  # else the pending lookup starts it as a fallback
@@ -190,16 +200,73 @@ class Player(QObject):
             nxt_idx = 0
         return self._queue[nxt_idx]
 
-    def _resolve(self, track: dict) -> tuple[dict | None, str]:
-        """(match, stream address) for a track; blocking. The address is "" when yt-dlp could not get it."""
+    def _resolve(self, track: dict) -> tuple[dict | None, str, str]:
+        """(match, stream address, problem) for a track; blocking. The address is "" when yt-dlp
+        could not get it, and the problem then says why."""
         info = self.resolver.match(track)
-        url = ""
+        url, problem = "", ""
         if info and info.get("v"):
             try:
                 url = self.streams.resolve(info["v"])
             except StreamError as e:
+                problem = str(e)
                 logger.info("no direct stream for %s: %s", info["v"], e)
-        return info, url
+        return info, url, problem
+
+    def _current_track(self) -> dict | None:
+        if 0 <= self._queue_index < len(self._queue):
+            return self._queue[self._queue_index]
+        return None
+
+    def _recover(self, track: dict, token: int, failed_id: str):
+        """The match would not play: look for another upload of the same song that does."""
+        self._recovering = token
+        self.worker.error.emit(tr("“{name}” would not play — trying another version…", name=track.get("name", "")))
+
+        def find():
+            return self.resolver.alternative(track, {failed_id} if failed_id else set(), self.streams.resolve)
+
+        def done(found):
+            if token != self._play_token:
+                return
+            if not found:
+                self._give_up(track, token, "unplayable")
+                return
+            info, url = found
+            self._apply_match(track, info)
+            self._started = (token, info["v"])
+            self._fallback_token = token  # a failure from here on ends in _give_up
+            self.engine.play(url)
+
+        def failed(e):
+            self._give_up(track, token, "blocked" if is_blocked(e) else "unplayable")
+
+        self.worker.run(find, done, failed)
+
+    def _give_up(self, track: dict, token: int, reason: str):
+        """This song cannot be played: say why, and go on with the next one unless that is pointless."""
+        if token != self._play_token:
+            return
+        self._fail_streak += 1
+        name = (track or {}).get("name", "")
+        if reason == "blocked":
+            # every song fails the same way for a while; skipping on would only make it last longer
+            message = tr("YouTube is limiting requests from this network for now, so “{name}” can't play. "
+                         "Wait a few minutes and try again.", name=name)
+        elif self._fail_streak >= MAX_FAIL_STREAK:
+            message = tr("Several songs in a row could not be found or played. Check the internet connection and try again.")
+        else:
+            self.worker.error.emit(
+                tr("Not found on YouTube Music: {name} — try right-click → Pick another version", name=name)
+                if reason == "not_found" else
+                tr("“{name}” can't be played right now — skipped to the next song.", name=name))
+            self.next()
+            return
+        self.worker.error.emit(message)
+        self.engine.stop()
+        if self._state.get("isPlaying"):
+            self._state["isPlaying"] = False
+            self.stateChanged.emit()
 
     def _prefetch_next(self):
         """Look the next track up ahead of time and hand it to the engine for a gapless change.
@@ -209,7 +276,7 @@ class Player(QObject):
         if not uri or self._started[0] != self._play_token:  # nothing next, or a track change is under way
             self.engine.queue_next("")
             return
-        video_id = uri.split(":", 2)[2] if uri.startswith("yt:track:") else (self.resolver.cached(uri) or {}).get("v")
+        video_id = (self.resolver.cached(uri) or {}).get("v") or (uri.split(":", 2)[2] if uri.startswith("yt:track:") else "")
         url = self.streams.cached(video_id) if video_id else None
         if url:
             self.engine.queue_next(url)
@@ -334,19 +401,29 @@ class Player(QObject):
 
         # Resolve stream URL and play (imported tracks are matched to a YouTube Music upload first)
         def on_resolved(found):
-            info, url = found
+            info, url, problem = found
             if token != self._play_token:
                 return  # the user already moved on to another track
             if info and info.get("v"):
                 self._apply_match(track, info)
                 self._started = (token, info["v"])
+                if not url and is_blocked(problem):
+                    self._give_up(track, token, "blocked")
+                    return
+                if not url and "ERROR:" in problem:
+                    # YouTube said this upload cannot be played (removed, private, not in this
+                    # country…): mpv's own yt-dlp lookup would hear the same, so try another upload
+                    self._fallback_token = token
+                    self._recover(track, token, info["v"])
+                    return
                 if not url or self._fallback_token == token:
                     self.streams.forget(info["v"])
                     url = watch_url(info["v"])  # slower: mpv's yt-dlp hook looks the stream up
                 self.engine.play(url)
             else:
-                self.worker.error.emit(tr("Not found on YouTube Music: {name} — try right-click → Pick another version", name=track.get("name")))
-                self.next()
+                if (track.get("uri") or "").startswith("spotify:"):
+                    self.trackMatched.emit(track["uri"], {"matchScore": 0})  # shows the "pick a version" mark
+                self._give_up(track, token, "not_found")
 
         def on_fail(e):
             if token == self._play_token:

@@ -339,4 +339,8 @@ ID = {
     "Only the current song, the open page and the controls take the color.": "Hanya lagu yang diputar, halaman yang dibuka, dan kontrol yang berwarna.",
     "Also lights the top of the pages with a soft glow of the color.": "Bagian atas halaman juga diberi cahaya lembut dari warna ini.",
     "Follow system uses the light/dark theme of Windows, KDE or GNOME.": "Ikuti sistem memakai tema terang/gelap dari Windows, KDE, atau GNOME.",
+    "“{name}” would not play — trying another version…": "“{name}” tidak bisa diputar — mencoba versi lain…",
+    "“{name}” can't be played right now — skipped to the next song.": "“{name}” tidak bisa diputar saat ini — lanjut ke lagu berikutnya.",
+    "YouTube is limiting requests from this network for now, so “{name}” can't play. Wait a few minutes and try again.": "YouTube sedang membatasi permintaan dari jaringan ini, jadi “{name}” tidak bisa diputar. Tunggu beberapa menit lalu coba lagi.",
+    "Several songs in a row could not be found or played. Check the internet connection and try again.": "Beberapa lagu berturut-turut tidak ketemu atau gagal diputar. Periksa koneksi internet lalu coba lagi.",
 }

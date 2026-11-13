@@ -34,6 +34,15 @@ FRESH_MARGIN = 1800   # an address must stay valid this long to be used for a ne
 CACHE_LIMIT = 300
 
 
+# YouTube's answer when it is limiting a network for a while ("confirm you're not a bot", HTTP 429):
+# every song fails the same way then, so trying other uploads or the next songs only makes it worse
+BLOCKED_RE = re.compile(r"not a bot|HTTP Error 429|Too Many Requests", re.I)
+
+
+def is_blocked(message) -> bool:
+    return bool(BLOCKED_RE.search(str(message or "")))
+
+
 class StreamError(Exception):
     pass
 

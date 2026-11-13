@@ -10,6 +10,10 @@ in `matching.py`:
 
 Matches are cached per track (with the matcher version, so improved scoring re-checks
 old guesses), and a manual pick from "Pilih versi lain…" always wins.
+
+When the chosen upload will not play (removed, blocked in this country, no audio stream),
+`alternative()` finds another upload of the same song that does. That also covers songs
+from the YouTube Music catalog itself: their replacement is remembered under their uri.
 """
 
 import json
@@ -19,7 +23,7 @@ import threading
 
 from . import matching, ytmusic
 from .config import CACHE_DIR, NO_WINDOW, read_json, write_private
-from .streams import watch_url
+from .streams import StreamError, is_blocked, watch_url
 
 logger = logging.getLogger("senada.resolver")
 
@@ -79,12 +83,12 @@ class AudioResolver:
     def match(self, track: dict) -> dict | None:
         """Cache entry {v, s, name, artists, image…} for a metadata-only track, searching if needed."""
         uri = track.get("uri") or ""
-        if uri.startswith("yt:track:"):
-            return {"v": uri.split(":", 2)[2], "s": 100}
         if uri:
-            hit = self.cached(uri)
+            hit = self.cached(uri)  # for a catalog song: a working replacement found earlier
             if hit:
                 return hit
+        if uri.startswith("yt:track:"):
+            return {"v": uri.split(":", 2)[2], "s": 100}
         if not track.get("name"):
             return None
         ranked = self.candidates(track)
@@ -115,6 +119,37 @@ class AudioResolver:
             found += self._search_ytdlp(query)
             ranked = matching.rank(track, found)
         return ranked
+
+    def alternative(self, track: dict, exclude: set, stream_for, tries: int = 3) -> tuple[dict, str] | None:
+        """(cache entry, stream address) of another upload of this song that plays, or None.
+        `stream_for(video_id)` returns the address or raises StreamError. Blocking."""
+        uri = track.get("uri") or ""
+        catalog = uri.startswith("yt:track:")
+        if catalog:
+            exclude = set(exclude) | {uri.split(":", 2)[2]}
+        meta = {k: track.get(k) for k in ("name", "artists", "durationMs", "album")}
+        if not meta.get("name"):
+            return None
+        # a catalog song is the real thing: only a sure match may stand in for it
+        floor = matching.ACCEPT if catalog else matching.MINIMUM
+        tried = 0
+        for cand in self.candidates(meta, thorough=True):
+            if cand["match"]["score"] < floor or tried >= tries:
+                break
+            if cand["id"] in exclude:
+                continue
+            tried += 1
+            try:
+                url = stream_for(cand["id"])
+            except StreamError as e:
+                if is_blocked(e):
+                    raise
+                logger.info("alternative %s for %s does not play either: %s", cand["id"], track.get("name"), e)
+                continue
+            entry = self._remember(uri, cand) if uri else {"v": cand["id"], "s": cand["match"]["score"]}
+            logger.info("playing %s instead for %s", cand["id"], track.get("name"))
+            return entry, url
+        return None
 
     def choose(self, track: dict, cand: dict) -> dict:
         """Remember the user's pick for this track."""
