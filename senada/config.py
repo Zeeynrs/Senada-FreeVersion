@@ -42,6 +42,7 @@ DEFAULTS = {
     "device_name": "Senada",
     "visualizer": True,
     "visualizer_style": "bars",
+    "mini_player": True,  # small player at the top of the screen while the window is minimized
     "audio_quality": "best",  # 'best', 'high', 'medium'
     "cache_audio": True,
 }

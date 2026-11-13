@@ -48,6 +48,53 @@ ApplicationWindow {
 
     onActiveChanged: player.setFastPolling(active)
 
+    // ---- mini player ("dynamic island") while minimized ----------------------------------
+    property bool miniMode: false
+    property bool wasMaximized: false
+    readonly property bool hidesToMini: Qt.platform.pluginName.indexOf("wayland") === 0
+
+    // Wayland compositors seldom minimize (Hyprland never does) and never say so, so there
+    // the button and Ctrl+M hide the window instead
+    function enterMiniPlayer() {
+        if (!player.state.hasTrack)
+            return
+        miniMode = true
+        if (hidesToMini) win.hide()
+        else win.showMinimized()
+    }
+    function leaveMiniPlayer() {
+        miniMode = false
+        if (win.wasMaximized) win.showMaximized()
+        else win.showNormal()
+        win.raise()
+        win.requestActivate()
+    }
+    onVisibilityChanged: {
+        if (visibility === Window.Minimized) {
+            if (session.miniPlayer && player.state.hasTrack)
+                miniMode = true
+        } else if (visibility !== Window.Hidden) {
+            miniMode = false
+            wasMaximized = visibility === Window.Maximized
+        }
+    }
+    onClosing: miniMode = false
+    onMiniModeChanged: {
+        if (miniMode) {
+            mini.place(win.screen)
+            mini.show()
+        } else {
+            mini.hide()
+        }
+    }
+    MiniPlayer {
+        id: mini
+        onRestore: win.leaveMiniPlayer()
+        // closed from the compositor: the main window comes back (refusing the close
+        // would also refuse Qt.quit())
+        onVisibleChanged: if (!visible && win.miniMode) win.leaveMiniPlayer()
+    }
+
     // no account needed: the app opens straight into the library
     AppShell { anchors.fill: parent }
 

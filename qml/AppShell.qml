@@ -375,6 +375,7 @@ Item {
         panel: shell.panel
         onOpenImmersive: shell.immersive = true
         onShowPanel: (name) => shell.togglePanel(name)
+        onOpenMiniPlayer: shell.Window.window.enterMiniPlayer()
     }
 
     // mouse "back" button
@@ -414,6 +415,7 @@ Item {
     Shortcut { sequence: "Alt+Left"; onActivated: shell.goBack() }
     Shortcut { sequence: "Alt+Right"; onActivated: shell.goForward() }
     Shortcut { sequence: "Ctrl+B"; onActivated: shell.sidebarOpen = !shell.sidebarOpen }
+    Shortcut { sequence: "Ctrl+M"; onActivated: shell.Window.window.enterMiniPlayer() }
     Shortcut {
         sequence: "Escape"
         onActivated: settingsDialog.visible ? settingsDialog.close() : shell.goBack()

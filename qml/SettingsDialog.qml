@@ -35,13 +35,14 @@ Popup {
           desc: "Language, theme and the look of the app.",
           words: ["Interface language", "Language", "Theme", "Color mode", "Dark", "Light", "Follow system",
                   "Accent color", "Accent strength", "Color", "Logo",
-                  "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer"] },
+                  "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer",
+                  "Mini player", "Dynamic island", "Minimize"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
           words: ["Engine status", "Device name", "Audio quality", "MPV", "Audio engine & streaming (MPV)"] },
         { group: "Preferences", key: "shortcuts", icon: "keyboard", title: "Shortcuts",
           desc: "Keyboard shortcuts that work anywhere in the app.",
-          words: ["Keyboard shortcuts", "Play / pause", "Search", "Volume up / down", "Next / previous song"] },
+          words: ["Keyboard shortcuts", "Play / pause", "Search", "Volume up / down", "Next / previous song", "Mini player"] },
         { group: "Preferences", key: "profile", icon: "person", title: "Profile & Library",
           desc: "Your name and the music kept on this device.",
           words: ["Display name", "Import from Spotify", "Spotify", "Import", "Playlist"] },
@@ -693,6 +694,15 @@ Popup {
                     onToggled: session.visualizerEnabled = checked
                 }
             }
+            Divider {}
+            SettingRow {
+                label: I18n.t("Mini player")
+                hint: I18n.t("A small player at the top of the screen while Senada is minimized: arrow down for the lyrics. Ctrl+M opens it any time.")
+                NSwitch {
+                    checked: session.miniPlayer
+                    onToggled: session.miniPlayer = checked
+                }
+            }
         }
     }
 
@@ -752,6 +762,7 @@ Popup {
                     { keys: ["Alt", "←"], what: I18n.t("Back / close full view") },
                     { keys: ["Alt", "→"], what: I18n.t("Forward") },
                     { keys: ["Ctrl", "B"], what: I18n.t("Show / hide sidebar") },
+                    { keys: ["Ctrl", "M"], what: I18n.t("Mini player") },
                     { keys: ["Ctrl", ","], what: I18n.t("Open / close Settings") }
                 ]
                 ColumnLayout {

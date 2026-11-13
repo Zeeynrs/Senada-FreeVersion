@@ -7,9 +7,9 @@ import getpass
 import os
 
 from PySide6.QtCore import Property, QObject, Qt, QUrl, Signal, Slot
-from PySide6.QtGui import QDesktopServices, QGuiApplication
+from PySide6.QtGui import QDesktopServices, QGuiApplication, QRegion, QWindow
 
-from . import i18n
+from . import i18n, island
 from .config import LIBRARY_FILE
 
 
@@ -149,6 +149,20 @@ class Session(QObject):
     def openUrl(self, url):
         QDesktopServices.openUrl(QUrl(url))
 
+    # ---- mini player ("dynamic island") -------------------------------------------
+
+    @Slot()
+    def prepareMiniPlayer(self):
+        """Window rules that float the mini player at the top of the screen (Hyprland)."""
+        island.prepare()
+
+    @Slot(QObject, int, int, int, int)
+    def setInputArea(self, window, x, y, w, h):
+        """Only this rectangle of a see-through window takes clicks, so the empty space
+        around the mini player's pill does not block what is underneath."""
+        if isinstance(window, QWindow):
+            window.setMask(QRegion(x, y, max(1, w), max(1, h)))
+
     # ---- settings ---------------------------------------------------------
 
     def _setting(key):
@@ -165,4 +179,5 @@ class Session(QObject):
     accentStrength = Property(str, *_setting("accent_strength"), notify=changed)
     visualizerEnabled = Property(bool, *_setting("visualizer"), notify=changed)
     visualizerStyle = Property(str, *_setting("visualizer_style"), notify=changed)
+    miniPlayer = Property(bool, *_setting("mini_player"), notify=changed)
     del _setting

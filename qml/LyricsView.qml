@@ -3,6 +3,8 @@ import QtQuick.Controls
 
 Item {
     id: lv
+    property int textSize: 26     // synced lines; plain lyrics are a little smaller
+    property int lineGap: 22
 
     ListView {
         id: list
@@ -10,7 +12,7 @@ Item {
         anchors.fill: parent
         clip: true
         model: lyrics.lines
-        spacing: 22
+        spacing: lv.lineGap
         currentIndex: lyrics.synced ? lyrics.current : -1
         highlightRangeMode: lyrics.synced ? ListView.ApplyRange : ListView.NoHighlightRange
         preferredHighlightBegin: height * 0.34
@@ -27,7 +29,7 @@ Item {
             readonly property bool isCurrent: lyrics.synced && index === lyrics.current
             readonly property bool past: lyrics.synced && index < lyrics.current
             width: list.width - 20
-            height: lineLabel.implicitHeight + 24
+            height: lineLabel.implicitHeight + lv.lineGap + 2
 
             Label {
                 id: lineLabel
@@ -39,7 +41,7 @@ Item {
                 width: row.width - 34
                 text: modelData.text || "♪"
                 wrapMode: Text.WordWrap
-                font.pixelSize: lyrics.synced ? 26 : 22
+                font.pixelSize: lyrics.synced ? lv.textSize : Math.round(lv.textSize * 0.85)
                 font.weight: Font.Bold
                 color: !lyrics.synced ? Qt.rgba(1, 1, 1, 0.85)
                      : row.isCurrent ? "#ffffff"
@@ -62,7 +64,7 @@ Item {
             text: ({ "loading": I18n.t("Loading lyrics…"), "none": I18n.t("No lyrics found for this song"),
                      "error": I18n.t("Could not load lyrics"), "idle": I18n.t("Play a song to see its lyrics") })[lyrics.status] || ""
             color: Qt.rgba(1, 1, 1, 0.6)
-            font.pixelSize: 18
+            font.pixelSize: Math.round(lv.textSize * 0.7)
         }
     }
 }

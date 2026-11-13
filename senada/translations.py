@@ -368,4 +368,9 @@ ID = {
     "This device has Senada {version}, run from the source code.": "Perangkat ini memakai Senada {version}, dijalankan dari kode sumber.",
     "This device has Senada {version} or newer, run from the source code.": "Perangkat ini memakai Senada {version} atau lebih baru, dijalankan dari kode sumber.",
     "This device has Senada {version}, installed from a system package.": "Perangkat ini memakai Senada {version}, dipasang dari paket sistem.",
+    "Mini player": "Pemutar mini",
+    "Mini player (Ctrl+M)": "Pemutar mini (Ctrl+M)",
+    "Dynamic island": "Dynamic island",
+    "Minimize": "Minimalkan",
+    "A small player at the top of the screen while Senada is minimized: arrow down for the lyrics. Ctrl+M opens it any time.": "Pemutar kecil di atas layar saat Senada diminimalkan: panah ke bawah untuk lirik. Ctrl+M membukanya kapan saja.",
 }

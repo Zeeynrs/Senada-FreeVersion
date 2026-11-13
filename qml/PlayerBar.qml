@@ -8,6 +8,7 @@ Rectangle {
     id: bar
     property string panel: ""            // which right panel is open
     signal openImmersive()
+    signal openMiniPlayer()
     signal showPanel(string name)        // toggles "lyrics" / "queue"
     readonly property var s: player.state
     readonly property bool hasTrack: !!s.hasTrack
@@ -275,6 +276,13 @@ Rectangle {
             ToolTip.visible: hovered
             ToolTip.text: "Volume " + bar.volume + "%"
             ToolTip.delay: 300
+        }
+        IconButton {
+            anchors.verticalCenter: parent.verticalCenter
+            iconName: "mini-player"; size: 18; tint: Theme.dim
+            enabled: bar.hasTrack
+            tip: I18n.t("Mini player (Ctrl+M)")
+            onClicked: bar.openMiniPlayer()
         }
         IconButton {
             anchors.verticalCenter: parent.verticalCenter

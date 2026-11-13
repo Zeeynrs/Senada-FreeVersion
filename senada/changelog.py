@@ -12,6 +12,9 @@ CHANGELOG = [
         "date": "",
         "en": {
             "new": [
+                "Mini player: a small “dynamic island” at the top of the screen while Senada is minimized, with the song, its time, "
+                "play / pause and a button back to the app. The arrow opens it wider with the controls and the lyrics. "
+                "The button next to full screen (or Ctrl+M) opens it any time; Settings → Appearance turns it off.",
                 "What's new: this page, with the version of Senada on this device.",
                 "Accent colors are easier to see: the playing song, the open page, the sung lyric line, chosen filters and a soft glow at the top of the pages. "
                 "Settings → Appearance → Accent strength turns the glow off.",
@@ -25,6 +28,9 @@ CHANGELOG = [
         },
         "id": {
             "new": [
+                "Pemutar mini: “dynamic island” kecil di atas layar saat Senada diminimalkan, berisi lagu, durasinya, "
+                "putar / jeda, dan tombol kembali ke aplikasi. Panahnya membuka island lebih lebar dengan kontrol dan lirik. "
+                "Tombol di sebelah layar penuh (atau Ctrl+M) membukanya kapan saja; Pengaturan → Tampilan bisa mematikannya.",
                 "Apa yang baru: halaman ini, lengkap dengan versi Senada di perangkat ini.",
                 "Warna aksen lebih terasa: lagu yang diputar, halaman yang dibuka, baris lirik yang dinyanyikan, filter yang dipilih, dan cahaya lembut di atas halaman. "
                 "Pengaturan → Tampilan → Intensitas aksen bisa mematikan cahayanya.",
