@@ -333,4 +333,10 @@ ID = {
     "Carbon": "Karbon",
     "Chrome": "Krom",
     "Color": "Warna",
+    "Accent strength": "Intensitas aksen",
+    "Subtle": "Halus",
+    "Vivid": "Kuat",
+    "Only the current song, the open page and the controls take the color.": "Hanya lagu yang diputar, halaman yang dibuka, dan kontrol yang berwarna.",
+    "Also lights the top of the pages with a soft glow of the color.": "Bagian atas halaman juga diberi cahaya lembut dari warna ini.",
+    "Follow system uses the light/dark theme of Windows, KDE or GNOME.": "Ikuti sistem memakai tema terang/gelap dari Windows, KDE, atau GNOME.",
 }

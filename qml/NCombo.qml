@@ -10,9 +10,14 @@ ComboBox {
     signal picked(var key)
 
     textRole: "label"
-    valueRole: "key"
-    currentIndex: Math.max(0, indexOfValue(value))
-    onActivated: (i) => picked(valueAt(i))
+    // looked up in the model by hand: indexOfValue() is not re-run when the model arrives
+    currentIndex: {
+        const m = model || []
+        for (let i = 0; i < m.length; ++i)
+            if (m[i].key === value) return i
+        return 0
+    }
+    onActivated: (i) => picked(model[i].key)
 
     implicitWidth: 200
     implicitHeight: 36
@@ -26,7 +31,7 @@ ComboBox {
         radius: 10
         color: cb.pressed || cb.popup.visible ? Theme.pressed : cb.hovered ? Theme.hover : Theme.subtle
         border.width: 1
-        border.color: cb.popup.visible || cb.hovered ? Theme.lineStrong : Theme.line
+        border.color: cb.popup.visible && Theme.accented ? Theme.primary : cb.popup.visible || cb.hovered ? Theme.lineStrong : Theme.line
         Behavior on color { ColorAnimation { duration: 120 } }
     }
     contentItem: Label {
@@ -68,7 +73,7 @@ ComboBox {
                 visible: cb.currentIndex === item.index
                 glyph: "check"
                 size: 16
-                color: Theme.text
+                color: Theme.accentInk
             }
         }
         background: Rectangle {

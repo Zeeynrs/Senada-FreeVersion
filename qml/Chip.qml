@@ -13,9 +13,9 @@ AbstractButton {
 
     background: Rectangle {
         radius: height / 2
-        color: c.checked ? Theme.hover : c.hovered ? Theme.subtle : "transparent"
+        color: c.checked ? Theme.selected : c.hovered ? Theme.subtle : "transparent"
         border.width: 1
-        border.color: c.checked ? Theme.lineStrong : c.hovered ? Theme.lineStrong : Theme.line
+        border.color: c.checked ? (Theme.accented ? Theme.alpha(Theme.primary, 0.7) : Theme.lineStrong) : c.hovered ? Theme.lineStrong : Theme.line
         Behavior on color { ColorAnimation { duration: 120 } }
     }
     contentItem: Item {
@@ -28,13 +28,13 @@ AbstractButton {
                 glyph: c.iconName
                 size: 15
                 anchors.verticalCenter: parent.verticalCenter
-                color: c.checked || c.hovered ? Theme.text : Theme.dim
+                color: c.checked ? Theme.accentInk : c.hovered ? Theme.text : Theme.dim
             }
             Label {
                 text: c.text
                 font.pixelSize: 12
                 font.weight: c.checked ? Font.Bold : Font.DemiBold
-                color: c.checked || c.hovered ? Theme.text : Theme.dim
+                color: c.checked ? Theme.accentInk : c.hovered ? Theme.text : Theme.dim
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

@@ -34,7 +34,7 @@ Popup {
         { group: "Preferences", key: "appearance", icon: "palette", title: "Appearance",
           desc: "Language, theme and the look of the app.",
           words: ["Interface language", "Language", "Theme", "Color mode", "Dark", "Light", "Follow system",
-                  "Accent color", "Color", "Logo",
+                  "Accent color", "Accent strength", "Color", "Logo",
                   "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
@@ -377,8 +377,14 @@ Popup {
                             onClicked: dlg.section = modelData.key
                             background: Rectangle {
                                 radius: 9
-                                color: entry.current ? Theme.pressed : entry.hovered ? Theme.hover : "transparent"
+                                color: entry.current ? (Theme.accented ? Theme.selected : Theme.pressed) : entry.hovered ? Theme.hover : "transparent"
                                 Behavior on color { ColorAnimation { duration: 120 } }
+                                Rectangle {
+                                    visible: entry.current && Theme.accented
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: 3; height: 16; radius: 1.5
+                                    color: Theme.primary
+                                }
                             }
                             contentItem: RowLayout {
                                 spacing: 12
@@ -386,14 +392,14 @@ Popup {
                                     Layout.leftMargin: 10
                                     glyph: entry.modelData.icon
                                     size: 18
-                                    color: entry.current || entry.hovered ? Theme.text : Theme.dim
+                                    color: entry.current ? Theme.accentInk : entry.hovered ? Theme.text : Theme.dim
                                 }
                                 Label {
                                     Layout.fillWidth: true
                                     text: I18n.t(entry.modelData.title)
                                     font.pixelSize: 14
                                     font.weight: entry.current ? Font.DemiBold : Font.Normal
-                                    color: entry.current || entry.hovered ? Theme.text : Theme.dim
+                                    color: entry.current ? Theme.accentInk : entry.hovered ? Theme.text : Theme.dim
                                     elide: Text.ElideRight
                                 }
                             }
@@ -565,7 +571,7 @@ Popup {
             Divider {}
             SettingBlock {
                 label: I18n.t("Theme")
-                hint: I18n.t("Follow system uses the light/dark theme of Windows, KDE or GNOME. The main color is white in the dark theme and black in the light theme.")
+                hint: I18n.t("Follow system uses the light/dark theme of Windows, KDE or GNOME.")
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 14
@@ -585,6 +591,22 @@ Popup {
                         model: Theme.accents
                         AccentChip { required property var modelData; accent: modelData }
                     }
+                }
+            }
+            SettingRow {
+                visible: Theme.accented
+                Layout.topMargin: 0
+                label: I18n.t("Accent strength")
+                hint: session.accentStrength === "subtle"
+                      ? I18n.t("Only the current song, the open page and the controls take the color.")
+                      : I18n.t("Also lights the top of the pages with a soft glow of the color.")
+                NCombo {
+                    model: [
+                        { key: "subtle", label: I18n.t("Subtle") },
+                        { key: "vivid", label: I18n.t("Vivid") }
+                    ]
+                    value: session.accentStrength
+                    onPicked: (key) => session.accentStrength = key
                 }
             }
             Divider {}

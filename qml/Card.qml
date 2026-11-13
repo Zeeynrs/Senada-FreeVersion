@@ -86,7 +86,7 @@ Item {
                 onClicked: player.playContext(card.item.uri, "")
                 background: Rectangle {
                     radius: 20
-                    color: playBtn.hovered ? "#ffffff" : Qt.rgba(0, 0, 0, 0.7)
+                    color: playBtn.hovered ? (Theme.accented ? Theme.primary : "#ffffff") : Qt.rgba(0, 0, 0, 0.7)
                     Behavior on color { ColorAnimation { duration: 100 } }
                 }
                 contentItem: Item {
@@ -94,7 +94,7 @@ Item {
                         anchors.centerIn: parent
                         glyph: "play"
                         size: 20
-                        color: playBtn.hovered ? "#000000" : "#ffffff"
+                        color: playBtn.hovered ? (Theme.accented ? Theme.primaryText : "#000000") : "#ffffff"
                     }
                 }
                 ToolTip.visible: hovered

@@ -217,6 +217,21 @@ Item {
         anchors.fill: content
         color: Theme.bg
     }
+    // "vivid" accent: a soft glow of the accent colour at the top of the pages
+    Rectangle {
+        anchors.left: content.left
+        anchors.right: content.right
+        anchors.top: content.top
+        height: Math.min(380, content.height * 0.6)
+        opacity: Theme.glowOn ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 300 } }
+        gradient: Gradient {
+            GradientStop { position: 0; color: Theme.glow }
+            GradientStop { position: 0.55; color: Theme.alpha(Theme.glow, Theme.glow.a * 0.35) }
+            GradientStop { position: 1; color: Theme.alpha(Theme.glow, 0) }
+        }
+    }
 
     TopBar {
         id: topBar

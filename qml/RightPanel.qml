@@ -106,7 +106,7 @@ Rectangle {
                     font.pixelSize: lyrics.synced ? 20 : 16
                     font.weight: lyrics.synced ? Font.Bold : Font.Normal
                     color: !lyrics.synced ? Theme.text
-                         : isCurrent ? Theme.text
+                         : isCurrent ? Theme.accentInk
                          : lineHover.hovered ? Theme.dim : Theme.alpha(Theme.text, index < lyrics.current ? 0.32 : 0.42)
                     Behavior on color { ColorAnimation { duration: 200 } }
                     HoverHandler { id: lineHover; cursorShape: lyrics.synced ? Qt.PointingHandCursor : Qt.ArrowCursor }

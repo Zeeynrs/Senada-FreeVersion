@@ -28,6 +28,7 @@ Item {
     // colours follow the inherited palette, so rows also read well in the (always dark) immersive queue
     readonly property color ink: palette.windowText
     readonly property color dimInk: Theme.alpha(ink, 0.62)
+    readonly property color hiInk: Theme.accented ? Theme.accentInkOn(Theme.luma(ink) > 0.5) : ink  // the playing song
     signal play()
     signal remove()
 
@@ -46,7 +47,8 @@ Item {
         anchors.topMargin: row.table ? 0 : 1
         anchors.bottomMargin: row.table ? 0 : 1
         radius: row.table ? 0 : 8
-        color: row.current ? Theme.alpha(row.ink, 0.08) : hover.hovered ? Theme.alpha(row.ink, 0.045) : "transparent"
+        color: row.current ? (Theme.accented ? Theme.alpha(Theme.primary, 0.15) : Theme.alpha(row.ink, 0.08))
+             : hover.hovered ? Theme.alpha(row.ink, 0.045) : "transparent"
     }
     Rectangle {  // table row separator
         visible: row.table
@@ -87,7 +89,7 @@ Item {
                         required property int index
                         width: 3
                         radius: 1.5
-                        color: row.ink
+                        color: row.hiInk
                         anchors.bottom: parent.bottom
                         height: 5
                         SequentialAnimation on height {
@@ -134,7 +136,7 @@ Item {
                     anchors.centerIn: parent
                     glyph: row.playing || (row.current && !hover.hovered) ? (hover.hovered ? "pause" : "equalizer") : "play"
                     size: 18
-                    color: "#ffffff"
+                    color: row.current && !hover.hovered && Theme.accented ? Theme.accentInkOn(true) : "#ffffff"
                 }
                 MouseArea {
                     anchors.fill: parent
@@ -165,7 +167,7 @@ Item {
                     elide: Text.ElideRight
                     font.pixelSize: row.compact ? 13 : 14
                     font.weight: row.current ? Font.Bold : Font.Normal
-                    color: row.ink
+                    color: row.current ? row.hiInk : row.ink
                 }
                 Row {
                     id: badgeRow

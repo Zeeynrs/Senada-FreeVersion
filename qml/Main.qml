@@ -15,6 +15,7 @@ ApplicationWindow {
     // light / dark follows the system unless chosen in Settings
     Binding { target: Theme; property: "mode"; value: session.themeMode }
     Binding { target: Theme; property: "accentName"; value: session.accentColor }
+    Binding { target: Theme; property: "accentStrength"; value: session.accentStrength }
     Binding { target: Theme; property: "glassMode"; value: session.glassMode }
     Binding { target: Theme; property: "glassOpacity"; value: session.glassOpacity }
     Binding { target: I18n; property: "table"; value: session.translations }

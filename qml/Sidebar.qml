@@ -29,9 +29,18 @@ Rectangle {
         focusPolicy: Qt.TabFocus
         background: Rectangle {
             radius: 8
-            color: e.current ? Theme.hover : e.hovered ? Theme.subtle : "transparent"
+            color: e.current ? Theme.selected : e.hovered ? Theme.subtle : "transparent"
             border.width: e.visualFocus ? 1 : 0
             border.color: Theme.lineStrong
+            Behavior on color { ColorAnimation { duration: 140 } }
+            // accent mark on the left edge of the open page
+            Rectangle {
+                visible: e.current && Theme.accented
+                anchors.verticalCenter: parent.verticalCenter
+                x: 0
+                width: 3; height: 16; radius: 1.5
+                color: Theme.primary
+            }
         }
         contentItem: RowLayout {
             spacing: 12
@@ -40,7 +49,7 @@ Rectangle {
                 Layout.leftMargin: 10
                 glyph: e.iconName
                 size: 18
-                color: e.current || e.hovered ? Theme.text : Theme.dim
+                color: e.current ? Theme.accentInk : e.hovered ? Theme.text : Theme.dim
             }
             Label {
                 Layout.fillWidth: true
@@ -49,7 +58,7 @@ Rectangle {
                 elide: Text.ElideRight
                 font.pixelSize: 14
                 font.weight: e.current ? Font.DemiBold : Font.Normal
-                color: e.current || e.hovered ? Theme.text : Theme.dim
+                color: e.current ? Theme.accentInk : e.hovered ? Theme.text : Theme.dim
             }
             Icon {
                 visible: e.trailing !== ""
@@ -184,7 +193,13 @@ Rectangle {
                 onClicked: Nav.go(modelData.kind, modelData.id)
                 background: Rectangle {
                     radius: 8
-                    color: it.current ? Theme.hover : it.hovered ? Theme.subtle : "transparent"
+                    color: it.current ? Theme.selected : it.hovered ? Theme.subtle : "transparent"
+                    Rectangle {
+                        visible: it.current && Theme.accented
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 3; height: 18; radius: 1.5
+                        color: Theme.primary
+                    }
                 }
                 contentItem: RowLayout {
                     spacing: 10
@@ -207,6 +222,7 @@ Rectangle {
                             elide: Text.ElideRight
                             font.pixelSize: 13
                             font.weight: it.current ? Font.DemiBold : Font.Normal
+                            color: it.current ? Theme.accentInk : Theme.text
                         }
                         Label {
                             Layout.fillWidth: true

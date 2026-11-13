@@ -3,7 +3,9 @@ import QtQuick
 
 // Senada design tokens. Monochrome by default: the primary colour is white on the dark
 // theme and black on the light theme. An accent colour picked in Settings (`accentName`)
-// takes over the primary colour: logo, play buttons, seek bar, switches, active icons.
+// takes over the primary colour (logo, play buttons, seek bar, switches, active icons) and
+// marks what is current: the playing song, the open page, the sung lyric line, chosen chips.
+// "vivid" strength also lights the top of the pages with it.
 // Album art colours only the immersive player (`accent`).
 QtObject {
     // "system" | "dark" | "light" (bound to session.themeMode in Main.qml)
@@ -61,10 +63,21 @@ QtObject {
     function accentColors(a) { return a.colors.length > 0 ? a.colors : [text] }
     function accentMain(a) { return a.colors.length > 0 ? a.colors[Math.floor(a.colors.length / 2)] : text }
 
+    property string accentStrength: "vivid"  // "subtle" | "vivid"
+
     // primary: the accent colour, or white on dark / black on light without one
     readonly property color primary: accentMain(accentInfo)
     readonly property color primaryText: !accented ? (dark ? "#000000" : "#ffffff")
                                          : luma(primary) > 0.55 ? "#000000" : "#ffffff"
+    // the accent as text/icon colour, kept readable on a dark or light background
+    function accentInkOn(darkBg) {
+        if (!accented) return darkBg ? "#f5f5f5" : "#111111"
+        return darkBg ? mix(primary, Qt.rgba(1, 1, 1, 1), 0.18) : mix(primary, Qt.rgba(0, 0, 0, 1), 0.28)
+    }
+    readonly property color accentInk: accentInkOn(dark)          // current item text & icons
+    readonly property color selected: accented ? alpha(primary, dark ? 0.17 : 0.14) : hover  // current item fill
+    readonly property bool glowOn: accented && accentStrength === "vivid"
+    readonly property color glow: alpha(primary, glowOn ? (dark ? 0.26 : 0.18) : 0)  // top of the pages
 
     // semantic
     readonly property color like: "#ff3b4f"

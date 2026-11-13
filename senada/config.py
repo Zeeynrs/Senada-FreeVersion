@@ -36,6 +36,7 @@ DEFAULTS = {
     "display_name": "",
     "theme": "system",  # "system", "dark", "light"
     "accent": "default",  # accent colour key, see Theme.accents in qml/Theme.qml
+    "accent_strength": "vivid",  # "subtle" or "vivid" (adds a glow of the accent at the top of pages)
     "glass": "off",  # "off", "cover" (blurred album art behind), "desktop" (see-through window)
     "glass_opacity": 0.62,  # how opaque the glass panels are (0.3 - 0.9)
     "device_name": "Senada",
