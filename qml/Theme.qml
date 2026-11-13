@@ -8,6 +8,15 @@ import QtQuick
 // "vivid" strength also lights the top of the pages with it.
 // Album art colours only the immersive player (`accent`).
 QtObject {
+    // a handwriting font where the system has one (cassette labels, paper cards)
+    readonly property string handFont: {
+        const have = Qt.fontFamilies()
+        for (const name of ["Ink Free", "Segoe Print", "Comic Neue", "Comic Sans MS"])
+            if (have.indexOf(name) >= 0)
+                return name
+        return ""
+    }
+
     // "system" | "dark" | "light" (bound to session.themeMode in Main.qml)
     property string mode: "system"
     readonly property bool dark: mode === "dark" || (mode !== "light" && Qt.styleHints.colorScheme !== Qt.ColorScheme.Light)

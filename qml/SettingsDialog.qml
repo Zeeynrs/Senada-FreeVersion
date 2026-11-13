@@ -38,6 +38,7 @@ Popup {
                   "Accent color", "Accent strength", "Color", "Logo",
                   "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer",
                   "Full view style", "Vinyl record", "Turntable", "Cassette", "Tape", "Full view",
+                  "Poster", "Magazine", "Radio", "Walkman",
                   "Seek bar", "Progress bar", "Wave", "Waveform", "Dots",
                   "Mini player", "Dynamic island", "Minimize"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
@@ -805,17 +806,24 @@ Popup {
             Divider {}
             SettingBlock {
                 label: I18n.t("Full view style")
-                hint: session.immersiveStyle === "vinyl"
-                      ? I18n.t("A spinning record on the left edge with a tonearm that follows the song (drag it to seek); the lyrics fan out around the record.")
-                      : session.immersiveStyle === "cassette"
-                      ? I18n.t("A cassette whose tape winds from the left reel to the right one as the song plays (click it to pause); the lyrics are written on a paper card beside it.")
-                      : I18n.t("The round cover in the middle of a circular visualizer, the lyrics next to it.")
-                RowLayout {
+                hint: ({
+                    "vinyl": I18n.t("A spinning record on the left edge with a tonearm that follows the song (drag it to seek); the lyrics fan out around the record."),
+                    "cassette": I18n.t("A cassette whose tape winds from the left reel to the right one as the song plays (click it to pause); the lyrics are written on a paper card beside it."),
+                    "poster": I18n.t("A magazine poster: the cover large and sharp, the title huge and upright beside it, the sung line as a pull quote."),
+                    "radio": I18n.t("An old valve radio: the needle moves along the dial as the song plays and the sung line glows in the dial; turn the knobs for volume and to seek."),
+                    "walkman": I18n.t("A portable cassette player whose keys really work, with a volume wheel and a bass boost switch; the lyrics are on a paper card beside it.")
+                })[session.immersiveStyle] || I18n.t("The round cover in the middle of a circular visualizer, the lyrics next to it.")
+                GridLayout {
                     Layout.fillWidth: true
-                    spacing: 14
+                    columns: 3
+                    rowSpacing: 10
+                    columnSpacing: 14
                     ViewStyleCard { viewStyle: "visualizer"; label: I18n.t("Visualizer") }
                     ViewStyleCard { viewStyle: "vinyl"; label: I18n.t("Vinyl record") }
                     ViewStyleCard { viewStyle: "cassette"; label: I18n.t("Cassette") }
+                    ViewStyleCard { viewStyle: "poster"; label: I18n.t("Poster") }
+                    ViewStyleCard { viewStyle: "radio"; label: I18n.t("Radio") }
+                    ViewStyleCard { viewStyle: "walkman"; label: I18n.t("Walkman") }
                 }
             }
             Divider {}

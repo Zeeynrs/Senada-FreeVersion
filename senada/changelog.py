@@ -23,6 +23,10 @@ CHANGELOG = [
                 "Equalizer and tempo settings are kept after closing the panel or Senada, and are the same in every full view style.",
                 "Seek bar styles (Settings → Appearance → Seek bar): a line, a wave that ripples while the song plays, "
                 "a waveform of bars with its own shape for each song, or dots.",
+                "Three more full view styles: Poster (the cover large, the title huge and upright beside it, the sung line "
+                "as a pull quote), Radio (an old valve radio: the needle runs along the dial with the song, the sung line "
+                "glows in the dial, knobs for volume and seeking, a magic eye lamp) and Walkman (a portable cassette player "
+                "with working keys, a volume wheel and a bass boost switch). Each has its own queue and equalizer.",
             ],
             "fixed": [],
         },
@@ -39,6 +43,10 @@ CHANGELOG = [
                 "Pengaturan equalizer dan tempo tetap tersimpan setelah panel atau Senada ditutup, dan sama di semua gaya tampilan penuh.",
                 "Gaya bilah progres (Pengaturan → Tampilan → Bilah progres): garis, gelombang yang beriak saat lagu diputar, "
                 "bentuk gelombang dari batang-batang yang berbeda untuk tiap lagu, atau titik-titik.",
+                "Tiga gaya tampilan penuh baru: Poster (sampul besar, judul raksasa berdiri di sampingnya, baris yang dinyanyikan "
+                "sebagai kutipan), Radio (radio tabung lawas: jarum berjalan di skala mengikuti lagu, baris yang dinyanyikan "
+                "menyala di skala, kenop volume dan pencari, lampu magic eye) dan Walkman (pemutar kaset portabel dengan tombol "
+                "yang berfungsi, roda volume, dan saklar bass boost). Masing-masing punya antrean dan equalizer sendiri.",
             ],
             "fixed": [],
         },
