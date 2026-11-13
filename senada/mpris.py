@@ -8,6 +8,8 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
+from .links import track_link
+
 ROOT_IFACE = "org.mpris.MediaPlayer2"
 PLAYER_IFACE = "org.mpris.MediaPlayer2.Player"
 PROPS_IFACE = "org.freedesktop.DBus.Properties"
@@ -22,15 +24,6 @@ def track_object_path(track_id: str) -> str:
     """D-Bus object paths allow only [A-Za-z0-9_], and YouTube ids also use '-': escape the rest."""
     safe = "".join(c if c.isascii() and c.isalnum() else f"_{ord(c):02x}" for c in track_id or "unknown")
     return "/org/senada/track/" + safe
-
-
-def track_link(state) -> str:
-    uri = state.get("uri", "") or ""
-    if uri.startswith("yt:track:"):
-        return "https://music.youtube.com/watch?v=" + uri.split(":", 2)[2]
-    if uri.startswith("spotify:track:"):
-        return "https://open.spotify.com/track/" + uri.split(":", 2)[2]
-    return ""
 
 
 class Mpris(dbus.service.Object):

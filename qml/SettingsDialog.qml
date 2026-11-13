@@ -47,6 +47,9 @@ Popup {
         { group: "Preferences", key: "lyrics", icon: "lyrics", title: "Lyrics",
           desc: "Where synced lyrics come from.",
           words: ["Lyrics source", "Automatic", "LRCLIB", "YouTube Music", "NetEase", "Synced lyrics"] },
+        { group: "Preferences", key: "discord", icon: "presence", title: "Discord",
+          desc: "Show what you are listening to on your Discord profile.",
+          words: ["Rich Presence", "Discord", "Listening to", "Show the song on Discord", "While paused", "Status"] },
         { group: "Preferences", key: "shortcuts", icon: "keyboard", title: "Shortcuts",
           desc: "Keyboard shortcuts that work anywhere in the app.",
           words: ["Keyboard shortcuts", "Play / pause", "Search", "Volume up / down", "Next / previous song", "Mini player"] },
@@ -696,6 +699,7 @@ Popup {
                     width: body.width - 56
                     sourceComponent: dlg.section === "audio" ? audioPage
                                    : dlg.section === "lyrics" ? lyricsPage
+                                   : dlg.section === "discord" ? discordPage
                                    : dlg.section === "shortcuts" ? shortcutsPage
                                    : dlg.section === "profile" ? profilePage
                                    : dlg.section === "updates" ? updatesPage
@@ -967,6 +971,64 @@ Popup {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    Component {
+        id: discordPage
+        ColumnLayout {
+            id: discordCol
+            spacing: 0
+            readonly property var statusText: ({
+                "off": I18n.t("Off"),
+                "searching": I18n.t("Looking for Discord…"),
+                "connected": I18n.t("Connected: your profile shows the song"),
+                "missing": I18n.t("Discord is not open. Senada connects by itself once it is."),
+                "rejected": I18n.t("Discord did not accept Senada's application id.")
+            })
+            SettingRow {
+                label: I18n.t("Show the song on Discord")
+                hint: discord.available
+                      ? I18n.t("Your Discord profile shows \"Listening to Senada\" with the title, artist, cover, a progress bar and a button that opens the song. Needs the Discord app on this computer.")
+                      : I18n.t("Not available in this version of Senada.")
+                NSwitch {
+                    enabled: discord.available
+                    checked: discord.enabled
+                    onToggled: discord.enabled = checked
+                }
+            }
+            Divider {}
+            SettingRow {
+                label: I18n.t("While paused")
+                hint: I18n.t("Keep showing the song while it is paused. Off: it disappears from your profile until you play again.")
+                opacity: discord.enabled ? 1 : 0.5
+                NSwitch {
+                    enabled: discord.enabled
+                    checked: discord.showPaused
+                    onToggled: discord.showPaused = checked
+                }
+            }
+            Divider {}
+            SettingRow {
+                visible: discord.available
+                label: I18n.t("Status")
+                hint: discordCol.statusText[discord.status] || ""
+                Rectangle {
+                    implicitWidth: 8; implicitHeight: 8; radius: 4
+                    color: discord.status === "connected" ? Theme.ok
+                         : discord.status === "off" ? Theme.dim : Theme.warn
+                }
+                NButton {
+                    visible: discord.enabled && discord.status !== "connected"
+                    text: I18n.t("Try again")
+                    iconName: "refresh"
+                    onClicked: discord.retry()
+                }
+            }
+            Divider { visible: discord.available }
+            Note {
+                text: I18n.t("Others see the button; Discord does not show it on your own profile. Turning this off clears the status at once.")
             }
         }
     }

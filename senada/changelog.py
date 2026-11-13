@@ -24,6 +24,8 @@ CHANGELOG = [
                 "The equalizer and tempo now change the sound: the six bands and presets (Bass Boost, Rock, Vocal…) shape the "
                 "music as it plays without a break while dragging, and the tempo plays songs faster or slower, with or without "
                 "keeping the original pitch. The equalizer starts flat.",
+                "Discord Rich Presence (Settings → Discord): your Discord profile shows \"Listening to Senada\" with the song, "
+                "artist, cover, a progress bar and a button that opens the song. Off by default.",
                 "Seek bar styles (Settings → Appearance → Seek bar): a line, a wave that ripples while the song plays, "
                 "a waveform of bars with its own shape for each song, or dots.",
                 "Three more full view styles: Poster (the cover large, the title huge and upright beside it, the sung line "
@@ -47,6 +49,8 @@ CHANGELOG = [
                 "Equalizer dan tempo kini benar-benar mengubah suara: enam pita dan presetnya (Bass Boost, Rock, Vokal…) membentuk "
                 "musik saat diputar tanpa jeda ketika slider digeser, dan tempo memutar lagu lebih cepat atau lambat, dengan atau "
                 "tanpa mempertahankan nada asli. Equalizer dimulai datar.",
+                "Discord Rich Presence (Pengaturan → Discord): profil Discord-mu menampilkan \"Listening to Senada\" beserta lagu, "
+                "artis, sampul, bilah progres, dan tombol untuk membuka lagunya. Mati secara bawaan.",
                 "Gaya bilah progres (Pengaturan → Tampilan → Bilah progres): garis, gelombang yang beriak saat lagu diputar, "
                 "bentuk gelombang dari batang-batang yang berbeda untuk tiap lagu, atau titik-titik.",
                 "Tiga gaya tampilan penuh baru: Poster (sampul besar, judul raksasa berdiri di sampingnya, baris yang dinyanyikan "

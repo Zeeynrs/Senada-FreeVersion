@@ -36,6 +36,10 @@ DOWNLOADS_FILE = CONFIG_DIR / "downloads.json"
 # senada.log and mpv.log: what happened, for when something does not work (%LOCALAPPDATA%\Senada\logs)
 LOG_DIR = CACHE_DIR.parent / "logs" if IS_WINDOWS else CACHE_DIR / "logs"
 
+# The Discord application whose name shows as "Listening to …" (discord.com/developers);
+# SENADA_DISCORD_APP_ID overrides it. Empty: no Rich Presence.
+DISCORD_APP_ID = (os.environ.get("SENADA_DISCORD_APP_ID") or "").strip()
+
 DEFAULTS = {
     "language": "en",  # "en" or "id" (see i18n.py)
     "display_name": "",
@@ -47,13 +51,15 @@ DEFAULTS = {
     "device_name": "Senada",
     "visualizer": True,
     "visualizer_style": "bars",
-    "immersive_style": "visualizer",
-    "seek_style": "line",  # seek bars: "line", "wave", "bars", "dots" (see qml/SeekTrack.qml)  # full view: "visualizer" (cover in a spectrum) or "vinyl" (turntable)
+    "immersive_style": "visualizer",  # full view: "visualizer", "vinyl", "cassette", "poster", "radio", "walkman"
+    "seek_style": "line",  # seek bars: "line", "wave", "bars", "dots" (see qml/SeekTrack.qml)
     "mini_player": True,  # small player at the top of the screen while the window is minimized
     "audio_quality": "best",  # 'best', 'high', 'medium'
     "cache_audio": True,
-    "lyrics_source": "auto",
-    "effects": {},  # equalizer and tempo (see effects.py)  # "auto", "lrclib", "ytmusic", "netease" (see lyrics.py)
+    "lyrics_source": "auto",  # "auto", "lrclib", "ytmusic", "netease" (see lyrics.py)
+    "effects": {},  # equalizer and tempo (see effects.py)
+    "discord_presence": False,  # show the song on the user's Discord profile (see discord.py)
+    "discord_show_paused": False,  # keep showing it while paused
 }
 
 
