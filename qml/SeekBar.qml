@@ -22,6 +22,9 @@ RowLayout {
         from: 0
         to: Math.max(1, sb.s.durationMs || 0)
         enabled: !!sb.s.hasTrack
+        trackStyle: session.seekStyle
+        seed: sb.s.uri || ""
+        playing: !!sb.s.isPlaying
         Binding on value {
             value: player.position
             when: !seek.pressed

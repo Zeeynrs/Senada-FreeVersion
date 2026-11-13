@@ -189,5 +189,6 @@ class Session(QObject):
     visualizerEnabled = Property(bool, *_setting("visualizer"), notify=changed)
     visualizerStyle = Property(str, *_setting("visualizer_style"), notify=changed)
     immersiveStyle = Property(str, *_setting("immersive_style"), notify=changed)
+    seekStyle = Property(str, *_setting("seek_style"), notify=changed)
     miniPlayer = Property(bool, *_setting("mini_player"), notify=changed)
     del _setting

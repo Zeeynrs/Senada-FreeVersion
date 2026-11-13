@@ -1,9 +1,14 @@
 import QtQuick
 import QtQuick.Controls
 
+// Slider in the app's style. The bar itself is a SeekTrack, so the seek bars can take the
+// style picked in Settings (`trackStyle`); everything else keeps the plain line.
 Slider {
     id: c
     property color fill: Theme.accented ? Theme.primary : palette.windowText
+    property string trackStyle: "line"
+    property string seed: ""        // the song, for the "bars" style
+    property bool playing: false    // the "wave" style ripples while playing
     readonly property bool engaged: hovered || pressed
 
     implicitHeight: 20
@@ -11,32 +16,25 @@ Slider {
     hoverEnabled: true
     focusPolicy: Qt.NoFocus
 
-    background: Rectangle {
+    background: SeekTrack {
         x: c.leftPadding
-        y: c.topPadding + c.availableHeight / 2 - height / 2
+        y: c.topPadding
         width: c.availableWidth
-        height: c.engaged ? 6 : 4
-        radius: height / 2
-        color: Theme.alpha(c.palette.windowText, 0.16)
-        Behavior on height { NumberAnimation { duration: 120 } }
-
-        Rectangle {
-            width: c.visualPosition * parent.width
-            height: parent.height
-            radius: height / 2
-            color: c.fill
-            Behavior on color { ColorAnimation { duration: 120 } }
-        }
+        height: c.availableHeight
+        trackStyle: c.trackStyle
+        progress: c.visualPosition
+        fill: c.fill
+        rest: Theme.alpha(c.palette.windowText, 0.16)
+        knob: c.palette.windowText
+        engaged: c.engaged
+        playing: c.playing
+        seed: c.seed
     }
-
-    handle: Rectangle {
+    // the knob is drawn by the track; this only gives the slider something to grab
+    handle: Item {
         x: c.leftPadding + c.visualPosition * (c.availableWidth - width)
         y: c.topPadding + c.availableHeight / 2 - height / 2
         width: 14
         height: 14
-        radius: 7
-        color: c.palette.windowText
-        opacity: c.engaged ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 120 } }
     }
 }

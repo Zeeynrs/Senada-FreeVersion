@@ -21,6 +21,8 @@ CHANGELOG = [
                 "around the record and each equalizer band is a spoke with a knob, next to a pitch fader with 33 / 45 buttons; "
                 "on the cassette the queue is a handwritten track list and the equalizer a tape deck panel with LED meters and faders.",
                 "Equalizer and tempo settings are kept after closing the panel or Senada, and are the same in every full view style.",
+                "Seek bar styles (Settings → Appearance → Seek bar): a line, a wave that ripples while the song plays, "
+                "a waveform of bars with its own shape for each song, or dots.",
             ],
             "fixed": [],
         },
@@ -35,6 +37,8 @@ CHANGELOG = [
                 "mengelilingi piringan dan tiap pita equalizer berupa jari-jari dengan kenop, di samping fader pitch dengan tombol 33 / 45; "
                 "di kaset antrean berupa daftar lagu tulisan tangan dan equalizer berupa panel tape deck dengan meter LED dan fader.",
                 "Pengaturan equalizer dan tempo tetap tersimpan setelah panel atau Senada ditutup, dan sama di semua gaya tampilan penuh.",
+                "Gaya bilah progres (Pengaturan → Tampilan → Bilah progres): garis, gelombang yang beriak saat lagu diputar, "
+                "bentuk gelombang dari batang-batang yang berbeda untuk tiap lagu, atau titik-titik.",
             ],
             "fixed": [],
         },

@@ -38,6 +38,7 @@ Popup {
                   "Accent color", "Accent strength", "Color", "Logo",
                   "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer",
                   "Full view style", "Vinyl record", "Turntable", "Cassette", "Tape", "Full view",
+                  "Seek bar", "Progress bar", "Wave", "Waveform", "Dots",
                   "Mini player", "Dynamic island", "Minimize"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
@@ -430,6 +431,54 @@ Popup {
         }
     }
 
+    // a seek bar style, shown live (moving and rippling) on a small card
+    component SeekStyleCard: AbstractButton {
+        id: sc
+        property string seekStyle
+        property string label
+        readonly property bool selected: session.seekStyle === seekStyle
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        implicitHeight: frame.height + 28
+        hoverEnabled: true
+        focusPolicy: Qt.NoFocus
+        onClicked: session.seekStyle = seekStyle
+
+        contentItem: Item {}
+        background: Item {
+            Rectangle {
+                id: frame
+                width: parent.width
+                height: 58
+                radius: 10
+                color: Theme.subtle
+                border.width: sc.selected ? 2 : 1
+                border.color: sc.selected ? Theme.primary : sc.hovered ? Theme.lineStrong : Theme.line
+                SeekTrack {
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: 16
+                    width: parent.width - 32
+                    height: 22
+                    trackStyle: sc.seekStyle
+                    progress: 0.42
+                    fill: Theme.accented ? Theme.primary : Theme.text
+                    rest: Theme.alpha(Theme.text, 0.16)
+                    knob: Theme.text
+                    engaged: sc.hovered
+                    playing: true
+                    seed: "senada-preview"
+                }
+            }
+            Label {
+                y: frame.height + 8
+                text: sc.label
+                font.pixelSize: 13
+                font.weight: sc.selected ? Font.Bold : Font.Normal
+                color: sc.selected || sc.hovered ? Theme.text : Theme.dim
+            }
+        }
+    }
+
     contentItem: Item {
         // ---- left: search + sections + profile ------------------------------------------
         ColumnLayout {
@@ -767,6 +816,19 @@ Popup {
                     ViewStyleCard { viewStyle: "visualizer"; label: I18n.t("Visualizer") }
                     ViewStyleCard { viewStyle: "vinyl"; label: I18n.t("Vinyl record") }
                     ViewStyleCard { viewStyle: "cassette"; label: I18n.t("Cassette") }
+                }
+            }
+            Divider {}
+            SettingBlock {
+                label: I18n.t("Seek bar")
+                hint: I18n.t("How the song's progress is drawn in the player bar, the mini player and the full view.")
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 14
+                    SeekStyleCard { seekStyle: "line"; label: I18n.t("Line") }
+                    SeekStyleCard { seekStyle: "wave"; label: I18n.t("Wave") }
+                    SeekStyleCard { seekStyle: "bars"; label: I18n.t("Waveform") }
+                    SeekStyleCard { seekStyle: "dots"; label: I18n.t("Dots") }
                 }
             }
             SettingRow {

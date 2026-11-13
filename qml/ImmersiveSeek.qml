@@ -27,28 +27,16 @@ RowLayout {
         height: 22
         readonly property bool engaged: seekMouse.containsMouse || seekMouse.pressed
 
-        Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-            height: seekTrack.engaged ? 6 : 4
-            radius: height / 2
-            color: Qt.rgba(1, 1, 1, 0.22)
-            Behavior on height { NumberAnimation { duration: 120 } }
-            Rectangle {
-                width: seekRow.progress * parent.width
-                height: parent.height
-                radius: height / 2
-                color: "#ffffff"
-            }
-        }
-        Rectangle {  // thumb
-            width: seekTrack.engaged ? 14 : 0
-            height: width
-            radius: width / 2
-            color: "#ffffff"
-            anchors.verticalCenter: parent.verticalCenter
-            x: seekRow.progress * parent.width - width / 2
-            Behavior on width { NumberAnimation { duration: 120 } }
+        SeekTrack {
+            anchors.fill: parent
+            trackStyle: session.seekStyle
+            progress: seekRow.progress
+            fill: "#ffffff"
+            rest: Qt.rgba(1, 1, 1, 0.22)
+            knob: "#ffffff"
+            engaged: seekTrack.engaged
+            playing: !!seekRow.s.isPlaying
+            seed: seekRow.s.uri || ""
         }
 
         MouseArea {

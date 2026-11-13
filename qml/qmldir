@@ -45,6 +45,7 @@ RightPanel 1.0 RightPanel.qml
 QueueView 1.0 QueueView.qml
 SearchPage 1.0 SearchPage.qml
 SeekBar 1.0 SeekBar.qml
+SeekTrack 1.0 SeekTrack.qml
 SettingsDialog 1.0 SettingsDialog.qml
 Sidebar 1.0 Sidebar.qml
 SmoothScroll 1.0 SmoothScroll.qml

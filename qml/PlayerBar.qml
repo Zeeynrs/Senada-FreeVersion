@@ -173,18 +173,39 @@ Rectangle {
                 }
                 onPressedChanged: if (!pressed) player.seek(value)
 
-                background: Rectangle {
+                // "line" keeps the bar's own look (knob always shown); the other seek bar
+                // styles from Settings → Appearance are drawn by SeekTrack
+                readonly property bool plain: session.seekStyle === "line"
+                background: Item {
                     x: seek.leftPadding
-                    y: seek.topPadding + seek.availableHeight / 2 - height / 2
+                    y: seek.topPadding
                     width: seek.availableWidth
-                    height: 4
-                    radius: 2
-                    color: Theme.surface3
+                    height: seek.availableHeight
                     Rectangle {
-                        width: seek.visualPosition * parent.width
-                        height: parent.height
+                        visible: seek.plain
+                        y: (parent.height - height) / 2
+                        width: parent.width
+                        height: 4
                         radius: 2
-                        color: Theme.primary
+                        color: Theme.surface3
+                        Rectangle {
+                            width: seek.visualPosition * parent.width
+                            height: parent.height
+                            radius: 2
+                            color: Theme.primary
+                        }
+                    }
+                    SeekTrack {
+                        visible: !seek.plain
+                        anchors.fill: parent
+                        trackStyle: session.seekStyle
+                        progress: seek.visualPosition
+                        fill: Theme.primary
+                        rest: Theme.surface3
+                        knob: Theme.primary
+                        engaged: seek.hovered || seek.pressed
+                        playing: !!bar.s.isPlaying
+                        seed: bar.s.uri || ""
                     }
                 }
                 handle: Rectangle {
@@ -192,7 +213,7 @@ Rectangle {
                     y: seek.topPadding + seek.availableHeight / 2 - height / 2
                     width: 13; height: 13; radius: 6.5
                     color: Theme.primary
-                    visible: bar.hasTrack
+                    visible: bar.hasTrack && seek.plain
                     scale: seek.hovered || seek.pressed ? 1 : 0.85
                     Behavior on scale { NumberAnimation { duration: 100 } }
                 }
