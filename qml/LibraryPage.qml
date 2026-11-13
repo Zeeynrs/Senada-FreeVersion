@@ -44,10 +44,10 @@ Item {
                     }
                 }
                 NButton { text: I18n.t("New playlist"); iconName: "queue-add"; primary: true; onClicked: Nav.newPlaylist([]) }
-                NButton { text: I18n.t("Import Spotify"); iconName: "download"; onClicked: importBox.visible = !importBox.visible }
+                NButton { text: I18n.t("Import playlist"); iconName: "download"; onClicked: importBox.visible = !importBox.visible }
             }
 
-            // inline Spotify import
+            // inline import (Spotify or YouTube Music link)
             Rectangle {
                 id: importBox
                 visible: false
@@ -65,7 +65,7 @@ Item {
                         id: importField
                         Layout.fillWidth: true
                         iconName: "download"
-                        placeholderText: I18n.t("Paste a link to a public Spotify playlist/album (open.spotify.com/playlist/…)")
+                        placeholderText: I18n.t("Paste a playlist or album link from Spotify or YouTube Music")
                         onAccepted: importBtn.clicked()
                     }
                     NButton {
@@ -73,7 +73,7 @@ Item {
                         text: I18n.t("Import")
                         primary: true
                         enabled: importField.text.trim().length > 0
-                        onClicked: { library.importSpotify(importField.text.trim()); importField.text = ""; importBox.visible = false }
+                        onClicked: { library.importLink(importField.text.trim()); importField.text = ""; importBox.visible = false }
                     }
                 }
             }
@@ -165,7 +165,7 @@ Item {
             Label {
                 visible: page.items.length === 0 && page.filter !== "all"
                 x: 12
-                text: page.filter === "playlist" || page.filter === "imported" ? I18n.t("No playlists here yet. Click “New playlist” or “Import Spotify”.")
+                text: page.filter === "playlist" || page.filter === "imported" ? I18n.t("No playlists here yet. Click “New playlist” or “Import playlist”.")
                                             : I18n.t("Nothing saved yet. Tap ♡ on an album, playlist or artist page.")
                 color: Theme.dim
                 font.pixelSize: 15

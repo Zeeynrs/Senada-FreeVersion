@@ -10,8 +10,20 @@ CHANGELOG = [
     {
         "version": "next",
         "date": "",
-        "en": {"new": [], "fixed": []},
-        "id": {"new": [], "fixed": []},
+        "en": {
+            "new": [
+                "Import playlists from YouTube Music too: paste a link to a public or unlisted playlist or album "
+                "(also a song link copied while playing from a playlist) in Library → Import playlist. The songs play right away, nothing to match.",
+            ],
+            "fixed": [],
+        },
+        "id": {
+            "new": [
+                "Impor playlist dari YouTube Music juga: tempel link playlist atau album publik atau tidak publik "
+                "(juga link lagu yang disalin saat diputar dari playlist) di Library → Impor playlist. Lagunya langsung bisa diputar tanpa perlu dicocokkan.",
+            ],
+            "fixed": [],
+        },
     },
     {
         "version": "1.0.5",

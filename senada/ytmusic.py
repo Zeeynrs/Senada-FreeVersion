@@ -81,7 +81,7 @@ def _post(endpoint: str, body: dict, timeout: float = 12) -> dict:
                 _visitor = _visitor or visitor
         return data
     except urllib.error.HTTPError as e:
-        raise YTMusicError(f"YouTube Music menolak permintaan (HTTP {e.code})") from e
+        raise YTMusicError(i18n.tr("YouTube Music refused the request (HTTP {code})", code=e.code)) from e
     except (urllib.error.URLError, TimeoutError, OSError) as e:
         raise YTMusicError(i18n.tr("Could not reach YouTube Music: {error}", error=getattr(e, "reason", e))) from e
     except ValueError as e:

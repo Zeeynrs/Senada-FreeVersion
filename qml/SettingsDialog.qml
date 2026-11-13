@@ -45,7 +45,7 @@ Popup {
           words: ["Keyboard shortcuts", "Play / pause", "Search", "Volume up / down", "Next / previous song", "Mini player"] },
         { group: "Preferences", key: "profile", icon: "person", title: "Profile & Library",
           desc: "Your name and the music kept on this device.",
-          words: ["Display name", "Import from Spotify", "Spotify", "Import", "Playlist"] },
+          words: ["Display name", "Import a playlist", "Import from Spotify", "Spotify", "YouTube Music", "YouTube", "Import", "Playlist"] },
         { group: "App", key: "whatsnew", icon: "new", title: "What's new",
           desc: "What changed in each version, and which version is on this device.",
           words: ["Changelog", "Log", "Release", "Version", "On this device", "Version history"] },
@@ -808,8 +808,8 @@ Popup {
             }
             Divider {}
             SettingBlock {
-                label: I18n.t("Import from Spotify")
-                hint: I18n.t("Paste a link to a public Spotify playlist or album. No login; the whole playlist is imported.")
+                label: I18n.t("Import a playlist")
+                hint: I18n.t("Paste a link to a public (or unlisted) playlist or album from Spotify or YouTube Music. No login; the whole playlist is imported.")
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 10
@@ -817,14 +817,14 @@ Popup {
                         id: importField
                         Layout.fillWidth: true
                         implicitHeight: 38
-                        placeholderText: "https://open.spotify.com/playlist/…"
-                        onAccepted: if (text.trim()) { library.importSpotify(text.trim()); text = "" }
+                        placeholderText: "open.spotify.com/playlist/…  ·  music.youtube.com/playlist?list=…"
+                        onAccepted: if (text.trim()) { library.importLink(text.trim()); text = "" }
                     }
                     NButton {
                         text: I18n.t("Import")
                         iconName: "download"
                         enabled: importField.text.trim().length > 0
-                        onClicked: { library.importSpotify(importField.text.trim()); importField.text = "" }
+                        onClicked: { library.importLink(importField.text.trim()); importField.text = "" }
                     }
                 }
             }

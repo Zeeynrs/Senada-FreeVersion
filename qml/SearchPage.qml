@@ -109,7 +109,7 @@ Item {
                 visible: !page.hasResults && !page.searching
                 spacing: 14
                 Label {
-                    text: field.text.trim() ? I18n.t("No results.") : I18n.t("Try one of these, or paste a link to a public Spotify playlist.")
+                    text: field.text.trim() ? I18n.t("No results.") : I18n.t("Try one of these, or paste a Spotify or YouTube Music playlist link.")
                     color: Theme.dim
                     font.pixelSize: 15
                 }

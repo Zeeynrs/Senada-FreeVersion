@@ -102,7 +102,7 @@ Item {
                         Label {
                             Layout.fillWidth: true
                             text: page.resume ? page.resume.artists + (page.resume.album ? " • " + page.resume.album : "")
-                                              : I18n.t("Search songs, open albums or import a Spotify playlist.")
+                                              : I18n.t("Search songs, open albums or import a playlist from Spotify or YouTube Music.")
                             color: Theme.dim
                             font.pixelSize: 13
                             elide: Text.ElideRight
@@ -184,8 +184,8 @@ Item {
                     }
                     QuickAction {
                         iconName: "download"
-                        title: I18n.t("Import from Spotify")
-                        subtitle: I18n.t("Paste a playlist or album link")
+                        title: I18n.t("Import a playlist")
+                        subtitle: I18n.t("From Spotify or YouTube Music")
                         onClicked: Nav.go("library")
                     }
                 }

@@ -16,14 +16,24 @@ from .i18n import tr, trn
 from .store import LocalStore
 
 YT_LINK_RE = re.compile(r"(?:music\.)?youtube\.com/|youtu\.be/")
+YT_IMPORT_LIMIT = 5000  # YouTube's own playlist limit
+# lists that only exist for a signed-in account: Liked Music, Liked videos, Watch later, Episodes
+YT_ACCOUNT_LISTS = ("LM", "LL", "WL", "SE")
 
 
-def _yt_link(text: str) -> tuple[str, str] | None:
-    """(kind, id) for a YouTube / YouTube Music link."""
+class ImportLinkError(Exception):
+    pass
+
+
+def _yt_link(text: str, list_first: bool = False) -> tuple[str, str] | None:
+    """(kind, id) for a YouTube / YouTube Music link. `list_first`: a song played from a
+    playlist (watch?v=…&list=…) stands for the playlist (for importing)."""
     if not YT_LINK_RE.search(text):
         return None
     url = urllib.parse.urlparse(text if "://" in text else "https://" + text)
     q = urllib.parse.parse_qs(url.query)
+    if list_first and q.get("list"):
+        return "playlist", q["list"][0]
     if url.netloc.endswith("youtu.be"):
         return ("track", url.path.strip("/")) if url.path.strip("/") else None
     if url.path.startswith("/watch") and q.get("v"):
@@ -37,6 +47,27 @@ def _yt_link(text: str) -> tuple[str, str] | None:
     if m:
         return "artist", m.group(1)
     return None
+
+
+def youtube_collection(kind: str, cid: str) -> dict:
+    """A public or unlisted YouTube Music / YouTube playlist (or album) ready to import."""
+    if cid.upper() in YT_ACCOUNT_LISTS:
+        raise ImportLinkError(tr("Liked songs and other lists of your YouTube account need a login, which Senada does not use. "
+                                 "Copy the songs into a playlist, make it public or unlisted, and import that link."))
+    if cid.startswith("RD") and not cid.startswith("RDCLAK"):  # mixes are made for each listener (RDCLAK = editorial)
+        raise ImportLinkError(tr("A YouTube mix cannot be imported: it changes for every listener. Save it as a playlist first."))
+    unreachable = tr("YouTube Music could not open this playlist (make sure it is public or unlisted).")
+    try:
+        page = ytmusic.album(cid) if kind == "album" else ytmusic.playlist(cid, limit=YT_IMPORT_LIMIT)
+    except ytmusic.YTMusicError as e:
+        if "HTTP" in str(e):
+            raise ImportLinkError(unreachable) from e
+        raise
+    if not page.get("tracks"):
+        raise ImportLinkError(unreachable)
+    source = (f"https://music.youtube.com/browse/{cid}" if kind == "album"
+              else f"https://music.youtube.com/playlist?list={cid}")
+    return {**page, "source": source}
 
 
 class Library(QObject):
@@ -393,11 +424,18 @@ class Library(QObject):
         self.toast.emit(tr("Using “{name}” for this song", name=cand.get("name", "")))
 
     @Slot(str)
-    def importSpotify(self, link):
-        parsed = spotify_import.parse_link(link)
-        if not parsed or parsed[0] == "track":
-            self.toast.emit(tr("Paste a Spotify playlist or album link (open.spotify.com/playlist/…)"))
+    def importLink(self, link):
+        """Copy a public playlist or album from Spotify or YouTube Music into a new own playlist."""
+        link = (link or "").strip()
+        sp = spotify_import.parse_link(link)
+        yt = None if sp else _yt_link(link, list_first=True)
+        if sp and sp[0] != "track":
+            self.toast.emit(tr("Reading the Spotify playlist…"))
+            fetch = lambda: spotify_import.fetch(*sp)  # noqa: E731
+        elif yt and yt[0] in ("playlist", "album"):
+            self.toast.emit(tr("Reading the YouTube Music playlist…"))
+            fetch = lambda: youtube_collection(*yt)  # noqa: E731
+        else:
+            self.toast.emit(tr("Paste a link to a playlist or album from Spotify or YouTube Music"))
             return
-        self.toast.emit(tr("Reading the Spotify playlist…"))
-        self.worker.run(lambda: spotify_import.fetch(*parsed), self.importCollection,
-                        lambda e: self.toast.emit(str(e)))
+        self.worker.run(fetch, self.importCollection, lambda e: self.toast.emit(str(e)))
