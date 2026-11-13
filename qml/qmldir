@@ -21,9 +21,11 @@ MatchPicker 1.0 MatchPicker.qml
 singleton I18n 1.0 I18n.qml
 singleton Nav 1.0 Nav.qml
 NButton 1.0 NButton.qml
+NCombo 1.0 NCombo.qml
 NMenu 1.0 NMenu.qml
 NScrollBar 1.0 NScrollBar.qml
 NSlider 1.0 NSlider.qml
+NSwitch 1.0 NSwitch.qml
 NTextField 1.0 NTextField.qml
 PageHeader 1.0 PageHeader.qml
 PlayerBar 1.0 PlayerBar.qml
@@ -31,7 +33,7 @@ RightPanel 1.0 RightPanel.qml
 QueueView 1.0 QueueView.qml
 SearchPage 1.0 SearchPage.qml
 SeekBar 1.0 SeekBar.qml
-SettingsPage 1.0 SettingsPage.qml
+SettingsDialog 1.0 SettingsDialog.qml
 Sidebar 1.0 Sidebar.qml
 SmoothScroll 1.0 SmoothScroll.qml
 singleton Theme 1.0 Theme.qml

@@ -10,12 +10,11 @@ Item {
     property bool sidebarOpen: true
     property string panel: "lyrics"   // right panel: "lyrics" | "queue" | "" (closed)
     property var forwardStack: []     // pages left with "back", for "forward"
-    property var beforeSettings: null // page that was open when Settings opened
 
     readonly property string currentKey: stack.currentItem ? stack.currentItem.pageKey : ""
     readonly property string libraryFilter: currentKey === "library" ? stack.currentItem.filter : ""
     // these replace each other instead of piling up
-    readonly property var topLevel: ["search", "library", "settings", "liked"]
+    readonly property var topLevel: ["search", "library", "liked"]
 
     function entryOf(item) {
         if (!item) return null
@@ -28,6 +27,16 @@ Item {
     function navigate(kind, itemId, keepForward) {
         if (!kind) return
         itemId = itemId || ""
+        // Settings is a dialog over the page: the Settings button (and Ctrl+,) toggles it
+        if (kind === "settings") {
+            if (settingsDialog.opened && (!itemId || itemId === settingsDialog.section))
+                settingsDialog.close()
+            else
+                settingsDialog.openAt(itemId)
+            return
+        }
+        if (settingsDialog.visible)
+            settingsDialog.close()
         immersive = false
         if (!keepForward) forwardStack = []
         if (kind === "home") {
@@ -39,17 +48,10 @@ Item {
             stack.currentItem.filter = itemId || "all"
             return
         }
-        // the Settings button (and Ctrl+,) closes Settings again when it is open
-        if (kind === "settings" && currentKey === "settings") {
-            closeSettings()
-            return
-        }
         const key = kind + ":" + itemId
         const standalone = kind === "liked" || topLevel.indexOf(kind) >= 0
         if (currentKey === key || currentKey === kind || (!standalone && !itemId))
             return
-        if (kind === "settings")
-            beforeSettings = entryOf(stack.currentItem)
         if (topLevel.indexOf(kind) >= 0 && stack.depth > 1)
             stack.pop(null, StackView.Immediate)
         if (kind === "playlist" || kind === "album" || kind === "liked")
@@ -60,20 +62,6 @@ Item {
             stack.push(searchComp)
         else if (kind === "library")
             stack.push(libraryComp, { filter: itemId || "all" })
-        else if (kind === "settings")
-            stack.push(settingsComp)
-    }
-
-    function closeSettings() {
-        const back = beforeSettings
-        beforeSettings = null
-        if (back && back.kind !== "home" && back.kind !== "settings") {
-            // Settings sits right on top of Home: go down to it and reopen the page from before
-            stack.pop(null, StackView.Immediate)
-            navigate(back.kind, back.itemId)
-        } else {
-            stack.pop(null)
-        }
     }
 
     function goBack() {
@@ -117,6 +105,7 @@ Item {
         function onImmersive(on) { shell.immersive = on }
     }
     MatchPicker { id: matchPicker }
+    SettingsDialog { id: settingsDialog }
 
     // create / rename / delete an own playlist
     Popup {
@@ -252,6 +241,7 @@ Item {
         width: shell.sidebarOpen ? Theme.sidebarWidth : 0
         visible: width > 0
         currentKey: shell.currentKey
+        settingsOpen: settingsDialog.visible
         libraryFilter: shell.libraryFilter
         Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
     }
@@ -396,7 +386,6 @@ Item {
     Component { id: artistComp; ArtistPage {} }
     Component { id: searchComp; SearchPage {} }
     Component { id: libraryComp; LibraryPage {} }
-    Component { id: settingsComp; SettingsPage {} }
 
     Shortcut { sequence: "Space"; onActivated: player.togglePlay() }
     Shortcut { sequence: "Ctrl+Right"; onActivated: player.next() }
@@ -412,6 +401,6 @@ Item {
     Shortcut { sequence: "Ctrl+B"; onActivated: shell.sidebarOpen = !shell.sidebarOpen }
     Shortcut {
         sequence: "Escape"
-        onActivated: shell.goBack()
+        onActivated: settingsDialog.visible ? settingsDialog.close() : shell.goBack()
     }
 }

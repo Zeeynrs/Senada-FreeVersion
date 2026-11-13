@@ -7,6 +7,7 @@ import QtQuick.Layouts
 Rectangle {
     id: side
     property string currentKey
+    property bool settingsOpen: false
     property string libraryFilter   // filter of the open library page, "" otherwise
     property bool libraryOpen: true
     color: Theme.sidebar
@@ -103,7 +104,7 @@ Rectangle {
             text: I18n.t("Settings")
             iconName: "settings"
             trailing: "chevron-right"
-            current: side.currentKey === "settings"
+            current: side.settingsOpen
             onClicked: Nav.go("settings")
         }
 
