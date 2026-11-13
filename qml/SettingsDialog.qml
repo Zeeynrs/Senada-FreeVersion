@@ -34,6 +34,7 @@ Popup {
         { group: "Preferences", key: "appearance", icon: "palette", title: "Appearance",
           desc: "Language, theme and the look of the app.",
           words: ["Interface language", "Language", "Theme", "Color mode", "Dark", "Light", "Follow system",
+                  "Accent color", "Color", "Logo",
                   "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
@@ -213,6 +214,44 @@ Popup {
         }
     }
 
+    // one accent colour: the logo in that colour and its name
+    component AccentChip: AbstractButton {
+        id: ac
+        property var accent
+        readonly property bool selected: Theme.accentName === accent.key
+        implicitHeight: 36
+        implicitWidth: acRow.implicitWidth + 22
+        hoverEnabled: true
+        focusPolicy: Qt.NoFocus
+        onClicked: session.accentColor = accent.key
+        background: Rectangle {
+            radius: 9
+            color: ac.selected ? Theme.pressed : ac.hovered ? Theme.hover : "transparent"
+            border.width: ac.selected ? 1 : 0
+            border.color: Theme.line
+            Behavior on color { ColorAnimation { duration: 120 } }
+        }
+        contentItem: Item {
+            Row {
+                id: acRow
+                anchors.centerIn: parent
+                spacing: 8
+                LogoMark {
+                    anchors.verticalCenter: parent.verticalCenter
+                    size: 22
+                    colors: Theme.accentColors(ac.accent)
+                }
+                Label {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: I18n.t(ac.accent.label)
+                    font.pixelSize: 13
+                    font.weight: ac.selected ? Font.Bold : Font.Normal
+                    color: ac.selected || ac.hovered ? Theme.text : Theme.dim
+                }
+            }
+        }
+    }
+
     component ThemeCard: AbstractButton {
         id: tc
         property string mode
@@ -263,7 +302,7 @@ Popup {
                     radius: 10
                     color: "transparent"
                     border.width: tc.selected ? 2 : 1
-                    border.color: tc.selected ? Theme.text : tc.hovered ? Theme.lineStrong : Theme.line
+                    border.color: tc.selected ? Theme.primary : tc.hovered ? Theme.lineStrong : Theme.line
                 }
                 Rectangle {
                     visible: tc.selected
@@ -271,7 +310,7 @@ Popup {
                     anchors.right: parent.right
                     anchors.margins: 8
                     width: 20; height: 20; radius: 10
-                    color: Theme.text
+                    color: Theme.primary
                     Icon { anchors.centerIn: parent; glyph: "check"; size: 14; color: Theme.primaryText }
                 }
             }
@@ -536,6 +575,19 @@ Popup {
                 }
             }
             Divider {}
+            SettingBlock {
+                label: I18n.t("Accent color")
+                hint: I18n.t("Color of the logo, play buttons, seek bar and other details.")
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 6
+                    Repeater {
+                        model: Theme.accents
+                        AccentChip { required property var modelData; accent: modelData }
+                    }
+                }
+            }
+            Divider {}
             SettingRow {
                 label: I18n.t("Glass effect")
                 hint: session.glassMode === "desktop"
@@ -781,12 +833,9 @@ Popup {
                 Layout.topMargin: 14
                 Layout.bottomMargin: 18
                 spacing: 16
-                Image {
-                    source: Qt.resolvedUrl("../data/senada.svg")
-                    visible: status === Image.Ready
-                    sourceSize: Qt.size(112, 112)
-                    Layout.preferredWidth: 56
-                    Layout.preferredHeight: 56
+                LogoMark {
+                    size: 52
+                    colors: Theme.accentColors(Theme.accentInfo)
                 }
                 ColumnLayout {
                     Layout.fillWidth: true

@@ -3,7 +3,7 @@ import QtQuick.Controls
 
 Slider {
     id: c
-    property color fill: palette.windowText
+    property color fill: Theme.accented ? Theme.primary : palette.windowText
     readonly property bool engaged: hovered || pressed
 
     implicitHeight: 20

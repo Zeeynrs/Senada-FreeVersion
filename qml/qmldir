@@ -11,6 +11,7 @@ DevicesPopup 1.0 DevicesPopup.qml
 EqualizerView 1.0 EqualizerView.qml
 HomePage 1.0 HomePage.qml
 Icon 1.0 Icon.qml
+LogoMark 1.0 LogoMark.qml
 IconButton 1.0 IconButton.qml
 ImmersivePlayer 1.0 ImmersivePlayer.qml
 LibraryPage 1.0 LibraryPage.qml

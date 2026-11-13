@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
-// Round icon button. `filled` = solid primary (white on dark, black on light),
+// Round icon button. `filled` = solid primary (the accent colour, or white on dark / black on light),
 // `outlined` = thin ring, `active` = toggled on (shuffle, repeat, …).
 AbstractButton {
     id: b
@@ -12,6 +12,7 @@ AbstractButton {
     property bool outlined: false
     property color tint: palette.windowText
     readonly property color ink: palette.windowText  // Theme.text, or light inside the immersive view
+    readonly property color activeInk: Theme.accented ? Theme.primary : ink
     property string tip
 
     implicitWidth: size + (filled ? 24 : 16)
@@ -22,7 +23,7 @@ AbstractButton {
 
     background: Rectangle {
         radius: height / 2
-        color: b.filled ? (b.down ? Theme.alpha(b.ink, 0.8) : b.ink)
+        color: b.filled ? (b.down ? Theme.alpha(b.activeInk, 0.8) : b.activeInk)
                         : b.down ? Theme.alpha(b.ink, 0.13) : b.hovered ? Theme.alpha(b.ink, 0.08) : "transparent"
         border.width: b.outlined && !b.filled ? 1 : 0
         border.color: Theme.alpha(b.ink, b.hovered ? 0.55 : 0.13)
@@ -36,12 +37,12 @@ AbstractButton {
             anchors.centerIn: parent
             glyph: b.iconName
             size: b.size
-            color: b.filled ? b.palette.window : b.active ? b.ink : b.tint
+            color: b.filled ? (Theme.accented ? Theme.primaryText : b.palette.window) : b.active ? b.activeInk : b.tint
         }
         Rectangle {
             visible: b.active && !b.filled
             implicitWidth: 4; implicitHeight: 4; radius: 2
-            color: b.ink
+            color: b.activeInk
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
             anchors.bottomMargin: -1

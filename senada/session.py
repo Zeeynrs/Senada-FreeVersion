@@ -161,6 +161,7 @@ class Session(QObject):
         return getter, setter
 
     deviceName = Property(str, *_setting("device_name"), notify=changed)
+    accentColor = Property(str, *_setting("accent"), notify=changed)
     visualizerEnabled = Property(bool, *_setting("visualizer"), notify=changed)
     visualizerStyle = Property(str, *_setting("visualizer_style"), notify=changed)
     del _setting

@@ -1,9 +1,10 @@
 pragma Singleton
 import QtQuick
 
-// Senada design tokens. Monochrome: the primary colour is white on the dark theme and
-// black on the light theme; colour comes only from album art (`accent`, used by the
-// immersive player) and the red "liked" heart.
+// Senada design tokens. Monochrome by default: the primary colour is white on the dark
+// theme and black on the light theme. An accent colour picked in Settings (`accentName`)
+// takes over the primary colour: logo, play buttons, seek bar, switches, active icons.
+// Album art colours only the immersive player (`accent`).
 QtObject {
     // "system" | "dark" | "light" (bound to session.themeMode in Main.qml)
     property string mode: "system"
@@ -38,9 +39,32 @@ QtObject {
     readonly property color hover: dark ? Qt.rgba(1, 1, 1, 0.07) : Qt.rgba(0, 0, 0, 0.05)
     readonly property color pressed: dark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.09)
 
-    // monochrome primary: white on dark, black on light
-    readonly property color primary: text
-    readonly property color primaryText: dark ? "#000000" : "#ffffff"
+    // accent colours; `colors` with more than one entry draws the logo as a gradient
+    property string accentName: "default"
+    readonly property var accents: [
+        { key: "default", label: "Default", colors: [] },
+        { key: "mint", label: "Mint", colors: ["#1ed760"] },
+        { key: "indigo", label: "Indigo", colors: ["#5865f2"] },
+        { key: "sky", label: "Sky", colors: ["#2aabee"] },
+        { key: "aurora", label: "Aurora", colors: ["#8b5cf6"] },
+        { key: "sunset", label: "Sunset", colors: ["#ff6b5a"] },
+        { key: "ocean", label: "Ocean", colors: ["#14b8a6"] },
+        { key: "forest", label: "Forest", colors: ["#65a30d"] },
+        { key: "berry", label: "Berry", colors: ["#d946ef"] },
+        { key: "amber", label: "Amber", colors: ["#f59e0b"] },
+        { key: "rose", label: "Rose", colors: ["#f43f5e"] },
+        { key: "carbon", label: "Carbon", colors: ["#8a8f98"] },
+        { key: "chrome", label: "Chrome", colors: ["#ff6ad5", "#a78bfa", "#38bdf8"] }
+    ]
+    readonly property var accentInfo: accents.find(a => a.key === accentName) || accents[0]
+    readonly property bool accented: accentInfo.colors.length > 0
+    function accentColors(a) { return a.colors.length > 0 ? a.colors : [text] }
+    function accentMain(a) { return a.colors.length > 0 ? a.colors[Math.floor(a.colors.length / 2)] : text }
+
+    // primary: the accent colour, or white on dark / black on light without one
+    readonly property color primary: accentMain(accentInfo)
+    readonly property color primaryText: !accented ? (dark ? "#000000" : "#ffffff")
+                                         : luma(primary) > 0.55 ? "#000000" : "#ffffff"
 
     // semantic
     readonly property color like: "#ff3b4f"
@@ -59,6 +83,7 @@ QtObject {
     readonly property string font: "Google Sans Flex"
     readonly property string mono: "JetBrainsMono Nerd Font"
 
+    function luma(c) { return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b }
     function alpha(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }
     function mix(a, b, t) { return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1) }
 
