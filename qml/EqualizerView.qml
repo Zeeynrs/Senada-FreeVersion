@@ -2,43 +2,28 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-// Equalizer & Tempo/Pitch panel matching the reference design (Image 1).
+// Equalizer & Tempo/Pitch panel of the classic full view. The values live in `effects`
+// (senada/effects.py), shared with the turntable and cassette styles.
 Item {
     id: eqRoot
-    property bool eqEnabled: true
-    property string presetName: "Custom"
-    // Normalized band gains [-1.0 .. +1.0] for 60, 150, 400, 1k, 2k, 15k (default matches Image 1 curve)
-    property var bands: [0.36, 0.14, -0.02, -0.10, -0.08, -0.08]
-    property real tempo: 1.0
-    property bool keepPitch: false
-
-    readonly property var bandLabels: ["60", "150", "400", "1k", "2k", "15k"]
-    readonly property var presets: ({
-        "Custom":     [0.36,  0.14, -0.02, -0.10, -0.08, -0.08],
-        "Bass Boost": [0.65,  0.45,  0.10, -0.05,  0.00,  0.05],
-        "Rock":       [0.45,  0.22, -0.15,  0.12,  0.32,  0.42],
-        "Vocal":      [-0.15, 0.05,  0.38,  0.48,  0.25, -0.05],
-        "Flat":       [0.0,   0.0,   0.0,   0.0,   0.0,   0.0]
-    })
-    readonly property var presetNames: ["Custom", "Bass Boost", "Rock", "Vocal", "Flat"]
+    readonly property bool eqEnabled: effects.enabled
+    readonly property string presetName: effects.preset
+    // band gains [-1.0 .. +1.0] for 60, 150, 400, 1k, 2k, 15k
+    readonly property var bands: effects.bands
+    readonly property real tempo: effects.tempo
+    readonly property bool keepPitch: effects.keepPitch
+    readonly property var bandLabels: effects.bandLabels
+    onBandsChanged: eqGraph.requestPaint()
 
     property var _specSmooth: []
     property real _time: 0
 
     function setBand(index, val) {
-        const next = eqRoot.bands.slice()
-        next[index] = Math.max(-1, Math.min(1, val))
-        eqRoot.bands = next
-        eqRoot.presetName = "Custom"
-        eqGraph.requestPaint()
+        effects.setBand(index, val)
     }
 
     function nextPreset() {
-        const idx = (presetNames.indexOf(presetName) + 1) % presetNames.length
-        const name = presetNames[idx]
-        presetName = name
-        bands = presets[name].slice()
-        eqGraph.requestPaint()
+        effects.nextPreset()
     }
 
     FrameAnimation {
@@ -172,7 +157,7 @@ Item {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: eqRoot.eqEnabled = !eqRoot.eqEnabled
+                            onClicked: effects.setEnabled(!eqRoot.eqEnabled)
                         }
                     }
                 }
@@ -412,7 +397,7 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: eqRoot.tempo = 1.0
+                            onClicked: effects.setTempo(1.0)
                         }
                     }
 
@@ -463,11 +448,11 @@ Item {
                             function setFromX(mx) {
                                 const n = Math.max(0, Math.min(1, mx / Math.max(1, width)))
                                 const rawT = 0.5 + n * 1.5
-                                eqRoot.tempo = Math.round(rawT * 20) / 20
+                                effects.setTempo(Math.round(rawT * 20) / 20)
                             }
                             onPressed: (mouse) => setFromX(mouse.x)
                             onPositionChanged: (mouse) => { if (pressed) setFromX(mouse.x) }
-                            onDoubleClicked: eqRoot.tempo = 1.0
+                            onDoubleClicked: effects.setTempo(1.0)
                         }
                     }
 
@@ -518,7 +503,7 @@ Item {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: eqRoot.keepPitch = !eqRoot.keepPitch
+                            onClicked: effects.setKeepPitch(!eqRoot.keepPitch)
                         }
                     }
                 }

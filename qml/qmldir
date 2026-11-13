@@ -8,6 +8,7 @@ Chip 1.0 Chip.qml
 CircularSpectrum 1.0 CircularSpectrum.qml
 CollectionPage 1.0 CollectionPage.qml
 Cover 1.0 Cover.qml
+DeckEqualizer 1.0 DeckEqualizer.qml
 DevicesPopup 1.0 DevicesPopup.qml
 DownloadButton 1.0 DownloadButton.qml
 EqualizerView 1.0 EqualizerView.qml
@@ -30,6 +31,7 @@ MatchPicker 1.0 MatchPicker.qml
 MiniPlayer 1.0 MiniPlayer.qml
 singleton I18n 1.0 I18n.qml
 singleton Nav 1.0 Nav.qml
+PaperCard 1.0 PaperCard.qml
 NButton 1.0 NButton.qml
 NCombo 1.0 NCombo.qml
 NMenu 1.0 NMenu.qml
@@ -52,5 +54,7 @@ TopBar 1.0 TopBar.qml
 TrackRow 1.0 TrackRow.qml
 TrackTableHeader 1.0 TrackTableHeader.qml
 TransportControls 1.0 TransportControls.qml
+VinylEqualizer 1.0 VinylEqualizer.qml
 VinylPlayer 1.0 VinylPlayer.qml
+VinylQueueFan 1.0 VinylQueueFan.qml
 VolumeControl 1.0 VolumeControl.qml

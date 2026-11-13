@@ -17,6 +17,10 @@ CHANGELOG = [
                 "Click the cassette to pause.",
                 "The full view styles are picked from cards with a small drawing of each (Settings → Appearance).",
                 "Vinyl full view with nothing open on the right: the title, artist, controls and the next song fill the space.",
+                "The queue and the equalizer now match the vinyl and cassette full views: on the turntable the queue fans out "
+                "around the record and each equalizer band is a spoke with a knob, next to a pitch fader with 33 / 45 buttons; "
+                "on the cassette the queue is a handwritten track list and the equalizer a tape deck panel with LED meters and faders.",
+                "Equalizer and tempo settings are kept after closing the panel or Senada, and are the same in every full view style.",
             ],
             "fixed": [],
         },
@@ -27,6 +31,10 @@ CHANGELOG = [
                 "Klik kasetnya untuk menjeda.",
                 "Gaya tampilan penuh dipilih lewat kartu bergambar (Pengaturan → Tampilan).",
                 "Tampilan piringan hitam saat panel kanan ditutup: judul, artis, kontrol, dan lagu berikutnya mengisi ruang kosong.",
+                "Antrean dan equalizer kini menyesuaikan tampilan piringan hitam dan kaset: di piringan hitam antrean menyebar "
+                "mengelilingi piringan dan tiap pita equalizer berupa jari-jari dengan kenop, di samping fader pitch dengan tombol 33 / 45; "
+                "di kaset antrean berupa daftar lagu tulisan tangan dan equalizer berupa panel tape deck dengan meter LED dan fader.",
+                "Pengaturan equalizer dan tempo tetap tersimpan setelah panel atau Senada ditutup, dan sama di semua gaya tampilan penuh.",
             ],
             "fixed": [],
         },

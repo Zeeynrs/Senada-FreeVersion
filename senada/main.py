@@ -16,6 +16,7 @@ from .engine import AudioEngine
 from .resolver import AudioResolver
 from .library import Library
 from .downloads import Downloads
+from .effects import AudioEffects
 from .lyrics import Lyrics
 from .player import Player
 from .session import Session
@@ -90,6 +91,7 @@ def main():
 
     session.languageChanged.connect(on_language)
     lyrics = Lyrics(player, worker, settings, downloads)
+    effects = AudioEffects(settings)
     visualizer = Visualizer()
     updater = Updater(worker)
     updater.toast.connect(session.toast)
@@ -114,7 +116,7 @@ def main():
     engine.warnings.connect(lambda ws: [print("QML:", w.toString(), file=sys.stderr) for w in ws])
     ctx = engine.rootContext()
     for name, obj in (("session", session), ("player", player), ("library", library),
-                      ("lyrics", lyrics), ("visualizer", visualizer), ("downloads", downloads),
+                      ("lyrics", lyrics), ("visualizer", visualizer), ("downloads", downloads), ("effects", effects),
                       ("updater", updater)):
         ctx.setContextProperty(name, obj)
     engine.load(str(ROOT / "qml" / "Main.qml"))

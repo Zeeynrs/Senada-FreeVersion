@@ -5,9 +5,10 @@ import QtQuick.Layouts
 
 // Full view as a cassette (Settings → Appearance → Full view style). The tape winds from the
 // left reel onto the right one as the song plays, so the reels show how far along it is; the
-// reels turn at a real cassette's pace (the emptier one spins faster). The lyrics are written
-// on a ruled paper card beside it, the sung line marked with a highlighter. Clicking the
-// cassette plays / pauses. The controls sit in a strip along the bottom.
+// reels turn at a real cassette's pace (the emptier one spins faster). Beside it: the lyrics
+// written on a ruled paper card (the sung line marked with a highlighter), the queue as a
+// mixtape's handwritten track list, or the equalizer as a tape deck's front panel. Clicking
+// the cassette plays / pauses. The controls sit in a strip along the bottom.
 Item {
     id: cp
     property bool active: true            // the full view is on screen
@@ -30,7 +31,6 @@ Item {
                 return name
         return ""
     }
-    readonly property color ink: "#26262e"
     readonly property color labelInk: "#2b2a33"
     readonly property color stripe: Theme.accent
 
@@ -335,166 +335,254 @@ Item {
         TapHandler { onTapped: if (cp.s.hasTrack) player.togglePlay() }
     }
 
-    // ---- lyrics on a ruled paper card --------------------------------------------------------
-    Item {
-        id: card
-        readonly property real lineGap: 8
+    // ---- the right-hand side: lyrics, the track list or the deck's equalizer ---------------------
+    // all three take the same place beside the cassette
+    // (an inline component cannot see `cp`, so each use places itself)
+    component Side: Item {
+        property bool open
         visible: opacity > 0
-        opacity: cp.showPanel && cp.panel === "lyrics" ? 1 : 0
+        opacity: open ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
-        x: cp.width * 0.6
-        y: cp.topSpace + 6
-        width: cp.width - x - 48
-        height: cp.areaH - 12
-        rotation: 1.2
+    }
+    readonly property rect sideRect: Qt.rect(width * 0.6, topSpace + 6, width * 0.4 - 48, areaH - 12)
 
-        Rectangle {
-            id: paperShape
+    // lyrics on a ruled paper card, the sung line marked with a highlighter
+    Side {
+        open: cp.showPanel && cp.panel === "lyrics"
+        x: cp.sideRect.x; y: cp.sideRect.y; width: cp.sideRect.width; height: cp.sideRect.height
+        PaperCard {
+            id: card
+            readonly property real lineGap: 8
             anchors.fill: parent
-            radius: 6
-            color: "#f4efe2"
-            visible: false
-        }
-        MultiEffect {
-            anchors.fill: paperShape
-            source: paperShape
-            shadowEnabled: true
-            shadowColor: "#000000"
-            shadowOpacity: 0.55
-            shadowBlur: 0.8
-            shadowVerticalOffset: 10
-        }
-        Rectangle {  // the paper
-            anchors.fill: parent
-            radius: 6
-            color: "#f4efe2"
-            // margin line, like a notebook
-            Rectangle { x: 44; y: 0; width: 1.5; height: parent.height; color: Qt.rgba(0.85, 0.3, 0.3, 0.45) }
-        }
+            handFont: cp.handFont
+            title: I18n.t("Lyrics") + (cp.s.name ? " — " + cp.s.name : "")
 
-        Label {
-            id: cardTitle
-            x: 56
-            y: 16
-            width: parent.width - 72
-            text: I18n.t("Lyrics") + (cp.s.name ? " — " + cp.s.name : "")
-            font.family: cp.handFont
-            font.pixelSize: 18
-            font.weight: Font.Bold
-            color: Qt.rgba(0.15, 0.15, 0.19, 0.7)
-            elide: Text.ElideRight
-        }
+            ListView {
+                id: lines
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: sourceButton.top
+                clip: true
+                model: lyrics.status === "ready" ? lyrics.lines : []
+                currentIndex: lyrics.synced ? lyrics.current : -1
+                highlightRangeMode: lyrics.synced && !handScroll.running ? ListView.ApplyRange : ListView.NoHighlightRange
+                preferredHighlightBegin: height * 0.3
+                preferredHighlightEnd: height * 0.3 + 48
+                highlightMoveDuration: 450
+                boundsBehavior: Flickable.StopAtBounds
+                onMovementStarted: handScroll.restart()
+                Timer { id: handScroll; interval: 3500 }
+                ScrollBar.vertical: NScrollBar {}
+                SmoothScroll { flickable: lines }
 
-        ListView {
-            id: lines
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: cardTitle.bottom
-            anchors.topMargin: 10
-            anchors.bottom: sourceButton.top
-            clip: true
-            model: lyrics.status === "ready" ? lyrics.lines : []
-            currentIndex: lyrics.synced ? lyrics.current : -1
-            highlightRangeMode: lyrics.synced && !handScroll.running ? ListView.ApplyRange : ListView.NoHighlightRange
-            preferredHighlightBegin: height * 0.3
-            preferredHighlightEnd: height * 0.3 + 48
-            highlightMoveDuration: 450
-            boundsBehavior: Flickable.StopAtBounds
-            onMovementStarted: handScroll.restart()
-            Timer { id: handScroll; interval: 3500 }
-            ScrollBar.vertical: NScrollBar {}
-            SmoothScroll { flickable: lines }
+                delegate: Item {
+                    id: row
+                    required property var modelData
+                    required property int index
+                    readonly property bool isCurrent: lyrics.synced && index === lyrics.current
+                    readonly property bool past: lyrics.synced && index < lyrics.current
+                    width: lines.width
+                    height: lineText.implicitHeight + card.lineGap * 2
 
-            delegate: Item {
-                id: row
-                required property var modelData
-                required property int index
-                readonly property bool isCurrent: lyrics.synced && index === lyrics.current
-                readonly property bool past: lyrics.synced && index < lyrics.current
-                width: lines.width
-                height: lineText.implicitHeight + card.lineGap * 2
+                    // highlighter on the sung line
+                    Rectangle {
+                        x: lineText.x - 4
+                        y: lineText.y + 2
+                        width: Math.min(lineText.contentWidth + 8, row.width - x - 8)
+                        height: lineText.implicitHeight - 2
+                        radius: 3
+                        color: Qt.rgba(1, 0.86, 0.3, 0.75)
+                        opacity: row.isCurrent ? 1 : 0
+                        Behavior on opacity { NumberAnimation { duration: 260 } }
+                    }
+                    Label {
+                        id: lineText
+                        x: card.textX
+                        y: card.lineGap
+                        width: row.width - card.textX - 16
+                        text: row.modelData.text || "♪"
+                        wrapMode: Text.WordWrap
+                        font.family: cp.handFont
+                        font.pixelSize: lyrics.synced ? 21 : 18
+                        font.weight: row.isCurrent ? Font.Bold : Font.Normal
+                        color: card.ink
+                        opacity: !lyrics.synced || row.isCurrent ? 1 : row.past ? 0.42 : 0.7
+                        Behavior on opacity { NumberAnimation { duration: 260 } }
+                    }
+                    // ruled line
+                    Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Qt.rgba(0.35, 0.5, 0.8, 0.22) }
+                    HoverHandler { cursorShape: lyrics.synced ? Qt.PointingHandCursor : Qt.ArrowCursor }
+                    TapHandler { onTapped: if (lyrics.synced) player.seek(row.modelData.t) }
+                }
+            }
 
-                // highlighter on the sung line
-                Rectangle {
-                    x: lineText.x - 4
-                    y: lineText.y + 2
-                    width: Math.min(lineText.contentWidth + 8, row.width - x - 8)
-                    height: lineText.implicitHeight - 2
-                    radius: 3
-                    color: Qt.rgba(1, 0.86, 0.3, 0.75)
-                    opacity: row.isCurrent ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 260 } }
+            Column {
+                anchors.centerIn: lines
+                width: lines.width - 96
+                spacing: 8
+                visible: lyrics.status !== "ready"
+                Label {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                    text: ({ "loading": I18n.t("Loading lyrics…"), "none": I18n.t("No lyrics found for this song"),
+                             "error": I18n.t("Could not load lyrics"), "idle": I18n.t("Play a song to see its lyrics") })[lyrics.status] || ""
+                    font.family: cp.handFont
+                    font.pixelSize: 18
+                    color: Qt.rgba(0.15, 0.15, 0.19, 0.6)
                 }
                 Label {
-                    id: lineText
-                    x: 56
-                    y: card.lineGap
-                    width: row.width - 72
-                    text: row.modelData.text || "♪"
-                    wrapMode: Text.WordWrap
-                    font.family: cp.handFont
-                    font.pixelSize: lyrics.synced ? 21 : 18
-                    font.weight: row.isCurrent ? Font.Bold : Font.Normal
-                    color: cp.ink
-                    opacity: !lyrics.synced || row.isCurrent ? 1 : row.past ? 0.42 : 0.7
-                    Behavior on opacity { NumberAnimation { duration: 260 } }
+                    visible: lyrics.status === "none" && lyrics.source !== "auto"
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    text: I18n.t("Try another source below.")
+                    font.pixelSize: 13
+                    color: Qt.rgba(0.15, 0.15, 0.19, 0.5)
                 }
-                // ruled line
-                Rectangle { x: 0; anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Qt.rgba(0.35, 0.5, 0.8, 0.22) }
-                HoverHandler { cursorShape: lyrics.synced ? Qt.PointingHandCursor : Qt.ArrowCursor }
-                TapHandler { onTapped: if (lyrics.synced) player.seek(row.modelData.t) }
             }
-        }
 
-        Column {
-            anchors.centerIn: lines
-            width: lines.width - 96
-            spacing: 8
-            visible: lyrics.status !== "ready"
-            Label {
-                width: parent.width
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WordWrap
-                text: ({ "loading": I18n.t("Loading lyrics…"), "none": I18n.t("No lyrics found for this song"),
-                         "error": I18n.t("Could not load lyrics"), "idle": I18n.t("Play a song to see its lyrics") })[lyrics.status] || ""
-                font.family: cp.handFont
-                font.pixelSize: 18
-                color: Qt.rgba(0.15, 0.15, 0.19, 0.6)
+            LyricsSourceButton {
+                id: sourceButton
+                x: card.textX
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 8
+                visible: lyrics.status !== "idle"
+                height: visible ? implicitHeight : 0
+                tint: Qt.rgba(0.15, 0.15, 0.19, 0.55)
+                hoverTint: card.ink
             }
-            Label {
-                visible: lyrics.status === "none" && lyrics.source !== "auto"
-                width: parent.width
-                horizontalAlignment: Text.AlignHCenter
-                text: I18n.t("Try another source below.")
-                font.pixelSize: 13
-                color: Qt.rgba(0.15, 0.15, 0.19, 0.5)
-            }
-        }
-
-        LyricsSourceButton {
-            id: sourceButton
-            x: 56
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 8
-            visible: lyrics.status !== "idle"
-            height: visible ? implicitHeight : 0
-            tint: Qt.rgba(0.15, 0.15, 0.19, 0.55)
-            hoverTint: cp.ink
         }
     }
 
-    // ---- queue / equalizer on the right --------------------------------------------------------
-    Loader {
-        anchors.right: parent.right
-        anchors.rightMargin: 40
-        y: cp.topSpace
-        width: Math.min(440, cp.width * 0.38)
-        height: cp.areaH
-        active: cp.active && cp.showPanel && cp.panel !== "lyrics"
-        sourceComponent: cp.panel === "equalizer" ? eqComp : queueComp
+    // the queue as a mixtape's handwritten track list
+    Side {
+        open: cp.showPanel && cp.panel === "queue"
+        x: cp.sideRect.x; y: cp.sideRect.y; width: cp.sideRect.width; height: cp.sideRect.height
+        PaperCard {
+            id: listCard
+            anchors.fill: parent
+            handFont: cp.handFont
+            title: I18n.t("Up next") + " — " + I18n.t("Side B")
+
+            ListView {
+                id: tracks
+                anchors.fill: parent
+                anchors.bottomMargin: 8
+                clip: true
+                model: player.queue
+                boundsBehavior: Flickable.StopAtBounds
+                ScrollBar.vertical: NScrollBar {}
+                SmoothScroll { flickable: tracks }
+                Component.onCompleted: player.refreshQueue()
+
+                // the song playing now heads the list, marked like the sung lyric line
+                header: Item {
+                    width: tracks.width
+                    height: cp.s.hasTrack ? 52 : 0
+                    visible: cp.s.hasTrack
+                    Rectangle {
+                        x: listCard.textX - 4
+                        y: 10
+                        width: Math.min(nowText.contentWidth + 8, parent.width - x - 8)
+                        height: 30
+                        radius: 3
+                        color: Qt.rgba(1, 0.86, 0.3, 0.75)
+                    }
+                    Label {
+                        id: nowText
+                        x: listCard.textX
+                        y: 12
+                        width: parent.width - listCard.textX - 70
+                        text: "♪  " + (cp.s.name || "") + (cp.s.artists ? " — " + cp.s.artists : "")
+                        font.family: cp.handFont
+                        font.pixelSize: 20
+                        font.weight: Font.Bold
+                        color: listCard.ink
+                        elide: Text.ElideRight
+                    }
+                    Label {
+                        anchors.right: parent.right
+                        anchors.rightMargin: 18
+                        y: 14
+                        text: Theme.fmt(cp.s.durationMs || 0)
+                        font.family: cp.handFont
+                        font.pixelSize: 17
+                        color: Qt.rgba(0.15, 0.15, 0.19, 0.6)
+                    }
+                    Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Qt.rgba(0.35, 0.5, 0.8, 0.22) }
+                }
+
+                delegate: Item {
+                    id: trackRow
+                    required property var modelData
+                    required property int index
+                    width: tracks.width
+                    height: 46
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.bottomMargin: 1
+                        color: Qt.rgba(0.35, 0.5, 0.8, trackHover.hovered ? 0.08 : 0)
+                    }
+                    Label {
+                        x: 6
+                        width: listCard.textX - 22   // ends left of the margin line
+                        anchors.verticalCenter: parent.verticalCenter
+                        horizontalAlignment: Text.AlignRight
+                        text: (trackRow.index + 1) + "."
+                        font.family: cp.handFont
+                        font.pixelSize: 16
+                        color: Qt.rgba(0.85, 0.3, 0.3, 0.75)
+                    }
+                    Label {
+                        x: listCard.textX
+                        width: parent.width - listCard.textX - 70
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: (trackRow.modelData.name || "") + (trackRow.modelData.artists ? " — " + trackRow.modelData.artists : "")
+                        font.family: cp.handFont
+                        font.pixelSize: 18
+                        color: listCard.ink
+                        opacity: 0.85
+                        elide: Text.ElideRight
+                    }
+                    Label {
+                        anchors.right: parent.right
+                        anchors.rightMargin: 18
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: trackRow.modelData.durationMs ? Theme.fmt(trackRow.modelData.durationMs) : ""
+                        font.family: cp.handFont
+                        font.pixelSize: 16
+                        color: Qt.rgba(0.15, 0.15, 0.19, 0.55)
+                    }
+                    Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Qt.rgba(0.35, 0.5, 0.8, 0.22) }
+                    HoverHandler { id: trackHover; cursorShape: Qt.PointingHandCursor }
+                    TapHandler { onTapped: player.skip(trackRow.index + 1) }
+                    ToolTip.visible: trackHover.hovered
+                    ToolTip.delay: 600
+                    ToolTip.text: I18n.t("Play")
+                }
+
+                Label {
+                    anchors.centerIn: parent
+                    visible: tracks.count === 0
+                    text: I18n.t("The queue is empty")
+                    font.family: cp.handFont
+                    font.pixelSize: 18
+                    color: Qt.rgba(0.15, 0.15, 0.19, 0.55)
+                }
+            }
+        }
     }
-    Component { id: queueComp; QueueView {} }
-    Component { id: eqComp; EqualizerView {} }
+
+    // the equalizer as a hi-fi tape deck's front panel
+    Side {
+        open: cp.showPanel && cp.panel === "equalizer"
+        x: cp.sideRect.x; y: cp.sideRect.y; width: cp.sideRect.width; height: cp.sideRect.height
+        DeckEqualizer {
+            anchors.fill: parent
+            active: cp.active && parent.visible
+        }
+    }
 
     // ---- controls along the bottom ---------------------------------------------------------
     ImmersiveBar {

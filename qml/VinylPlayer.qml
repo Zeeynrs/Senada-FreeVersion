@@ -6,7 +6,9 @@ import QtQuick.Layouts
 // Full view as a turntable (Settings → Appearance → Full view style): a record spinning on
 // the left edge with the cover as its label, a tonearm whose needle follows the song (drag
 // it to seek), and the lyrics fanned out around the record like the spokes of a wheel,
-// the sung line level with the record's centre. Controls sit in a strip along the bottom.
+// the sung line level with the record's centre. The queue fans out the same way
+// (VinylQueueFan) and the equalizer is a spoke per band (VinylEqualizer). Controls sit in a
+// strip along the bottom.
 Item {
     id: vp
     property bool active: true            // the full view is on screen
@@ -316,7 +318,9 @@ Item {
         anchors.topMargin: vp.topSpace
         anchors.bottomMargin: vp.bottomSpace
         clip: true
-        visible: vp.showPanel && vp.panel === "lyrics"
+        // lyrics and the queue both fan out here; the equalizer has its own spokes below
+        visible: vp.showPanel && (vp.panel === "lyrics" || vp.panel === "queue")
+        readonly property bool showLyrics: vp.panel === "lyrics"
         // lines fade out towards the top and towards the controls instead of being cut off
         layer.enabled: true
         layer.effect: MultiEffect {
@@ -370,6 +374,10 @@ Item {
         WheelHandler {
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
             onWheel: (event) => {
+                if (!wheel.showLyrics) {
+                    queueFan.scrollBy(-event.angleDelta.y * 0.5)
+                    return
+                }
                 wheel.scroll -= event.angleDelta.y * 0.5
                 scrollBack.restart()
             }
@@ -377,7 +385,7 @@ Item {
 
         Repeater {
             id: rep
-            model: lyrics.status === "ready" ? lyrics.lines : []
+            model: wheel.showLyrics && lyrics.status === "ready" ? lyrics.lines : []
             onCountChanged: Qt.callLater(wheel.relayout)
 
             delegate: Item {
@@ -428,7 +436,7 @@ Item {
             y: wheel.oy - height / 2
             width: wheel.lineWidth
             spacing: 8
-            visible: lyrics.status !== "ready"
+            visible: wheel.showLyrics && lyrics.status !== "ready"
             Label {
                 width: parent.width
                 wrapMode: Text.WordWrap
@@ -445,6 +453,30 @@ Item {
                 font.pixelSize: 14
             }
         }
+
+        // the queue, fanned out the same way
+        VinylQueueFan {
+            id: queueFan
+            anchors.fill: parent
+            visible: !wheel.showLyrics
+            ox: wheel.ox
+            oy: wheel.oy
+            r0: wheel.r0
+            lineWidth: wheel.lineWidth
+            upLimit: wheel.upLimit
+            downLimit: wheel.downLimit
+        }
+    }
+
+    // the equalizer: a spoke per band around the record, and a pitch fader
+    VinylEqualizer {
+        anchors.fill: wheel
+        visible: opacity > 0
+        opacity: vp.showPanel && vp.panel === "equalizer" ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+        ox: wheel.ox
+        oy: wheel.oy
+        r0: wheel.r0
     }
 
     Item {
@@ -464,7 +496,7 @@ Item {
     }
 
     LyricsSourceButton {
-        visible: wheel.visible && lyrics.status !== "idle"
+        visible: wheel.visible && wheel.showLyrics && lyrics.status !== "idle"
         x: vp.width - width - 40
         y: vp.height - vp.bottomSpace - height - 2
         tint: Qt.rgba(1, 1, 1, 0.55)
@@ -472,18 +504,6 @@ Item {
         fontSize: 13
     }
 
-    // ---- queue / equalizer on the right ----------------------------------------------------
-    Loader {
-        anchors.right: parent.right
-        anchors.rightMargin: 40
-        y: vp.topSpace
-        width: Math.min(440, vp.width * 0.38)
-        height: vp.areaH
-        active: vp.active && vp.showPanel && vp.panel !== "lyrics"
-        sourceComponent: vp.panel === "equalizer" ? eqComp : queueComp
-    }
-    Component { id: queueComp; QueueView {} }
-    Component { id: eqComp; EqualizerView {} }
 
     // ---- nothing open on the right (cover-only): the song itself fills the space -------------
     // title, artist and the controls, centred between the record (with its tonearm) and the edge
