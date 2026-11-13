@@ -2,14 +2,20 @@
 
 Kept in the app (not fetched) so it works offline and matches the code that is running.
 Each entry has the text in English and Indonesian. "next" collects what is on `main` but
-not in a release yet; when releasing, give it the new version number and date and start
-a fresh "next" entry.
+not in a release yet (hidden while empty); when releasing, move its lines into an entry
+with the new version number and date and leave "next" empty.
 """
 
 CHANGELOG = [
     {
         "version": "next",
         "date": "",
+        "en": {"new": [], "fixed": []},
+        "id": {"new": [], "fixed": []},
+    },
+    {
+        "version": "1.0.5",
+        "date": "2026-11-13",
         "en": {
             "new": [
                 "Mini player: a small “dynamic island” at the top of the screen while Senada is minimized, with the song, its time, "
@@ -158,9 +164,9 @@ def entries(lang: str, include_next: bool) -> list[dict]:
     """The changelog in one language: [{version, date, new: [...], fixed: [...]}]."""
     out = []
     for e in CHANGELOG:
-        if e["version"] == "next" and not include_next:
-            continue
         text = e.get(lang) or e["en"]
+        if e["version"] == "next" and not (include_next and (text.get("new") or text.get("fixed"))):
+            continue
         out.append({"version": e["version"], "date": format_date(e["date"], lang),
                     "new": list(text.get("new", [])), "fixed": list(text.get("fixed", []))})
     return out

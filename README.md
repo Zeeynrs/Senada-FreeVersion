@@ -72,6 +72,7 @@ Catalog from YouTube Music, library stored locally on your computer, audio playe
 - Dark and light themes that follow your system (Windows, KDE, GNOME) or can be chosen in Settings.
 - Collapsible sidebar, right panel for lyrics or queue, and a table-style track list sortable by column.
 - **Immersive player**: round cover inside a circular visualizer (*cava*), equalizer, tempo & pitch, queue, and lyrics.
+- **Mini player** ("dynamic island"): a small pill at the top of the screen while Senada is minimized, with the song, its time and play / pause; the arrow opens it wider with the lyrics.
 - **Glass effect** (optional): *Album cover* (works on all systems) or *Transparent* (acrylic on Windows 11, Hyprland/KDE blur).
 - Automatic accent color extracted from the song cover.
 
@@ -155,6 +156,7 @@ The entire playlist is imported (up to Spotify's 10,000-track limit); large play
 | `Ctrl+→` / `Ctrl+←` | Next / previous song |
 | `Ctrl+↑` / `Ctrl+↓` | Volume up / down |
 | `Ctrl+L` | Open / close immersive player |
+| `Ctrl+M` | Mini player (dynamic island) |
 | `Ctrl+F` | Search |
 | `Ctrl+B` | Show / hide sidebar |
 | `Alt+←` / `Alt+→` | Back / forward |
@@ -287,6 +289,7 @@ Distributed under the [GNU General Public License v3.0](LICENSE).
 - Tema gelap dan terang yang mengikuti sistem (Windows, KDE, GNOME) atau dipilih di Pengaturan.
 - Sidebar yang bisa disembunyikan, panel kanan untuk lirik atau antrean, dan daftar lagu berbentuk tabel yang bisa diurutkan per kolom.
 - **Player imersif**: sampul bulat di tengah visualizer melingkar (*cava*), equalizer, tempo & pitch, antrean, dan lirik.
+- **Pemutar mini** ("dynamic island"): pil kecil di atas layar saat Senada diminimalkan, berisi lagu, durasinya, dan putar / jeda; panahnya membuka island lebih lebar dengan lirik.
 - **Efek kaca** (opsional): *Sampul album* (jalan di semua sistem) atau *Transparan* (acrylic di Windows 11, blur Hyprland/KDE).
 - Warna aksen otomatis dari sampul lagu.
 
@@ -370,6 +373,7 @@ Seluruh isi playlist ikut diimpor (sampai batas Spotify, 10.000 lagu); playlist 
 | `Ctrl+→` / `Ctrl+←` | Lagu berikutnya / sebelumnya |
 | `Ctrl+↑` / `Ctrl+↓` | Volume naik / turun |
 | `Ctrl+L` | Buka / tutup player imersif |
+| `Ctrl+M` | Pemutar mini (dynamic island) |
 | `Ctrl+F` | Cari |
 | `Ctrl+B` | Tampilkan / sembunyikan sidebar |
 | `Alt+←` / `Alt+→` | Kembali / maju |

@@ -1,6 +1,7 @@
 """Offline tests for senada.changelog (run: python -m unittest discover tests)."""
 
 import unittest
+from unittest import mock
 
 from senada import __version__, changelog
 
@@ -15,8 +16,15 @@ class Changelog(unittest.TestCase):
         self.assertIn(__version__, [e["version"] for e in changelog.CHANGELOG])
 
     def test_unreleased_changes_only_when_asked(self):
-        self.assertNotIn("next", [e["version"] for e in changelog.entries("en", include_next=False)])
-        self.assertEqual(changelog.entries("id", include_next=True)[0]["version"], "next")
+        log = [{"version": "next", "date": "", "en": {"new": ["Thing"]}, "id": {"new": ["Hal"]}},
+               *changelog.CHANGELOG[1:]]
+        with mock.patch.object(changelog, "CHANGELOG", log):
+            self.assertNotIn("next", [e["version"] for e in changelog.entries("en", include_next=False)])
+            self.assertEqual(changelog.entries("id", include_next=True)[0]["new"], ["Hal"])
+
+    def test_empty_unreleased_entry_is_not_shown(self):
+        self.assertNotIn("next", [e["version"] for e in changelog.entries("en", include_next=True)
+                                  if not e["new"] and not e["fixed"]])
 
     def test_dates_in_the_language(self):
         self.assertEqual(changelog.format_date("2026-08-13", "en"), "13 August 2026")
