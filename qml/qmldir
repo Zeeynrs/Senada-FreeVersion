@@ -14,6 +14,9 @@ Icon 1.0 Icon.qml
 LogoMark 1.0 LogoMark.qml
 IconButton 1.0 IconButton.qml
 ImmersivePlayer 1.0 ImmersivePlayer.qml
+ImmersiveSeek 1.0 ImmersiveSeek.qml
+ImmersiveTransport 1.0 ImmersiveTransport.qml
+ImmersiveVolume 1.0 ImmersiveVolume.qml
 LibraryPage 1.0 LibraryPage.qml
 LinkLabel 1.0 LinkLabel.qml
 LyricsSourceButton 1.0 LyricsSourceButton.qml
@@ -45,4 +48,5 @@ TopBar 1.0 TopBar.qml
 TrackRow 1.0 TrackRow.qml
 TrackTableHeader 1.0 TrackTableHeader.qml
 TransportControls 1.0 TransportControls.qml
+VinylPlayer 1.0 VinylPlayer.qml
 VolumeControl 1.0 VolumeControl.qml

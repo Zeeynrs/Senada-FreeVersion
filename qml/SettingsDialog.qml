@@ -36,6 +36,7 @@ Popup {
           words: ["Interface language", "Language", "Theme", "Color mode", "Dark", "Light", "Follow system",
                   "Accent color", "Accent strength", "Color", "Logo",
                   "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer",
+                  "Full view style", "Vinyl record", "Turntable", "Full view",
                   "Mini player", "Dynamic island", "Minimize"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
@@ -690,6 +691,22 @@ Popup {
             }
             Divider {}
             SettingRow {
+                label: I18n.t("Full view style")
+                hint: session.immersiveStyle === "vinyl"
+                      ? I18n.t("A spinning record on the left edge with a tonearm that follows the song (drag it to seek); the lyrics fan out around the record.")
+                      : I18n.t("The round cover in the middle of a circular visualizer, the lyrics next to it.")
+                NCombo {
+                    model: [
+                        { key: "visualizer", label: I18n.t("Visualizer") },
+                        { key: "vinyl", label: I18n.t("Vinyl record") }
+                    ]
+                    value: session.immersiveStyle
+                    onPicked: (key) => session.immersiveStyle = key
+                }
+            }
+            SettingRow {
+                visible: session.immersiveStyle !== "vinyl"
+                Layout.topMargin: 0
                 label: I18n.t("Visualizer")
                 hint: visualizer.available ? I18n.t("Circular spectrum around the cover in full view (uses cava).")
                                            : I18n.t("Circular spectrum in full view (install cava to follow the audio live).")

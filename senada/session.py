@@ -188,5 +188,6 @@ class Session(QObject):
     accentStrength = Property(str, *_setting("accent_strength"), notify=changed)
     visualizerEnabled = Property(bool, *_setting("visualizer"), notify=changed)
     visualizerStyle = Property(str, *_setting("visualizer_style"), notify=changed)
+    immersiveStyle = Property(str, *_setting("immersive_style"), notify=changed)
     miniPlayer = Property(bool, *_setting("mini_player"), notify=changed)
     del _setting

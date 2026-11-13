@@ -44,6 +44,7 @@ DEFAULTS = {
     "device_name": "Senada",
     "visualizer": True,
     "visualizer_style": "bars",
+    "immersive_style": "visualizer",  # full view: "visualizer" (cover in a spectrum) or "vinyl" (turntable)
     "mini_player": True,  # small player at the top of the screen while the window is minimized
     "audio_quality": "best",  # 'best', 'high', 'medium'
     "cache_audio": True,

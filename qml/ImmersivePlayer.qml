@@ -5,6 +5,8 @@ import QtQuick.Layouts
 
 // Full-window "now playing": round cover inside a circular visualizer (bars & wave),
 // seek and volume bars, synced lyrics, queue and equalizer, on the blurred cover art.
+// With the "vinyl" full view style (wide windows) VinylPlayer takes the place of the
+// cover and lyrics columns.
 Item {
     id: im
     objectName: "immersive"
@@ -15,6 +17,7 @@ Item {
     property bool panelOpen: true
     readonly property bool showPanel: panelOpen
     readonly property bool shown: y < height
+    readonly property bool vinyl: !!session && session.immersiveStyle === "vinyl" && wide
     signal close()
 
     function selectPanel(name) {
@@ -81,6 +84,19 @@ Item {
             GradientStop { position: 0.0; color: Qt.rgba(0.06, 0.07, 0.09, 0.28) }
             GradientStop { position: 0.6; color: Qt.rgba(0.06, 0.07, 0.09, 0.42) }
             GradientStop { position: 1.0; color: Qt.rgba(0.06, 0.07, 0.09, 0.68) }
+        }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: im.vinyl && im.shown
+        sourceComponent: Component {
+            VinylPlayer {
+                active: im.shown
+                panel: im.panel
+                showPanel: im.showPanel
+                onCloseRequested: im.close()
+            }
         }
     }
 
@@ -213,6 +229,7 @@ Item {
 
                 // 4. Visualizer Style Toggle (Moon icon: switches "bars" <-> "wave")
                 Rectangle {
+                    visible: !im.vinyl
                     width: 38; height: 30; radius: 15
                     readonly property bool isWave: session && session.visualizerStyle === "wave"
                     color: styleMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : "transparent"
@@ -282,6 +299,7 @@ Item {
     // ========================================================================
     RowLayout {
         id: mainRow
+        visible: !im.vinyl
         anchors.top: topBar.bottom
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
@@ -316,7 +334,7 @@ Item {
 
                 CircularSpectrum {
                     anchors.fill: parent
-                    visible: coverStage.visOn
+                    visible: coverStage.visOn && !im.vinyl
                     active: visualizer ? visualizer.active : false
                     playing: !!im.s.isPlaying && im.shown
                     style: session ? session.visualizerStyle : "bars"
@@ -386,216 +404,21 @@ Item {
                 }
             }
 
-            // Seek bar with elapsed and "-remaining" time
-            RowLayout {
-                id: seekRow
+            ImmersiveSeek {
                 Layout.preferredWidth: Math.min(360, coverStage.side + 20)
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 6
-                spacing: 10
-
-                readonly property real durationMs: Math.max(1, im.s.durationMs || 0)
-                readonly property real currentMs: seekMouse.pressed ? seekMouse.dragMs : (player ? player.position : 0)
-                readonly property real progress: Math.max(0, Math.min(1, currentMs / durationMs))
-
-                Label {
-                    text: Theme.fmt(seekRow.currentMs)
-                    color: Qt.rgba(1, 1, 1, 0.72)
-                    font.pixelSize: 11
-                    font.features: { "tnum": 1 }
-                    Layout.preferredWidth: 34
-                    horizontalAlignment: Text.AlignRight
-                }
-
-                Item {
-                    id: seekTrack
-                    Layout.fillWidth: true
-                    height: 22
-                    readonly property bool engaged: seekMouse.containsMouse || seekMouse.pressed
-
-                    Rectangle {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width
-                        height: seekTrack.engaged ? 6 : 4
-                        radius: height / 2
-                        color: Qt.rgba(1, 1, 1, 0.22)
-                        Behavior on height { NumberAnimation { duration: 120 } }
-                        Rectangle {
-                            width: seekRow.progress * parent.width
-                            height: parent.height
-                            radius: height / 2
-                            color: "#ffffff"
-                        }
-                    }
-                    Rectangle {  // thumb
-                        width: seekTrack.engaged ? 14 : 0
-                        height: width
-                        radius: width / 2
-                        color: "#ffffff"
-                        anchors.verticalCenter: parent.verticalCenter
-                        x: seekRow.progress * parent.width - width / 2
-                        Behavior on width { NumberAnimation { duration: 120 } }
-                    }
-
-                    MouseArea {
-                        id: seekMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        enabled: !!im.s.hasTrack
-                        property real dragMs: 0
-                        function updateDrag(mx) {
-                            const n = Math.max(0, Math.min(1, mx / Math.max(1, width)))
-                            dragMs = n * seekRow.durationMs
-                        }
-                        onPressed: (mouse) => updateDrag(mouse.x)
-                        onPositionChanged: (mouse) => { if (pressed) updateDrag(mouse.x) }
-                        onReleased: player.seek(dragMs)
-                    }
-                }
-
-                Label {
-                    text: "-" + Theme.fmt(Math.max(0, (im.s.durationMs || 0) - seekRow.currentMs))
-                    color: Qt.rgba(1, 1, 1, 0.72)
-                    font.pixelSize: 11
-                    font.features: { "tnum": 1 }
-                    Layout.preferredWidth: 38
-                }
             }
 
-            // Transport controls
-            Row {
+            ImmersiveTransport {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 4
-                spacing: 22
-
-                IconButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    iconName: "shuffle"
-                    size: 20
-                    active: !!im.s.shuffle
-                    tip: I18n.t("Shuffle")
-                    onClicked: player.toggleShuffle()
-                }
-                IconButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    iconName: "previous"
-                    size: 22
-                    tip: I18n.t("Previous (Ctrl+←)")
-                    onClicked: player.previous()
-                }
-
-                // round white play / pause button
-                Rectangle {
-                    width: 62
-                    height: 62
-                    radius: 31
-                    anchors.verticalCenter: parent.verticalCenter
-                    color: "#ffffff"
-                    scale: playMouse.pressed ? 0.94 : (playMouse.containsMouse ? 1.05 : 1.0)
-                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-
-                    Icon {
-                        anchors.centerIn: parent
-                        glyph: im.s.isPlaying ? "pause" : "play"
-                        size: 26
-                        color: "#111111"
-                    }
-                    MouseArea {
-                        id: playMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: player.togglePlay()
-                    }
-                }
-
-                IconButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    iconName: "next"
-                    size: 22
-                    tip: I18n.t("Next (Ctrl+→)")
-                    onClicked: player.next()
-                }
-                IconButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    iconName: im.s.repeat === "track" ? "repeat-one" : "repeat"
-                    size: 20
-                    active: im.s.repeat !== undefined && im.s.repeat !== "off"
-                    tip: I18n.t("Repeat")
-                    onClicked: player.cycleRepeat()
-                }
             }
 
-            // Volume
-            RowLayout {
-                id: volRow
+            ImmersiveVolume {
                 Layout.preferredWidth: Math.min(320, coverStage.side)
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 4
-                spacing: 12
-                property int lastVol: 60
-                readonly property int vol: (im.s.volume !== undefined && im.s.volume >= 0) ? im.s.volume : 80
-
-                Icon {
-                    glyph: volRow.vol === 0 ? "volume-off" : "volume"
-                    size: 16
-                    color: Qt.rgba(1, 1, 1, 0.72)
-                    HoverHandler { cursorShape: Qt.PointingHandCursor }
-                    TapHandler {
-                        onTapped: {
-                            if (volRow.vol > 0) {
-                                volRow.lastVol = volRow.vol
-                                player.setVolume(0)
-                            } else {
-                                player.setVolume(volRow.lastVol || 60)
-                            }
-                        }
-                    }
-                }
-
-                Item {
-                    id: volBar
-                    Layout.fillWidth: true
-                    height: 20
-                    readonly property real norm: Math.max(0, Math.min(1, volRow.vol / 100))
-
-                    Rectangle {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width
-                        height: 4
-                        radius: 2
-                        color: Qt.rgba(1, 1, 1, 0.22)
-
-                        Rectangle {
-                            width: volBar.norm * parent.width
-                            height: parent.height
-                            radius: 2
-                            color: "#ffffff"
-                        }
-                    }
-
-                    Rectangle {  // thumb
-                        width: 12
-                        height: 12
-                        radius: 6
-                        anchors.verticalCenter: parent.verticalCenter
-                        x: Math.max(0, Math.min(parent.width - width, volBar.norm * parent.width - width / 2))
-                        color: "#ffffff"
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        function setFromX(mx) {
-                            const pct = Math.round(Math.max(0, Math.min(1, mx / Math.max(1, width))) * 100)
-                            player.setVolume(pct)
-                        }
-                        onPressed: (mouse) => setFromX(mouse.x)
-                        onPositionChanged: (mouse) => { if (pressed) setFromX(mouse.x) }
-                        onWheel: (wheel) => player.setVolume(Math.max(0, Math.min(100, volRow.vol + (wheel.angleDelta.y > 0 ? 5 : -5))))
-                    }
-                }
             }
 
             Item { Layout.fillHeight: true }
@@ -611,7 +434,7 @@ Item {
             Loader {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                active: im.shown && im.showPanel
+                active: im.shown && im.showPanel && !im.vinyl
                 sourceComponent: im.panel === "lyrics" ? lyricsComp
                                : im.panel === "equalizer" ? eqComp
                                : queueComp
