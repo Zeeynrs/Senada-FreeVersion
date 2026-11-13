@@ -37,7 +37,7 @@ Popup {
           words: ["Interface language", "Language", "Theme", "Color mode", "Dark", "Light", "Follow system",
                   "Accent color", "Accent strength", "Color", "Logo",
                   "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer",
-                  "Full view style", "Vinyl record", "Turntable", "Full view",
+                  "Full view style", "Vinyl record", "Turntable", "Cassette", "Tape", "Full view",
                   "Mini player", "Dynamic island", "Minimize"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
@@ -758,17 +758,19 @@ Popup {
                 label: I18n.t("Full view style")
                 hint: session.immersiveStyle === "vinyl"
                       ? I18n.t("A spinning record on the left edge with a tonearm that follows the song (drag it to seek); the lyrics fan out around the record.")
+                      : session.immersiveStyle === "cassette"
+                      ? I18n.t("A cassette whose tape winds from the left reel to the right one as the song plays (click it to pause); the lyrics are written on a paper card beside it.")
                       : I18n.t("The round cover in the middle of a circular visualizer, the lyrics next to it.")
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 14
                     ViewStyleCard { viewStyle: "visualizer"; label: I18n.t("Visualizer") }
                     ViewStyleCard { viewStyle: "vinyl"; label: I18n.t("Vinyl record") }
-                    Item { Layout.fillWidth: true; Layout.preferredWidth: 1 }  // same card size as the theme cards
+                    ViewStyleCard { viewStyle: "cassette"; label: I18n.t("Cassette") }
                 }
             }
             SettingRow {
-                visible: session.immersiveStyle !== "vinyl"
+                visible: session.immersiveStyle === "visualizer"  // only that style draws the spectrum
                 Layout.topMargin: 0
                 label: I18n.t("Visualizer")
                 hint: visualizer.available ? I18n.t("Circular spectrum around the cover in full view (uses cava).")

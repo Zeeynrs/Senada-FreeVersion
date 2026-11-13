@@ -638,7 +638,7 @@ Item {
     }
 
     // ---- controls along the bottom ---------------------------------------------------------
-    Item {
+    ImmersiveBar {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -648,79 +648,6 @@ Item {
         visible: opacity > 0
         enabled: vp.showPanel
         Behavior on opacity { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
-
-        Rectangle {
-            anchors.fill: parent
-            gradient: Gradient {
-                GradientStop { position: 0; color: Qt.rgba(0, 0, 0, 0) }
-                GradientStop { position: 1; color: Qt.rgba(0, 0, 0, 0.4) }
-            }
-        }
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 40
-            anchors.rightMargin: 40
-            anchors.topMargin: 10
-            anchors.bottomMargin: 18
-            spacing: 28
-
-            ColumnLayout {
-                Layout.preferredWidth: parent.width * 0.27
-                Layout.alignment: Qt.AlignVCenter
-                spacing: 2
-                Label {
-                    Layout.fillWidth: true
-                    text: vp.s.name || I18n.t("Nothing is playing")
-                    font.pixelSize: 20
-                    font.weight: Font.Black
-                    color: "#ffffff"
-                    elide: Text.ElideRight
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
-                    LinkLabel {
-                        Layout.maximumWidth: parent.width - 36
-                        text: vp.s.artists || ""
-                        font.pixelSize: 14
-                        color: Qt.rgba(1, 1, 1, 0.72)
-                        elide: Text.ElideRight
-                        onClicked: if (vp.s.artistId) { vp.closeRequested(); Nav.go("artist", vp.s.artistId) }
-                    }
-                    IconButton {
-                        visible: !!vp.s.hasTrack
-                        implicitWidth: 28
-                        iconName: vp.s.liked ? "heart" : "heart-outline"
-                        size: 16
-                        tint: vp.s.liked ? Theme.like : Qt.rgba(1, 1, 1, 0.7)
-                        tip: vp.s.liked ? I18n.t("Remove from Liked Songs") : I18n.t("Save to Liked Songs")
-                        onClicked: player.toggleLike()
-                    }
-                    Item { Layout.fillWidth: true }
-                }
-            }
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter
-                spacing: 6
-                ImmersiveTransport {
-                    Layout.alignment: Qt.AlignHCenter
-                    playSize: 50
-                    spacing: 20
-                }
-                ImmersiveSeek {
-                    Layout.fillWidth: true
-                    Layout.maximumWidth: 560
-                    Layout.alignment: Qt.AlignHCenter
-                }
-            }
-
-            ImmersiveVolume {
-                Layout.preferredWidth: Math.min(200, parent.width * 0.18)
-                Layout.alignment: Qt.AlignVCenter
-            }
-        }
+        onCloseRequested: vp.closeRequested()
     }
 }

@@ -5,8 +5,8 @@ import QtQuick.Layouts
 
 // Full-window "now playing": round cover inside a circular visualizer (bars & wave),
 // seek and volume bars, synced lyrics, queue and equalizer, on the blurred cover art.
-// With the "vinyl" full view style (wide windows) VinylPlayer takes the place of the
-// cover and lyrics columns.
+// With the "vinyl" or "cassette" full view style (wide windows) VinylPlayer or
+// CassettePlayer takes the place of the cover and lyrics columns.
 Item {
     id: im
     objectName: "immersive"
@@ -17,7 +17,9 @@ Item {
     property bool panelOpen: true
     readonly property bool showPanel: panelOpen
     readonly property bool shown: y < height
-    readonly property bool vinyl: !!session && session.immersiveStyle === "vinyl" && wide
+    readonly property string fullStyle: session ? session.immersiveStyle : "visualizer"
+    // a style with its own layout replaces the columns below
+    readonly property bool staged: wide && (fullStyle === "vinyl" || fullStyle === "cassette")
     signal close()
 
     function selectPanel(name) {
@@ -89,14 +91,25 @@ Item {
 
     Loader {
         anchors.fill: parent
-        active: im.vinyl && im.shown
-        sourceComponent: Component {
-            VinylPlayer {
-                active: im.shown
-                panel: im.panel
-                showPanel: im.showPanel
-                onCloseRequested: im.close()
-            }
+        active: im.staged && im.shown
+        sourceComponent: im.fullStyle === "cassette" ? cassetteComp : vinylComp
+    }
+    Component {
+        id: vinylComp
+        VinylPlayer {
+            active: im.shown
+            panel: im.panel
+            showPanel: im.showPanel
+            onCloseRequested: im.close()
+        }
+    }
+    Component {
+        id: cassetteComp
+        CassettePlayer {
+            active: im.shown
+            panel: im.panel
+            showPanel: im.showPanel
+            onCloseRequested: im.close()
         }
     }
 
@@ -229,7 +242,7 @@ Item {
 
                 // 4. Visualizer Style Toggle (Moon icon: switches "bars" <-> "wave")
                 Rectangle {
-                    visible: !im.vinyl
+                    visible: !im.staged
                     width: 38; height: 30; radius: 15
                     readonly property bool isWave: session && session.visualizerStyle === "wave"
                     color: styleMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : "transparent"
@@ -299,7 +312,7 @@ Item {
     // ========================================================================
     RowLayout {
         id: mainRow
-        visible: !im.vinyl
+        visible: !im.staged
         anchors.top: topBar.bottom
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
@@ -334,7 +347,7 @@ Item {
 
                 CircularSpectrum {
                     anchors.fill: parent
-                    visible: coverStage.visOn && !im.vinyl
+                    visible: coverStage.visOn && !im.staged
                     active: visualizer ? visualizer.active : false
                     playing: !!im.s.isPlaying && im.shown
                     style: session ? session.visualizerStyle : "bars"
@@ -434,7 +447,7 @@ Item {
             Loader {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                active: im.shown && im.showPanel && !im.vinyl
+                active: im.shown && im.showPanel && !im.staged
                 sourceComponent: im.panel === "lyrics" ? lyricsComp
                                : im.panel === "equalizer" ? eqComp
                                : queueComp

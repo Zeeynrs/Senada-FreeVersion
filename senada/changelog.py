@@ -10,8 +10,26 @@ CHANGELOG = [
     {
         "version": "next",
         "date": "",
-        "en": {"new": [], "fixed": []},
-        "id": {"new": [], "fixed": []},
+        "en": {
+            "new": [
+                "Cassette full view: the tape winds from the left reel to the right one as the song plays and the reels turn "
+                "at a real cassette's pace; the lyrics are written on a ruled paper card with the sung line highlighted. "
+                "Click the cassette to pause.",
+                "The full view styles are picked from cards with a small drawing of each (Settings → Appearance).",
+                "Vinyl full view with nothing open on the right: the title, artist, controls and the next song fill the space.",
+            ],
+            "fixed": [],
+        },
+        "id": {
+            "new": [
+                "Tampilan penuh kaset: pita berpindah dari gulungan kiri ke kanan mengikuti lagu dan gulungannya berputar "
+                "secepat kaset sungguhan; liriknya tertulis di kartu kertas bergaris dengan stabilo di baris yang dinyanyikan. "
+                "Klik kasetnya untuk menjeda.",
+                "Gaya tampilan penuh dipilih lewat kartu bergambar (Pengaturan → Tampilan).",
+                "Tampilan piringan hitam saat panel kanan ditutup: judul, artis, kontrol, dan lagu berikutnya mengisi ruang kosong.",
+            ],
+            "fixed": [],
+        },
     },
     {
         "version": "1.0.7",
