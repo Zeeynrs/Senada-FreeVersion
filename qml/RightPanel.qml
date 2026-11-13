@@ -58,7 +58,7 @@ Rectangle {
         id: lyricsComp
         Item {
             Label {
-                anchors.centerIn: parent
+                anchors.centerIn: lines
                 width: parent.width - 48
                 visible: lyrics.status !== "ready"
                 horizontalAlignment: Text.AlignHCenter
@@ -68,11 +68,15 @@ Rectangle {
                 text: lyrics.status === "loading" ? I18n.t("Looking for lyrics…")
                     : lyrics.status === "idle" ? I18n.t("Play a song to see its lyrics.")
                     : lyrics.status === "error" ? I18n.t("Lyrics could not be loaded. Check the internet connection.")
-                    : I18n.t("No lyrics for this song yet.")
+                    : lyrics.source === "auto" ? I18n.t("No lyrics for this song yet.")
+                    : I18n.t("No lyrics for this song from this source. Try another source below.")
             }
             ListView {
                 id: lines
-                anchors.fill: parent
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: sourceBar.top
                 visible: lyrics.status === "ready"
                 clip: true
                 model: lyrics.lines
@@ -111,6 +115,21 @@ Rectangle {
                     Behavior on color { ColorAnimation { duration: 200 } }
                     HoverHandler { id: lineHover; cursorShape: lyrics.synced ? Qt.PointingHandCursor : Qt.ArrowCursor }
                     TapHandler { onTapped: if (lyrics.synced) player.seek(line.modelData.t) }
+                }
+            }
+            // which source the lyrics come from, and a menu to pick another one
+            Item {
+                id: sourceBar
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: lyrics.status === "idle" ? 0 : 38
+                visible: height > 0
+                Rectangle { width: parent.width; height: 1; color: Theme.line }
+                LyricsSourceButton {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 18
+                    anchors.verticalCenter: parent.verticalCenter
                 }
             }
         }

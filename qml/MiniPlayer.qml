@@ -269,6 +269,7 @@ Window {
                     textSize: 17
                     lineGap: 8
                     followHeight: true   // the lyrics open at the sung line as the pill grows
+                    showSource: false
                 }
                 // lines fade out at the edges instead of being cut
                 Rectangle {

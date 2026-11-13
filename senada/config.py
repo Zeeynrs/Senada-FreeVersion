@@ -47,6 +47,7 @@ DEFAULTS = {
     "mini_player": True,  # small player at the top of the screen while the window is minimized
     "audio_quality": "best",  # 'best', 'high', 'medium'
     "cache_audio": True,
+    "lyrics_source": "auto",  # "auto", "lrclib", "ytmusic", "netease" (see lyrics.py)
 }
 
 

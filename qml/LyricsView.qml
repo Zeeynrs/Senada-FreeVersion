@@ -6,6 +6,7 @@ Item {
     property int textSize: 26     // synced lines; plain lyrics are a little smaller
     property int lineGap: 22
     property bool followHeight: false   // keep the sung line in place while the view grows/shrinks
+    property bool showSource: true      // the lyrics-source menu under the lines (off in the mini player)
 
     // jump to the sung line, e.g. after the view was hidden or resized (the list only moves
     // by itself when the line changes)
@@ -19,7 +20,10 @@ Item {
     ListView {
         id: list
         SmoothScroll { flickable: list }
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: sourceButton.top
         clip: true
         model: lyrics.lines
         spacing: lv.lineGap
@@ -77,5 +81,25 @@ Item {
             color: Qt.rgba(1, 1, 1, 0.6)
             font.pixelSize: Math.round(lv.textSize * 0.7)
         }
+        Label {
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: lv.showSource && lyrics.status === "none" && lyrics.source !== "auto"
+            text: I18n.t("Try another source below.")
+            color: Qt.rgba(1, 1, 1, 0.45)
+            font.pixelSize: 14
+        }
+    }
+
+    // which source the lyrics come from, and a menu to pick another one
+    LyricsSourceButton {
+        id: sourceButton
+        anchors.left: parent.left
+        anchors.leftMargin: 10
+        anchors.bottom: parent.bottom
+        visible: lv.showSource && lyrics.status !== "idle"
+        height: visible ? implicitHeight : 0
+        tint: Qt.rgba(1, 1, 1, 0.55)
+        hoverTint: "#ffffff"
+        fontSize: 13
     }
 }

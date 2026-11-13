@@ -40,6 +40,9 @@ Popup {
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
           words: ["Engine status", "Device name", "Audio quality", "MPV", "Audio engine & streaming (MPV)"] },
+        { group: "Preferences", key: "lyrics", icon: "lyrics", title: "Lyrics",
+          desc: "Where synced lyrics come from.",
+          words: ["Lyrics source", "Automatic", "LRCLIB", "YouTube Music", "NetEase", "Synced lyrics"] },
         { group: "Preferences", key: "shortcuts", icon: "keyboard", title: "Shortcuts",
           desc: "Keyboard shortcuts that work anywhere in the app.",
           words: ["Keyboard shortcuts", "Play / pause", "Search", "Volume up / down", "Next / previous song", "Mini player"] },
@@ -577,6 +580,7 @@ Popup {
                     x: 28
                     width: body.width - 56
                     sourceComponent: dlg.section === "audio" ? audioPage
+                                   : dlg.section === "lyrics" ? lyricsPage
                                    : dlg.section === "shortcuts" ? shortcutsPage
                                    : dlg.section === "profile" ? profilePage
                                    : dlg.section === "updates" ? updatesPage
@@ -744,6 +748,29 @@ Popup {
             Divider {}
             Note {
                 text: I18n.t("Senada plays music without Spotify Premium and without ads, using a local MPV backend and a YouTube Music resolver.")
+            }
+        }
+    }
+
+    Component {
+        id: lyricsPage
+        ColumnLayout {
+            spacing: 0
+            SettingRow {
+                label: I18n.t("Lyrics source")
+                hint: lyrics.source === "auto"
+                      ? I18n.t("Tries LRCLIB, YouTube Music and NetEase in turn and shows the first synced lyrics found.")
+                      : I18n.t("Only this source is used. If a song has no lyrics there, pick another one here or under the lyrics.")
+                NCombo {
+                    Layout.preferredWidth: 220
+                    model: lyrics.sources.map(s => ({ key: s.key, label: s.key === "auto" ? I18n.t("Automatic") : s.name }))
+                    value: lyrics.source
+                    onPicked: (key) => lyrics.source = key
+                }
+            }
+            Divider {}
+            Note {
+                text: I18n.t("LRCLIB is a free, open lyrics database. YouTube Music shows the lyrics of the exact song being played. NetEase Cloud Music has many synced lyrics, also for Asian songs. You can also switch the source for the song that is playing with the button under the lyrics.")
             }
         }
     }

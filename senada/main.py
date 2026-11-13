@@ -85,7 +85,7 @@ def main():
         updater.changed.emit()
 
     session.languageChanged.connect(on_language)
-    lyrics = Lyrics(player, worker)
+    lyrics = Lyrics(player, worker, settings)
     visualizer = Visualizer()
     updater = Updater(worker)
     updater.toast.connect(session.toast)

@@ -87,7 +87,7 @@ A free desktop music player for **Windows & Linux**, powered by the YouTube Musi
 - Home, search, albums, artists and playlists from the **YouTube Music** catalog: new releases, trending, charts and community mixes.
 - **Import** public playlists and albums from **Spotify** (each song is matched on YouTube Music) and from **YouTube Music** (songs play right away).
 - **Radio**: right-click a song → *Play radio from this song*.
-- **Synced lyrics** from LRCLIB.
+- **Synced lyrics** from LRCLIB, YouTube Music or NetEase. Pick the source in *Settings → Lyrics* or from the button under the lyrics; *Automatic* tries all three in turn.
 - The next song is prepared in advance, so songs change without a gap.
 - If a song will not play, Senada tries another upload of it, and otherwise moves on: the queue never gets stuck.
 
@@ -243,7 +243,7 @@ Click **More info → Run anyway** on the SmartScreen prompt.
 | **Catalog** | Spotify | **YouTube Music** (+ Spotify & YouTube Music playlist import) |
 | **Library** | Spotify account | **On your computer** |
 | **Audio engine** | `librespot` (Spotify Connect) | **MPV + yt-dlp** |
-| **Lyrics & visualizer** | LRCLIB & cava | LRCLIB & cava |
+| **Lyrics & visualizer** | LRCLIB & cava | LRCLIB / YouTube Music / NetEase & cava |
 
 <a id="en-dev"></a>
 
@@ -341,7 +341,7 @@ On GitHub Actions, add the `SENADA_SIGN_PFX_BASE64` and `SENADA_SIGN_PASSWORD` s
 - Beranda, pencarian, album, artis, dan playlist dari katalog **YouTube Music**: rilis baru, trending, tangga lagu, dan mix komunitas.
 - **Impor** playlist dan album publik dari **Spotify** (setiap lagu dicocokkan di YouTube Music) dan dari **YouTube Music** (lagu langsung bisa diputar).
 - **Radio**: klik kanan lagu → *Putar radio dari lagu ini*.
-- **Lirik tersinkron** dari LRCLIB.
+- **Lirik tersinkron** dari LRCLIB, YouTube Music, atau NetEase. Pilih sumbernya di *Pengaturan → Lirik* atau dari tombol di bawah lirik; *Otomatis* mencoba ketiganya bergantian.
 - Lagu berikutnya disiapkan lebih dulu, jadi perpindahan lagu tanpa jeda.
 - Kalau sebuah lagu gagal diputar, Senada mencoba versi unggahan lain, atau melewatinya: antrean tidak pernah macet.
 
@@ -497,7 +497,7 @@ Klik **More info → Run anyway** pada layar SmartScreen.
 | **Katalog** | Spotify | **YouTube Music** (+ impor playlist Spotify & YouTube Music) |
 | **Library** | Akun Spotify | **Di komputermu** |
 | **Mesin audio** | `librespot` (Spotify Connect) | **MPV + yt-dlp** |
-| **Lirik & visualizer** | LRCLIB & cava | LRCLIB & cava |
+| **Lirik & visualizer** | LRCLIB & cava | LRCLIB / YouTube Music / NetEase & cava |
 
 <a id="id-pengembang"></a>
 
