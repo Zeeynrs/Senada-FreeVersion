@@ -1,42 +1,57 @@
 <div align="center">
 
-<img src="data/senada.png" alt="Senada Logo" width="112">
+<img src="data/senada.png" alt="Senada logo" width="104">
 
 # Senada
 
-**Free, ad-free, account-free music player for Windows & Linux.**
-<br>
-*Pemutar musik gratis, bebas iklan, dan tanpa akun untuk Windows & Linux.*
+### Your music. No account, no ads.
 
-Catalog from YouTube Music, library stored locally on your computer, audio played directly via MPV.
+A free desktop music player for **Windows & Linux**, powered by the YouTube Music catalog.
 <br>
-*Katalog dari YouTube Music, library tersimpan di komputermu sendiri, audio diputar langsung lewat MPV.*
+*Musikmu, tanpa akun dan tanpa iklan. Pemutar musik desktop gratis untuk Windows & Linux.*
 
 [![Latest release](https://img.shields.io/github/v/release/Zeeynrs/Senada-FreeVersion?label=release&color=111111)](https://github.com/Zeeynrs/Senada-FreeVersion/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Zeeynrs/Senada-FreeVersion/total?color=111111)](https://github.com/Zeeynrs/Senada-FreeVersion/releases)
 [![GPL-3.0 License](https://img.shields.io/badge/license-GPL--3.0-111111)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20%7C%20Linux-111111)
+![Made with](https://img.shields.io/badge/made%20with-Python%20%2B%20Qt%20Quick-111111)
 
-**Language / Bahasa:** [**English**](#english) · [**Bahasa Indonesia**](#bahasa-indonesia)
+[![Download for Windows](https://img.shields.io/badge/Download%20for-Windows-0078D4?style=for-the-badge)](https://github.com/Zeeynrs/Senada-FreeVersion/releases/latest)
+&nbsp;
+[![Install on Linux](https://img.shields.io/badge/Install%20on-Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](#en-linux)
 
-<img src="docs/screenshots/beranda.png" alt="Senada Home with synced lyrics in the right panel / Beranda Senada dengan lirik tersinkron di panel kanan" width="100%">
+**[English](#english)** · **[Bahasa Indonesia](#bahasa-indonesia)**
+
+<br>
+
+<img src="docs/screenshots/hero.webp" alt="Senada: Home with synced lyrics, and the mini player floating above it" width="100%">
 
 </div>
 
----
-
-## Screenshots · Tangkapan Layar
+<br>
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/player-imersif.png" alt="Immersive player / Player imersif"><p align="center"><b>Immersive player · Player imersif</b><br>Cover inside circular visualizer, synced lyrics / Sampul di tengah visualizer, lirik tersinkron</p></td>
-    <td width="50%"><img src="docs/screenshots/album.png" alt="Album page / Halaman album"><p align="center"><b>Albums & playlists · Album & playlist</b><br>Sortable track table / Tabel lagu yang bisa diurutkan</p></td>
+    <td width="50%" valign="top">
+      <h3>🏝️ Dynamic island</h3>
+      <p>Minimize Senada and a small player waits at the top of your screen: the song, its time and play / pause. Tap the arrow to open it wide, with the controls and the lyrics.</p>
+      <p><i>Minimalkan Senada, dan pemutar kecil menunggu di atas layar. Klik panahnya untuk membuka kontrol dan lirik.</i></p>
+    </td>
+    <td width="50%" align="center"><img src="docs/screenshots/mini-player.gif" alt="The mini player opening to show the lyrics, then closing again" width="100%"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/immersive.webp" alt="Full-screen player"><p align="center"><b>Full-screen player</b> · <i>Player layar penuh</i><br><sub>Cover inside a live visualizer, synced lyrics</sub></p></td>
+    <td width="50%"><img src="docs/screenshots/glass.webp" alt="Album page with the glass effect"><p align="center"><b>Glass effect</b> · <i>Efek kaca</i><br><sub>The album art glows behind see-through panels</sub></p></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/artis.png" alt="Artist page / Halaman artis"><p align="center"><b>Artist page · Halaman artis</b><br>Popular songs and discography / Lagu populer dan diskografi</p></td>
-    <td width="50%"><img src="docs/screenshots/tema-terang.png" alt="Light theme / Tema terang"><p align="center"><b>Light theme · Tema terang</b><br>Follows system or choose manually / Ikut sistem atau pilih sendiri</p></td>
+    <td width="50%"><img src="docs/screenshots/accent.webp" alt="Home with the Aurora accent color"><p align="center"><b>Accent colors</b> · <i>Warna aksen</i><br><sub>12 colors, or the classic black & white</sub></p></td>
+    <td width="50%"><img src="docs/screenshots/light.webp" alt="Light theme with the Ocean accent color"><p align="center"><b>Light & dark</b> · <i>Terang & gelap</i><br><sub>Follows your system, or pick one</sub></p></td>
   </tr>
   <tr>
-    <td colspan="2"><img src="docs/screenshots/efek-kaca.png" alt="Glass effect with album cover / Efek kaca dengan sampul album"><p align="center"><b>Glass effect · Efek kaca</b><br>Blurred album cover behind translucent panels / Sampul album yang diburamkan di balik panel tembus pandang</p></td>
+    <td colspan="2" align="center"><img src="docs/screenshots/settings.webp" alt="Settings" width="70%"><p align="center"><b>Settings</b> · <i>Pengaturan</i><br><sub>Searchable, with a What's new log of every version</sub></p></td>
   </tr>
 </table>
 
@@ -46,68 +61,84 @@ Catalog from YouTube Music, library stored locally on your computer, audio playe
 
 ## English
 
-> [**Download for Windows**](#en-windows) · [**Install on Linux**](#en-linux) · [Features](#en-features) · [How to Use](#en-usage) · [Troubleshooting](#en-troubleshooting) · [For Developers](#en-dev) · [Baca dalam Bahasa Indonesia ↓](#bahasa-indonesia)
+> [**Download for Windows**](#en-windows) · [**Install on Linux**](#en-linux) · [Features](#en-features) · [How to use](#en-usage) · [Troubleshooting](#en-troubleshooting) · [For developers](#en-dev) · [Baca dalam Bahasa Indonesia ↓](#bahasa-indonesia)
 
 <a id="en-features"></a>
 
-### Features
+### Why Senada?
 
-**No account, no ads**
-- Open the app, search, and play right away — no Spotify Premium, Client ID, cookies, or login required.
-- Audio is played directly by MPV, so the YouTube ad player is never loaded.
+<table>
+  <tr>
+    <td width="33%" valign="top"><h4>🎧 No account, no ads</h4>Open it and play. No Spotify Premium, no login, no cookies. Audio is played by MPV, so YouTube's ad player is never loaded.</td>
+    <td width="33%" valign="top"><h4>📥 Bring your playlists</h4>Paste a link to a Spotify or YouTube Music playlist or album and the whole thing is copied into your library.</td>
+    <td width="33%" valign="top"><h4>🎤 Synced lyrics</h4>Lines light up as they are sung, in the side panel, the full-screen player and the mini player. Click a line to jump there.</td>
+  </tr>
+  <tr>
+    <td valign="top"><h4>🏝️ Mini player</h4>A dynamic island at the top of the screen while Senada is minimized, or any time with <code>Ctrl+M</code>.</td>
+    <td valign="top"><h4>🎨 Make it yours</h4>12 accent colors, light and dark themes, a glass effect, a live visualizer, and English or Indonesian.</td>
+    <td valign="top"><h4>💾 Stays on your computer</h4>Liked songs, playlists and history are stored locally. The Windows version updates itself.</td>
+  </tr>
+</table>
+
+<details>
+<summary><b>Everything Senada can do</b></summary>
 
 **Music**
-- Home, search, albums, artists, and playlists from the **YouTube Music** catalog (new releases, trending, charts, community mixes).
-- **Import from Spotify**: paste a public playlist or album link, and Senada matches each song on YouTube Music.
+- Home, search, albums, artists and playlists from the **YouTube Music** catalog: new releases, trending, charts and community mixes.
+- **Import** public playlists and albums from **Spotify** (each song is matched on YouTube Music) and from **YouTube Music** (songs play right away).
 - **Radio**: right-click a song → *Play radio from this song*.
-- **Synced lyrics** from LRCLIB, in both the right panel and the immersive player.
-- Pre-fetching for the next track for fast transitions between songs.
+- **Synced lyrics** from LRCLIB.
+- The next song is prepared in advance, so songs change without a gap.
+- If a song will not play, Senada tries another upload of it, and otherwise moves on: the queue never gets stuck.
 
-**Local library**
-- Liked songs, custom playlists, saved albums/artists/playlists, and playback history.
-- Everything is stored locally on your computer: `%APPDATA%\Senada\library.json` (Windows) or `~/.config/senada/library.json` (Linux).
+**Your library**
+- Liked songs, your own playlists, saved albums / artists / playlists and history.
+- Stored on your computer: `%APPDATA%\Senada\library.json` (Windows) or `~/.config/senada/library.json` (Linux).
 
-**Appearance**
-- Interface available in **English** (default) and **Indonesian**.
-- Dark and light themes that follow your system (Windows, KDE, GNOME) or can be chosen in Settings.
-- Collapsible sidebar, right panel for lyrics or queue, and a table-style track list sortable by column.
-- **Immersive player**: round cover inside a circular visualizer (*cava*), equalizer, tempo & pitch, queue, and lyrics.
-- **Mini player** ("dynamic island"): a small pill at the top of the screen while Senada is minimized, with the song, its time and play / pause; the arrow opens it wider with the lyrics.
-- **Glass effect** (optional): *Album cover* (works on all systems) or *Transparent* (acrylic on Windows 11, Hyprland/KDE blur).
-- Automatic accent color extracted from the song cover.
+**Look and feel**
+- English (default) and Indonesian, switched without a restart.
+- Light and dark themes that follow Windows, KDE or GNOME, or that you pick yourself.
+- 12 accent colors: Mint, Indigo, Sky, Aurora, Sunset, Ocean, Forest, Berry, Amber, Rose, Carbon and Chrome.
+- Collapsible sidebar, a side panel for lyrics or the queue, and track lists you can sort by column.
+- **Full-screen player**: round cover inside a circular visualizer (*cava*), equalizer, tempo & pitch, queue and lyrics.
+- **Mini player** ("dynamic island") while Senada is minimized.
+- **Glass effect** (optional): *Album cover* (every system) or *Transparent* (acrylic on Windows 11, blur on Hyprland / KDE).
+- Settings with search, and a **What's new** page with the version on your computer and the changes in each release.
 
-**System integration**
+**Fits your desktop**
 - Windows: one-click installer with automatic updates.
-- Linux: MPRIS (`playerctl`, media keys, Hyprlock, Waybar), Wayland/Hyprland and X11.
+- Linux: MPRIS (`playerctl`, media keys, Hyprlock, Waybar), Wayland / Hyprland and X11.
 
-### Installation
+</details>
+
+### Install
 
 <a id="en-windows"></a>
 
-#### Windows 10/11
+#### 🪟 Windows 10 / 11
 
-1. Download **`Senada-Setup-<version>.exe`** from the [**Releases**](https://github.com/Zeeynrs/Senada-FreeVersion/releases/latest) page.
-2. Run the installer. If *"Windows protected your PC"* (SmartScreen) appears, click **More info → Run anyway** — this warning appears because the installer is not yet signed with a code signing certificate.
-3. Choose **Install for me only** (no admin rights needed), then follow the wizard until completion.
-4. Launch **Senada** from the Start Menu.
+1. Download **`Senada-Setup-<version>.exe`** from the [**latest release**](https://github.com/Zeeynrs/Senada-FreeVersion/releases/latest).
+2. Run it. If *"Windows protected your PC"* (SmartScreen) appears, click **More info → Run anyway**: the installer is not signed with a code-signing certificate yet.
+3. Choose **Install for me only** (no admin rights needed) and follow the wizard.
+4. Open **Senada** from the Start menu.
 
-The installer already bundles everything needed: Python, PySide6, **mpv**, **yt-dlp**, and **deno** (the JavaScript runtime required by yt-dlp for YouTube). Senada is installed in `%LOCALAPPDATA%\Programs\Senada`.
+Everything is included: Python, PySide6, **mpv**, **yt-dlp** and **deno** (which yt-dlp needs for YouTube). Senada goes to `%LOCALAPPDATA%\Programs\Senada`.
 
-**Automatic updates** — Senada checks for the latest release on startup, then every 6 hours (or via *Settings → Check for updates*). When a new version is available, click **Update**: the installer is downloaded and verified (size & SHA-256), installed, and Senada relaunches automatically.
+**Updates** — Senada looks for a new release when it opens and every 6 hours (or *Settings → Updates → Check for updates*). Click **Update**: the installer is downloaded, checked (size and SHA-256) and installed, and Senada opens again by itself.
 
-**Uninstall** — *Settings → Apps → Senada → Uninstall*. Your library and settings in `%APPDATA%\Senada` are preserved.
+**Uninstall** — *Windows Settings → Apps → Senada → Uninstall*. Your library and settings in `%APPDATA%\Senada` are kept.
 
 <a id="en-linux"></a>
 
-#### Linux
+#### 🐧 Linux
 
-**Quick install (all distros, recommended):**
+**Quick install (every distro, recommended):**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Zeeynrs/Senada-FreeVersion/main/install.sh | bash
 ```
 
-This script installs dependencies using your distro's package manager (pacman, apt, dnf, zypper, xbps, apk), then creates the `senada` command and an application menu entry. Uninstall anytime with `./install.sh --uninstall`.
+The script installs what Senada needs with your package manager (pacman, apt, dnf, zypper, xbps, apk), then adds the `senada` command and a menu entry. Remove it any time with `./install.sh --uninstall`.
 
 <details>
 <summary><b>Manual clone</b></summary>
@@ -129,24 +160,33 @@ makepkg -si
 ```
 </details>
 
-Run using the `senada` command or from your app launcher (Rofi, Wofi, tofi, KDE, GNOME, …).
+Start it with `senada` or from your app launcher (Rofi, Wofi, tofi, KDE, GNOME, …).
 
 <a id="en-usage"></a>
 
-### How to Use
+### How to use
 
-1. Open Senada — you land straight on Home with no login screen.
-2. **Search** for songs, artists, albums, or playlists (`Ctrl+F`). YouTube Music and Spotify links can also be pasted directly into the search bar.
-3. Click **♡** on the player bar to save a song to *Liked Songs*, or **♡** on an album/playlist/artist page to save it to your Library.
-4. Create a playlist via the **+** button in the sidebar, or right-click a song → *Add to playlist*.
+1. Open Senada: you land on Home, no login screen.
+2. **Search** songs, artists, albums or playlists (`Ctrl+F`). You can also paste a YouTube Music or Spotify link there.
+3. Click **♡** in the player bar to keep a song in *Liked Songs*, or **♡** on an album / playlist / artist page to save it to your library.
+4. Make a playlist with the **+** in the sidebar, or right-click a song → *Add to playlist*.
 
-#### Moving from Spotify
+#### Bring your playlists
 
-Open **Your Library → Import**, paste a **public** playlist or album link (e.g., `https://open.spotify.com/playlist/...`), and click **Import**. The playlist appears in the sidebar.
+Open **Library → Import playlist** (or *Settings → Profile & Library*), paste a link and click **Import**. The playlist appears in the sidebar.
 
-Senada then matches each track on YouTube Music in the background: title, artist, and duration are compared, while alternate versions (live, cover, karaoke, remix, slowed/sped up) are avoided unless that is what was requested. Songs with uncertain matches are marked with **?** — click the mark (or right-click → *Pick another version…*) to inspect all candidates with their scores, preview them, and pick the right one. Your choice is remembered.
+| From | Link | What happens |
+| :--- | :--- | :--- |
+| **YouTube Music** / YouTube | `music.youtube.com/playlist?list=…`, an album link, or a song link copied while playing from a playlist | Copied as it is; songs play right away. Up to 5,000 songs. |
+| **Spotify** | `open.spotify.com/playlist/…` or `…/album/…` | Each song is matched on YouTube Music in the background. Up to 10,000 songs. |
 
-The entire playlist is imported (up to Spotify's 10,000-track limit); large playlists take a few minutes to finish matching every song. Spotify's *Liked Songs* is private and cannot be imported directly — create a public playlist containing those songs, then import its link.
+The playlist must be **public** (or unlisted on YouTube). *Liked Songs* on Spotify or YouTube Music are private, so they cannot be read without a login: copy those songs into a public playlist and import that.
+
+For Spotify imports, title, artist and length are compared, and other versions (live, cover, karaoke, remix, slowed / sped up) are avoided unless that is what the song is. A song Senada is unsure about gets a **?** mark: click it (or right-click → *Pick another version…*) to see every candidate with its score, listen to them and pick the right one. Your choice is remembered.
+
+#### Mini player
+
+Minimize Senada while a song plays and the mini player appears at the top centre of the screen. The arrow opens it wider with the seek bar, previous / next and the lyrics; the open button next to it (or a double-click) brings Senada back. Drag it to move it. The button next to *Full screen* in the player bar, or `Ctrl+M`, opens it any time; on Hyprland, which has no minimize, that is the way to get it. Turn it off in *Settings → Appearance → Mini player*.
 
 #### Keyboard shortcuts
 
@@ -155,10 +195,10 @@ The entire playlist is imported (up to Spotify's 10,000-track limit); large play
 | `Space` | Play / pause |
 | `Ctrl+→` / `Ctrl+←` | Next / previous song |
 | `Ctrl+↑` / `Ctrl+↓` | Volume up / down |
-| `Ctrl+L` | Open / close immersive player |
-| `Ctrl+M` | Mini player (dynamic island) |
+| `Ctrl+L` | Open / close the full-screen player |
+| `Ctrl+M` | Mini player |
 | `Ctrl+F` | Search |
-| `Ctrl+B` | Show / hide sidebar |
+| `Ctrl+B` | Show / hide the sidebar |
 | `Alt+←` / `Alt+→` | Back / forward |
 | `Ctrl+,` | Settings |
 | `Ctrl+Q` | Quit |
@@ -167,47 +207,57 @@ The entire playlist is imported (up to Spotify's 10,000-track limit); large play
 
 ### Troubleshooting
 
-**Songs fail to play.** Senada streams audio from YouTube via `yt-dlp`.
-- If you see *"Sign in to confirm you're not a bot"* or YouTube is blocked on your network, try another network or a VPN.
-- If YouTube recently changed its system, update `yt-dlp`:
+<details>
+<summary><b>Songs will not play</b></summary>
+
+Senada streams audio from YouTube with `yt-dlp`.
+- *"YouTube is limiting requests from this network for now"* / *"Sign in to confirm you're not a bot"*: YouTube is temporarily limiting your network. Wait a while, or try another network or a VPN.
+- If YouTube changed something recently, update `yt-dlp`:
   - Windows (installer): `"%LOCALAPPDATA%\Programs\Senada\bin\yt-dlp.exe" -U`
-  - Linux: via your distro's package manager, or `yt-dlp -U`
+  - Linux: with your package manager, or `yt-dlp -U`
+</details>
 
-**Windows refuses to open the installer.** Click **More info → Run anyway** on the SmartScreen prompt.
+<details>
+<summary><b>Windows will not open the installer</b></summary>
 
-**Where is Senada's data stored?**
+Click **More info → Run anyway** on the SmartScreen prompt.
+</details>
+
+<details>
+<summary><b>Where is my data?</b></summary>
 
 | | Windows | Linux |
 | :--- | :--- | :--- |
 | Library & settings | `%APPDATA%\Senada` | `~/.config/senada` |
 | Cache | `%LOCALAPPDATA%\Senada\Cache` | `~/.cache/senada` |
+</details>
 
 ### Senada vs Nada
 
-| Feature | Nada | Senada |
+| | Nada | Senada |
 | :--- | :--- | :--- |
-| **Account requirement** | Requires Spotify Premium | **No account at all** |
-| **Ads** | Depends on Spotify account | **Ad-free** |
-| **Catalog** | Spotify | **YouTube Music** (+ public Spotify playlist import) |
-| **Library** | Spotify account | **Local on device** |
+| **Account** | Needs Spotify Premium | **None at all** |
+| **Ads** | Depends on the Spotify account | **None** |
+| **Catalog** | Spotify | **YouTube Music** (+ Spotify & YouTube Music playlist import) |
+| **Library** | Spotify account | **On your computer** |
 | **Audio engine** | `librespot` (Spotify Connect) | **MPV + yt-dlp** |
-| **Lyrics & visualizer** | LRCLIB & Cava | LRCLIB & Cava |
+| **Lyrics & visualizer** | LRCLIB & cava | LRCLIB & cava |
 
 <a id="en-dev"></a>
 
-### For Developers
+### For developers
 
-Senada is written in Python + Qt Quick (PySide6/QML). Application code lives in `senada/`, UI in `qml/`, and Windows packaging in `packaging/windows/`.
+Senada is Python + Qt Quick (PySide6 / QML). App code is in `senada/`, the interface in `qml/`, Windows packaging in `packaging/windows/`.
 
 <details>
-<summary><b>Running from source on Windows</b></summary>
+<summary><b>Run from source on Windows</b></summary>
 
-1. Install **Python 3.11+** from [python.org](https://www.python.org/downloads/) (check *Add python.exe to PATH*).
+1. Install **Python 3.11+** from [python.org](https://www.python.org/downloads/) (tick *Add python.exe to PATH*).
 2. `git clone https://github.com/Zeeynrs/Senada-FreeVersion.git`
-3. Place `mpv.exe` and `yt-dlp.exe` in the `bin\` folder, or install via [Scoop](https://scoop.sh): `scoop bucket add extras` then `scoop install mpv yt-dlp`.
-4. Double-click **`senada.bat`**. On first launch, this script creates `.venv` and installs PySide6.
+3. Put `mpv.exe` and `yt-dlp.exe` in `bin\`, or install them with [Scoop](https://scoop.sh): `scoop bucket add extras`, then `scoop install mpv yt-dlp`.
+4. Double-click **`senada.bat`**. The first time, it creates `.venv` and installs PySide6.
 
-This version updates via the in-app *Update* button (uses `git`, requires Git for Windows). MPRIS is not available on Windows; the visualizer requires `cava.exe` in `bin\` (optional).
+This copy updates with the *Update* button in the app (through `git`, needs Git for Windows). MPRIS does not exist on Windows; the visualizer needs `cava.exe` in `bin\` (optional).
 </details>
 
 <details>
@@ -219,43 +269,43 @@ python -m unittest discover -s tests
 </details>
 
 <details>
-<summary><b>Building the Windows installer</b></summary>
+<summary><b>Build the Windows installer</b></summary>
 
-Requires Python 3.11+ and [Inno Setup 6](https://jrsoftware.org/isinfo.php) (`winget install JRSoftware.InnoSetup`):
+Needs Python 3.11+ and [Inno Setup 6](https://jrsoftware.org/isinfo.php) (`winget install JRSoftware.InnoSetup`):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File packaging\windows\build.ps1
 ```
 
-Outputs `packaging\windows\dist\Senada-Setup-<version>.exe`. Pass `-SkipInstaller` for the portable `dist\Senada\` folder only.
+The result is `packaging\windows\dist\Senada-Setup-<version>.exe`. Add `-SkipInstaller` for just the portable `dist\Senada\` folder.
 </details>
 
 <details>
-<summary><b>Releasing a new version</b></summary>
+<summary><b>Release a new version</b></summary>
 
-1. Bump `__version__` in `senada/__init__.py`, then commit.
+1. Raise `__version__` in `senada/__init__.py`, and move the *next* entry in `senada/changelog.py` (the *What's new* page) to the new version. Commit.
 2. `git tag v<version>` and `git push origin v<version>`.
-3. The [`windows-installer.yml`](.github/workflows/windows-installer.yml) workflow builds the installer and attaches it to the Release. Installed apps will offer the update automatically.
+3. The [`windows-installer.yml`](.github/workflows/windows-installer.yml) workflow builds the installer and attaches it to the release. Installed copies offer the update by themselves.
 </details>
 
 <details>
 <summary><b>Code signing (optional)</b></summary>
 
-If any of the variables below are set, `build.ps1` signs `Senada.exe`, the installer, and the uninstaller (SHA-256 + timestamp) via `packaging\windows\sign.ps1`:
+When one of these is set, `build.ps1` signs `Senada.exe`, the installer and the uninstaller (SHA-256 + timestamp) with `packaging\windows\sign.ps1`:
 
 | Variable | Value |
 | :--- | :--- |
-| `SENADA_SIGN_PFX` | path to the `.pfx` certificate file |
-| `SENADA_SIGN_PFX_BASE64` | base64-encoded `.pfx` content (for GitHub Actions secrets) |
+| `SENADA_SIGN_PFX` | path to the `.pfx` certificate |
+| `SENADA_SIGN_PFX_BASE64` | the `.pfx` in base64 (for GitHub Actions secrets) |
 | `SENADA_SIGN_THUMBPRINT` | certificate thumbprint in `Cert:\CurrentUser\My` |
 | `SENADA_SIGN_PASSWORD` | `.pfx` password |
 
-On GitHub Actions, add the `SENADA_SIGN_PFX_BASE64` and `SENADA_SIGN_PASSWORD` secrets. Without them, the installer is still built, just unsigned.
+On GitHub Actions, add the `SENADA_SIGN_PFX_BASE64` and `SENADA_SIGN_PASSWORD` secrets. Without them the installer is still built, just unsigned.
 </details>
 
 ### License
 
-Distributed under the [GNU General Public License v3.0](LICENSE).
+[GNU General Public License v3.0](LICENSE).
 
 ---
 
@@ -263,60 +313,76 @@ Distributed under the [GNU General Public License v3.0](LICENSE).
 
 ## Bahasa Indonesia
 
-> [**Unduh untuk Windows**](#id-windows) · [**Pasang di Linux**](#id-linux) · [Fitur](#id-fitur) · [Cara Pakai](#id-cara-pakai) · [Pemecahan Masalah](#id-masalah) · [Untuk Pengembang](#id-pengembang) · [Read in English ↑](#english)
+> [**Unduh untuk Windows**](#id-windows) · [**Pasang di Linux**](#id-linux) · [Fitur](#id-fitur) · [Cara pakai](#id-cara-pakai) · [Pemecahan masalah](#id-masalah) · [Untuk pengembang](#id-pengembang) · [Read in English ↑](#english)
 
 <a id="id-fitur"></a>
 
-### Fitur
+### Kenapa Senada?
 
-**Tanpa akun, tanpa iklan**
-- Buka aplikasi, langsung cari dan putar — tidak perlu Spotify Premium, Client ID, cookie, atau login.
-- Audio diputar langsung oleh MPV, jadi pemutar iklan YouTube tidak pernah dimuat.
+<table>
+  <tr>
+    <td width="33%" valign="top"><h4>🎧 Tanpa akun, tanpa iklan</h4>Buka lalu putar. Tidak perlu Spotify Premium, login, atau cookie. Audio diputar oleh MPV, jadi pemutar iklan YouTube tidak pernah dimuat.</td>
+    <td width="33%" valign="top"><h4>📥 Bawa playlist-mu</h4>Tempel link playlist atau album Spotify maupun YouTube Music, dan seluruh isinya disalin ke library-mu.</td>
+    <td width="33%" valign="top"><h4>🎤 Lirik tersinkron</h4>Baris lirik menyala saat dinyanyikan, di panel samping, player layar penuh, dan pemutar mini. Klik satu baris untuk lompat ke sana.</td>
+  </tr>
+  <tr>
+    <td valign="top"><h4>🏝️ Pemutar mini</h4>Dynamic island di atas layar saat Senada diminimalkan, atau kapan saja dengan <code>Ctrl+M</code>.</td>
+    <td valign="top"><h4>🎨 Sesuai seleramu</h4>12 warna aksen, tema terang dan gelap, efek kaca, visualizer, serta bahasa Inggris atau Indonesia.</td>
+    <td valign="top"><h4>💾 Tetap di komputermu</h4>Lagu disukai, playlist, dan riwayat disimpan di komputermu. Versi Windows memperbarui dirinya sendiri.</td>
+  </tr>
+</table>
+
+<details>
+<summary><b>Semua yang bisa dilakukan Senada</b></summary>
 
 **Musik**
-- Beranda, pencarian, album, artis, dan playlist dari katalog **YouTube Music** (rilis baru, trending, tangga lagu, mix komunitas).
-- **Impor dari Spotify**: tempel link playlist/album publik, Senada mencocokkan setiap lagunya di YouTube Music.
+- Beranda, pencarian, album, artis, dan playlist dari katalog **YouTube Music**: rilis baru, trending, tangga lagu, dan mix komunitas.
+- **Impor** playlist dan album publik dari **Spotify** (setiap lagu dicocokkan di YouTube Music) dan dari **YouTube Music** (lagu langsung bisa diputar).
 - **Radio**: klik kanan lagu → *Putar radio dari lagu ini*.
-- **Lirik tersinkron** dari LRCLIB, di panel kanan maupun di player imersif.
-- Pre-fetching lagu berikutnya supaya perpindahan lagu cepat.
+- **Lirik tersinkron** dari LRCLIB.
+- Lagu berikutnya disiapkan lebih dulu, jadi perpindahan lagu tanpa jeda.
+- Kalau sebuah lagu gagal diputar, Senada mencoba versi unggahan lain, atau melewatinya: antrean tidak pernah macet.
 
-**Library lokal**
-- Lagu disukai, playlist buatan sendiri, album/artis/playlist yang disimpan, dan riwayat putar.
-- Semuanya tersimpan di komputermu: `%APPDATA%\Senada\library.json` (Windows) atau `~/.config/senada/library.json` (Linux).
+**Library-mu**
+- Lagu disukai, playlist buatan sendiri, album / artis / playlist yang disimpan, dan riwayat putar.
+- Tersimpan di komputermu: `%APPDATA%\Senada\library.json` (Windows) atau `~/.config/senada/library.json` (Linux).
 
 **Tampilan**
-- Bahasa antarmuka tersedia dalam **Inggris** (bawaan) dan **Indonesia**.
-- Tema gelap dan terang yang mengikuti sistem (Windows, KDE, GNOME) atau dipilih di Pengaturan.
-- Sidebar yang bisa disembunyikan, panel kanan untuk lirik atau antrean, dan daftar lagu berbentuk tabel yang bisa diurutkan per kolom.
-- **Player imersif**: sampul bulat di tengah visualizer melingkar (*cava*), equalizer, tempo & pitch, antrean, dan lirik.
-- **Pemutar mini** ("dynamic island"): pil kecil di atas layar saat Senada diminimalkan, berisi lagu, durasinya, dan putar / jeda; panahnya membuka island lebih lebar dengan lirik.
-- **Efek kaca** (opsional): *Sampul album* (jalan di semua sistem) atau *Transparan* (acrylic di Windows 11, blur Hyprland/KDE).
-- Warna aksen otomatis dari sampul lagu.
+- Bahasa Inggris (bawaan) dan Indonesia, diganti tanpa mulai ulang.
+- Tema terang dan gelap yang mengikuti Windows, KDE, atau GNOME, atau dipilih sendiri.
+- 12 warna aksen: Mint, Indigo, Langit, Aurora, Senja, Samudra, Hutan, Beri, Amber, Mawar, Karbon, dan Krom.
+- Sidebar yang bisa disembunyikan, panel samping untuk lirik atau antrean, dan daftar lagu yang bisa diurutkan per kolom.
+- **Player layar penuh**: sampul bulat di tengah visualizer melingkar (*cava*), equalizer, tempo & pitch, antrean, dan lirik.
+- **Pemutar mini** ("dynamic island") saat Senada diminimalkan.
+- **Efek kaca** (opsional): *Sampul album* (semua sistem) atau *Transparan* (acrylic di Windows 11, blur di Hyprland / KDE).
+- Pengaturan dengan kolom cari, dan halaman **Apa yang baru** berisi versi di komputermu serta perubahan di setiap rilis.
 
-**Integrasi sistem**
+**Menyatu dengan desktop**
 - Windows: installer sekali klik dengan pembaruan otomatis.
-- Linux: MPRIS (`playerctl`, tombol media, Hyprlock, Waybar), Wayland/Hyprland dan X11.
+- Linux: MPRIS (`playerctl`, tombol media, Hyprlock, Waybar), Wayland / Hyprland dan X11.
+
+</details>
 
 ### Instalasi
 
 <a id="id-windows"></a>
 
-#### Windows 10/11
+#### 🪟 Windows 10 / 11
 
-1. Unduh **`Senada-Setup-<versi>.exe`** dari halaman [**Releases**](https://github.com/Zeeynrs/Senada-FreeVersion/releases/latest).
-2. Jalankan installernya. Kalau muncul *"Windows protected your PC"* (SmartScreen), klik **More info → Run anyway** — peringatan ini muncul karena installer belum ditandatangani dengan sertifikat code signing.
-3. Pilih **Install for me only** (tidak perlu hak admin), lalu ikuti wizard sampai selesai.
-4. Buka **Senada** dari Start Menu.
+1. Unduh **`Senada-Setup-<versi>.exe`** dari [**rilis terbaru**](https://github.com/Zeeynrs/Senada-FreeVersion/releases/latest).
+2. Jalankan. Kalau muncul *"Windows protected your PC"* (SmartScreen), klik **More info → Run anyway**: installer-nya belum ditandatangani dengan sertifikat code signing.
+3. Pilih **Install for me only** (tidak perlu hak admin) dan ikuti wizard-nya.
+4. Buka **Senada** dari Start menu.
 
-Installer sudah berisi semua yang dibutuhkan: Python, PySide6, **mpv**, **yt-dlp**, dan **deno** (JavaScript runtime yang dibutuhkan yt-dlp untuk YouTube). Senada dipasang di `%LOCALAPPDATA%\Programs\Senada`.
+Semua sudah termasuk: Python, PySide6, **mpv**, **yt-dlp**, dan **deno** (yang dibutuhkan yt-dlp untuk YouTube). Senada dipasang di `%LOCALAPPDATA%\Programs\Senada`.
 
-**Pembaruan otomatis** — Senada memeriksa rilis terbaru saat dibuka, lalu tiap 6 jam (atau lewat *Pengaturan → Periksa Pembaruan*). Kalau ada versi baru, klik **Perbarui**: installer diunduh dan diperiksa (ukuran & SHA-256), dipasang, lalu Senada terbuka lagi dengan sendirinya.
+**Pembaruan** — Senada mencari rilis baru saat dibuka dan setiap 6 jam (atau *Pengaturan → Pembaruan → Periksa Pembaruan*). Klik **Perbarui**: installer diunduh, diperiksa (ukuran dan SHA-256), lalu dipasang, dan Senada terbuka lagi dengan sendirinya.
 
-**Menghapus** — *Settings → Apps → Senada → Uninstall*. Library dan setelan di `%APPDATA%\Senada` tidak ikut terhapus.
+**Menghapus** — *Settings Windows → Apps → Senada → Uninstall*. Library dan pengaturan di `%APPDATA%\Senada` tetap disimpan.
 
 <a id="id-linux"></a>
 
-#### Linux
+#### 🐧 Linux
 
 **Instalasi cepat (semua distro, direkomendasikan):**
 
@@ -324,7 +390,7 @@ Installer sudah berisi semua yang dibutuhkan: Python, PySide6, **mpv**, **yt-dlp
 curl -fsSL https://raw.githubusercontent.com/Zeeynrs/Senada-FreeVersion/main/install.sh | bash
 ```
 
-Skrip ini memasang dependensi lewat package manager distromu (pacman, apt, dnf, zypper, xbps, apk), lalu membuat perintah `senada` dan entri di menu aplikasi. Hapus lagi dengan `./install.sh --uninstall`.
+Skrip ini memasang yang dibutuhkan Senada lewat package manager-mu (pacman, apt, dnf, zypper, xbps, apk), lalu menambahkan perintah `senada` dan entri di menu aplikasi. Hapus kapan saja dengan `./install.sh --uninstall`.
 
 <details>
 <summary><b>Clone manual</b></summary>
@@ -346,24 +412,33 @@ makepkg -si
 ```
 </details>
 
-Jalankan dengan perintah `senada` atau dari app launcher (Rofi, Wofi, tofi, KDE, GNOME, …).
+Jalankan dengan `senada` atau dari app launcher (Rofi, Wofi, tofi, KDE, GNOME, …).
 
 <a id="id-cara-pakai"></a>
 
-### Cara Pakai
+### Cara pakai
 
-1. Buka Senada — langsung masuk ke Beranda, tanpa layar login.
-2. **Cari** lagu, artis, album, atau playlist (`Ctrl+F`). Link YouTube Music dan Spotify juga bisa langsung ditempel di kolom pencarian.
-3. Tekan **♡** di bilah pemutar untuk menyimpan lagu ke *Lagu yang Disukai*, atau **♡** di halaman album/playlist/artis untuk menyimpannya ke Koleksi.
-4. Buat playlist lewat tombol **+** di sidebar, atau klik kanan lagu → *Tambah ke playlist*.
+1. Buka Senada: langsung masuk ke Beranda, tanpa layar login.
+2. **Cari** lagu, artis, album, atau playlist (`Ctrl+F`). Link YouTube Music atau Spotify juga bisa ditempel di sana.
+3. Klik **♡** di bilah pemutar untuk menyimpan lagu ke *Lagu yang Disukai*, atau **♡** di halaman album / playlist / artis untuk menyimpannya ke library.
+4. Buat playlist dengan tombol **+** di sidebar, atau klik kanan lagu → *Tambah ke playlist*.
 
-#### Pindah dari Spotify
+#### Bawa playlist-mu
 
-Buka **Koleksimu → Impor**, tempel link playlist atau album **publik** (misalnya `https://open.spotify.com/playlist/...`), lalu klik **Impor**. Playlist muncul di sidebar.
+Buka **Library → Impor playlist** (atau *Pengaturan → Profil & Library*), tempel link, lalu klik **Impor**. Playlist-nya muncul di sidebar.
 
-Senada lalu mencocokkan setiap lagu dengan YouTube Music di latar belakang: judul, artis, dan durasi dibandingkan, dan versi lain (live, cover, karaoke, remix, slowed/sped up) dihindari kecuali memang itu yang dicari. Lagu yang pencocokannya kurang yakin diberi tanda **?** — klik tanda itu (atau klik kanan → *Pilih versi lain…*) untuk melihat semua kandidat beserta skornya, mencobanya, dan memilih yang benar. Pilihanmu diingat.
+| Dari | Link | Yang terjadi |
+| :--- | :--- | :--- |
+| **YouTube Music** / YouTube | `music.youtube.com/playlist?list=…`, link album, atau link lagu yang disalin saat diputar dari playlist | Disalin apa adanya; lagu langsung bisa diputar. Sampai 5.000 lagu. |
+| **Spotify** | `open.spotify.com/playlist/…` atau `…/album/…` | Setiap lagu dicocokkan dengan YouTube Music di latar belakang. Sampai 10.000 lagu. |
 
-Seluruh isi playlist ikut diimpor (sampai batas Spotify, 10.000 lagu); playlist besar butuh beberapa menit sampai semua lagunya cocok. *Liked Songs* Spotify bersifat privat sehingga tidak bisa diimpor langsung — buat playlist publik berisi lagu-lagu itu, lalu impor link-nya.
+Playlist-nya harus **publik** (atau tidak publik/unlisted di YouTube). *Lagu yang Disukai* di Spotify maupun YouTube Music bersifat privat, jadi tidak bisa dibaca tanpa login: salin lagu-lagunya ke playlist publik lalu impor playlist itu.
+
+Untuk impor dari Spotify, judul, artis, dan durasi dibandingkan, dan versi lain (live, cover, karaoke, remix, slowed / sped up) dihindari kecuali lagunya memang begitu. Lagu yang pencocokannya kurang yakin diberi tanda **?**: klik tanda itu (atau klik kanan → *Pilih versi lain…*) untuk melihat semua kandidat beserta skornya, mencobanya, dan memilih yang benar. Pilihanmu diingat.
+
+#### Pemutar mini
+
+Minimalkan Senada saat lagu diputar, dan pemutar mini muncul di tengah atas layar. Panahnya membuka island lebih lebar dengan bilah lagu, tombol sebelumnya / berikutnya, dan lirik; tombol buka di sebelahnya (atau klik dua kali) membuka Senada lagi. Seret untuk memindahkannya. Tombol di sebelah *Layar penuh* di bilah pemutar, atau `Ctrl+M`, membukanya kapan saja; di Hyprland, yang tidak punya minimize, pakai cara ini. Matikan di *Pengaturan → Tampilan → Pemutar mini*.
 
 #### Pintasan keyboard
 
@@ -372,8 +447,8 @@ Seluruh isi playlist ikut diimpor (sampai batas Spotify, 10.000 lagu); playlist 
 | `Space` | Putar / jeda |
 | `Ctrl+→` / `Ctrl+←` | Lagu berikutnya / sebelumnya |
 | `Ctrl+↑` / `Ctrl+↓` | Volume naik / turun |
-| `Ctrl+L` | Buka / tutup player imersif |
-| `Ctrl+M` | Pemutar mini (dynamic island) |
+| `Ctrl+L` | Buka / tutup player layar penuh |
+| `Ctrl+M` | Pemutar mini |
 | `Ctrl+F` | Cari |
 | `Ctrl+B` | Tampilkan / sembunyikan sidebar |
 | `Alt+←` / `Alt+→` | Kembali / maju |
@@ -382,49 +457,59 @@ Seluruh isi playlist ikut diimpor (sampai batas Spotify, 10.000 lagu); playlist 
 
 <a id="id-masalah"></a>
 
-### Pemecahan Masalah
+### Pemecahan masalah
 
-**Lagu tidak bisa diputar.** Senada memutar audio dari YouTube lewat `yt-dlp`.
-- Kalau muncul *"Sign in to confirm you're not a bot"* atau YouTube diblokir di jaringanmu, coba jaringan lain atau VPN.
-- Kalau YouTube baru mengubah sistemnya, perbarui `yt-dlp`:
+<details>
+<summary><b>Lagu tidak bisa diputar</b></summary>
+
+Senada memutar audio dari YouTube lewat `yt-dlp`.
+- *"YouTube sedang membatasi permintaan dari jaringan ini"* / *"Sign in to confirm you're not a bot"*: YouTube sedang membatasi jaringanmu untuk sementara. Tunggu sebentar, atau coba jaringan lain atau VPN.
+- Kalau YouTube baru mengubah sesuatu, perbarui `yt-dlp`:
   - Windows (installer): `"%LOCALAPPDATA%\Programs\Senada\bin\yt-dlp.exe" -U`
-  - Linux: lewat package manager distromu, atau `yt-dlp -U`
+  - Linux: lewat package manager-mu, atau `yt-dlp -U`
+</details>
 
-**Windows menolak membuka installer.** Klik **More info → Run anyway** pada layar SmartScreen.
+<details>
+<summary><b>Windows menolak membuka installer</b></summary>
 
-**Data Senada ada di mana?**
+Klik **More info → Run anyway** pada layar SmartScreen.
+</details>
+
+<details>
+<summary><b>Data-ku disimpan di mana?</b></summary>
 
 | | Windows | Linux |
 | :--- | :--- | :--- |
-| Library & setelan | `%APPDATA%\Senada` | `~/.config/senada` |
+| Library & pengaturan | `%APPDATA%\Senada` | `~/.config/senada` |
 | Cache | `%LOCALAPPDATA%\Senada\Cache` | `~/.cache/senada` |
+</details>
 
 ### Senada vs Nada
 
-| Fitur | Nada | Senada |
+| | Nada | Senada |
 | :--- | :--- | :--- |
-| **Syarat akun** | Butuh Spotify Premium | **Tanpa akun sama sekali** |
-| **Iklan** | Tergantung akun Spotify | **Bebas iklan** |
-| **Katalog** | Spotify | **YouTube Music** (+ impor playlist publik Spotify) |
-| **Library** | Akun Spotify | **Lokal di perangkat** |
+| **Akun** | Butuh Spotify Premium | **Tidak perlu sama sekali** |
+| **Iklan** | Tergantung akun Spotify | **Tidak ada** |
+| **Katalog** | Spotify | **YouTube Music** (+ impor playlist Spotify & YouTube Music) |
+| **Library** | Akun Spotify | **Di komputermu** |
 | **Mesin audio** | `librespot` (Spotify Connect) | **MPV + yt-dlp** |
-| **Lirik & visualizer** | LRCLIB & Cava | LRCLIB & Cava |
+| **Lirik & visualizer** | LRCLIB & cava | LRCLIB & cava |
 
 <a id="id-pengembang"></a>
 
-### Untuk Pengembang
+### Untuk pengembang
 
-Senada ditulis dengan Python + Qt Quick (PySide6/QML). Kode aplikasi ada di `senada/`, antarmuka di `qml/`, dan packaging Windows di `packaging/windows/`.
+Senada ditulis dengan Python + Qt Quick (PySide6 / QML). Kode aplikasi ada di `senada/`, antarmuka di `qml/`, dan packaging Windows di `packaging/windows/`.
 
 <details>
 <summary><b>Menjalankan dari kode sumber di Windows</b></summary>
 
 1. Pasang **Python 3.11+** dari [python.org](https://www.python.org/downloads/) (centang *Add python.exe to PATH*).
 2. `git clone https://github.com/Zeeynrs/Senada-FreeVersion.git`
-3. Taruh `mpv.exe` dan `yt-dlp.exe` di folder `bin\`, atau pasang lewat [Scoop](https://scoop.sh): `scoop bucket add extras` lalu `scoop install mpv yt-dlp`.
+3. Taruh `mpv.exe` dan `yt-dlp.exe` di `bin\`, atau pasang lewat [Scoop](https://scoop.sh): `scoop bucket add extras`, lalu `scoop install mpv yt-dlp`.
 4. Klik dua kali **`senada.bat`**. Saat pertama kali, skrip ini membuat `.venv` dan memasang PySide6.
 
-Versi ini diperbarui lewat tombol *Perbarui* di aplikasi (memakai `git`, butuh Git for Windows). MPRIS tidak tersedia di Windows; visualizer butuh `cava.exe` di `bin\` (opsional).
+Salinan ini diperbarui lewat tombol *Perbarui* di aplikasi (lewat `git`, butuh Git for Windows). MPRIS tidak ada di Windows; visualizer butuh `cava.exe` di `bin\` (opsional).
 </details>
 
 <details>
@@ -444,25 +529,25 @@ Butuh Python 3.11+ dan [Inno Setup 6](https://jrsoftware.org/isinfo.php) (`winge
 powershell -ExecutionPolicy Bypass -File packaging\windows\build.ps1
 ```
 
-Hasilnya `packaging\windows\dist\Senada-Setup-<versi>.exe`. Pakai `-SkipInstaller` untuk folder portabel `dist\Senada\` saja.
+Hasilnya `packaging\windows\dist\Senada-Setup-<versi>.exe`. Tambahkan `-SkipInstaller` untuk folder portabel `dist\Senada\` saja.
 </details>
 
 <details>
 <summary><b>Merilis versi baru</b></summary>
 
-1. Naikkan `__version__` di `senada/__init__.py`, lalu commit.
+1. Naikkan `__version__` di `senada/__init__.py`, dan pindahkan entri *next* di `senada/changelog.py` (halaman *Apa yang baru*) ke versi baru. Commit.
 2. `git tag v<versi>` dan `git push origin v<versi>`.
-3. Workflow [`windows-installer.yml`](.github/workflows/windows-installer.yml) membangun installer dan melampirkannya ke Release. Aplikasi yang sudah terpasang akan menawarkan pembaruan ke versi itu.
+3. Workflow [`windows-installer.yml`](.github/workflows/windows-installer.yml) membangun installer dan melampirkannya ke rilis. Aplikasi yang sudah terpasang menawarkan pembaruan dengan sendirinya.
 </details>
 
 <details>
 <summary><b>Code signing (opsional)</b></summary>
 
-Kalau salah satu variabel di bawah di-set, `build.ps1` menandatangani `Senada.exe`, installer, dan uninstaller (SHA-256 + timestamp) lewat `packaging\windows\sign.ps1`:
+Kalau salah satu variabel ini di-set, `build.ps1` menandatangani `Senada.exe`, installer, dan uninstaller (SHA-256 + timestamp) lewat `packaging\windows\sign.ps1`:
 
 | Variabel | Isi |
 | :--- | :--- |
-| `SENADA_SIGN_PFX` | path ke file sertifikat `.pfx` |
+| `SENADA_SIGN_PFX` | path ke sertifikat `.pfx` |
 | `SENADA_SIGN_PFX_BASE64` | isi `.pfx` dalam base64 (untuk secret GitHub Actions) |
 | `SENADA_SIGN_THUMBPRINT` | thumbprint sertifikat di `Cert:\CurrentUser\My` |
 | `SENADA_SIGN_PASSWORD` | password `.pfx` |
@@ -472,4 +557,4 @@ Di GitHub Actions, tambahkan secret `SENADA_SIGN_PFX_BASE64` dan `SENADA_SIGN_PA
 
 ### Lisensi
 
-Didistribusikan di bawah [GNU General Public License v3.0](LICENSE).
+[GNU General Public License v3.0](LICENSE).

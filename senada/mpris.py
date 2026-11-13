@@ -18,6 +18,12 @@ LOOP_TO_MPRIS = {"off": "None", "context": "Playlist", "track": "Track"}
 LOOP_FROM_MPRIS = {v: k for k, v in LOOP_TO_MPRIS.items()}
 
 
+def track_object_path(track_id: str) -> str:
+    """D-Bus object paths allow only [A-Za-z0-9_], and YouTube ids also use '-': escape the rest."""
+    safe = "".join(c if c.isascii() and c.isalnum() else f"_{ord(c):02x}" for c in track_id or "unknown")
+    return "/org/senada/track/" + safe
+
+
 def track_link(state) -> str:
     uri = state.get("uri", "") or ""
     if uri.startswith("yt:track:"):
@@ -46,9 +52,8 @@ class Mpris(dbus.service.Object):
         s = self.player.state
         if not s.get("hasTrack"):
             return dbus.Dictionary({"mpris:trackid": NO_TRACK}, signature="sv")
-        track_id = "/org/senada/track/" + (s.get("id") or "unknown")
         md = {
-            "mpris:trackid": dbus.ObjectPath(track_id),
+            "mpris:trackid": dbus.ObjectPath(track_object_path(s.get("id", ""))),
             "mpris:length": dbus.Int64(s.get("durationMs", 0) * 1000),
             "xesam:title": s.get("name", ""),
             "xesam:artist": dbus.Array([a.strip() for a in s.get("artists", "").split(",") if a.strip()], signature="s"),

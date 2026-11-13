@@ -59,6 +59,7 @@ Window {
 
     Rectangle {
         id: pill
+        objectName: "islandPill"
         x: Math.round((island.width - width) / 2)
         y: island.margin
         width: island.expanded ? island.wideW : island.compactW
@@ -191,6 +192,7 @@ Window {
                 }
 
                 IconButton {
+                    objectName: "islandChevron"
                     iconName: "chevron-down"
                     size: 20
                     tint: Qt.rgba(1, 1, 1, 0.8)
@@ -209,6 +211,7 @@ Window {
 
         // ---- opened wider: seek bar, controls, lyrics ------------------------------------
         ColumnLayout {
+            objectName: "islandBody"
             anchors.top: header.bottom
             anchors.left: parent.left
             anchors.right: parent.right
@@ -257,9 +260,11 @@ Window {
                 clip: true
 
                 LyricsView {
+                    id: islandLyrics
                     anchors.fill: parent
                     textSize: 17
                     lineGap: 8
+                    followHeight: true   // the lyrics open at the sung line as the pill grows
                 }
                 // lines fade out at the edges instead of being cut
                 Rectangle {

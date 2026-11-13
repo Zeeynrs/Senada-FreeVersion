@@ -5,6 +5,16 @@ Item {
     id: lv
     property int textSize: 26     // synced lines; plain lyrics are a little smaller
     property int lineGap: 22
+    property bool followHeight: false   // keep the sung line in place while the view grows/shrinks
+
+    // jump to the sung line, e.g. after the view was hidden or resized (the list only moves
+    // by itself when the line changes)
+    function settle() {
+        if (list.currentIndex < 0 || list.height <= 0)
+            return
+        list.positionViewAtIndex(list.currentIndex, ListView.Beginning)
+        list.contentY = Math.max(list.originY, list.contentY - list.preferredHighlightBegin)
+    }
 
     ListView {
         id: list
@@ -20,6 +30,7 @@ Item {
         highlightMoveDuration: 550
         highlightMoveVelocity: -1
         boundsBehavior: Flickable.StopAtBounds
+        onHeightChanged: if (lv.followHeight) lv.settle()
         header: Item { width: 1; height: list.height * 0.26 }
         footer: Item { width: 1; height: list.height * 0.48 }
         ScrollBar.vertical: NScrollBar {}
