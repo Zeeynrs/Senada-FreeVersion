@@ -45,6 +45,9 @@ Popup {
         { group: "Preferences", key: "profile", icon: "person", title: "Profile & Library",
           desc: "Your name and the music kept on this device.",
           words: ["Display name", "Import from Spotify", "Spotify", "Import", "Playlist"] },
+        { group: "App", key: "whatsnew", icon: "new", title: "What's new",
+          desc: "What changed in each version, and which version is on this device.",
+          words: ["Changelog", "Log", "Release", "Version", "On this device", "Version history"] },
         { group: "App", key: "updates", icon: "refresh", title: "Updates",
           desc: "New versions of Senada from GitHub.",
           words: ["App updates (GitHub)", "Check for updates", "Update & restart", "GitHub", "Version"] },
@@ -151,6 +154,39 @@ Popup {
         wrapMode: Text.WordWrap
         color: Theme.dim
         font.pixelSize: 13
+    }
+    component Pill: Rectangle {
+        property alias text: pl.text
+        implicitWidth: pl.implicitWidth + 16
+        implicitHeight: 22
+        radius: 11
+        color: Theme.selected
+        border.color: Theme.accented ? Theme.alpha(Theme.primary, 0.45) : Theme.line
+        Label {
+            id: pl
+            anchors.centerIn: parent
+            font.pixelSize: 11
+            font.weight: Font.Bold
+            color: Theme.accentInk
+        }
+    }
+    component Bullet: RowLayout {
+        property alias text: bl.text
+        Layout.fillWidth: true
+        spacing: 10
+        Rectangle {
+            Layout.alignment: Qt.AlignTop
+            Layout.topMargin: 7
+            implicitWidth: 5; implicitHeight: 5; radius: 2.5
+            color: Theme.accented ? Theme.primary : Theme.dim
+        }
+        Label {
+            id: bl
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 13
+            lineHeight: 1.15
+        }
     }
     component Keycap: Rectangle {
         property alias text: kl.text
@@ -544,6 +580,7 @@ Popup {
                                    : dlg.section === "profile" ? profilePage
                                    : dlg.section === "updates" ? updatesPage
                                    : dlg.section === "about" ? aboutPage
+                                   : dlg.section === "whatsnew" ? whatsNewPage
                                    : appearancePage
                 }
             }
@@ -847,6 +884,191 @@ Popup {
     }
 
     Component {
+        id: whatsNewPage
+        ColumnLayout {
+            id: wn
+            readonly property var info: updater.versionInfo
+            spacing: 0
+
+            // ---- the version on this device
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                Layout.bottomMargin: 8
+                implicitHeight: here.implicitHeight + 36
+                radius: 14
+                color: Theme.accented ? Theme.alpha(Theme.primary, Theme.dark ? 0.09 : 0.07) : Theme.subtle
+                border.color: Theme.accented ? Theme.alpha(Theme.primary, 0.35) : Theme.line
+                ColumnLayout {
+                    id: here
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 18
+                    spacing: 12
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 14
+                        LogoMark { size: 44; colors: Theme.accentColors(Theme.accentInfo) }
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+                            Label {
+                                text: I18n.t("On this device")
+                                color: Theme.dim
+                                font.pixelSize: 12
+                                font.weight: Font.DemiBold
+                            }
+                            RowLayout {
+                                spacing: 8
+                                Label { text: "Senada " + wn.info.version; font.pixelSize: 22; font.weight: Font.Black }
+                                Pill {
+                                    visible: wn.info.ahead > 0
+                                    text: I18n.n("+{n} change", "+{n} changes", wn.info.ahead)
+                                }
+                            }
+                        }
+                    }
+                    Label {
+                        Layout.fillWidth: true
+                        text: wn.info.summary
+                        wrapMode: Text.WordWrap
+                        font.pixelSize: 13
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: 18
+                        rowSpacing: 6
+                        Repeater {
+                            model: [
+                                { k: I18n.t("Installed from"), v: wn.info.source },
+                                { k: I18n.t("Commit"), v: wn.info.commit },
+                                { k: I18n.t("Latest change"), v: wn.info.commitMessage },
+                                { k: I18n.t("Update status"), v: updater.statusText },
+                                { k: I18n.t("System"), v: wn.info.system }
+                            ].filter(r => r.v)
+                            delegate: Item {
+                                id: cell
+                                required property var modelData
+                                required property int index
+                                Layout.columnSpan: 2
+                                Layout.fillWidth: true
+                                implicitHeight: Math.max(kLabel.implicitHeight, vLabel.implicitHeight)
+                                Label {
+                                    id: kLabel
+                                    width: 130
+                                    text: cell.modelData.k
+                                    color: Theme.dim
+                                    font.pixelSize: 12
+                                }
+                                Label {
+                                    id: vLabel
+                                    x: 148
+                                    width: cell.width - x
+                                    text: cell.modelData.v
+                                    font.pixelSize: 12
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+                    }
+                    RowLayout {
+                        spacing: 10
+                        NButton {
+                            text: updater.checking ? I18n.t("Checking…") : I18n.t("Check for updates")
+                            iconName: "refresh"
+                            enabled: !updater.checking && !updater.updating
+                            onClicked: updater.check(false)
+                        }
+                        NButton {
+                            visible: updater.updateAvailable || updater.updating
+                            text: updater.updating ? I18n.t("Updating…") : I18n.t("Update & restart")
+                            iconName: "download"
+                            primary: true
+                            enabled: !updater.updating && !updater.checking
+                            onClicked: updater.applyUpdate()
+                        }
+                    }
+                }
+            }
+
+            // ---- what changed in each version
+            Label {
+                Layout.topMargin: 18
+                Layout.bottomMargin: 4
+                text: I18n.t("Version history")
+                font.pixelSize: 16
+                font.weight: Font.Bold
+            }
+            Repeater {
+                model: updater.history
+                ColumnLayout {
+                    id: rel
+                    required property var modelData
+                    required property int index
+                    readonly property bool upcoming: modelData.version === "next"
+                    readonly property bool installed: upcoming || (modelData.version === wn.info.version && wn.info.ahead <= 0)
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Divider { visible: rel.index > 0; Layout.topMargin: 6; Layout.bottomMargin: 6 }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.topMargin: rel.index > 0 ? 0 : 8
+                        spacing: 8
+                        Label {
+                            text: rel.upcoming ? I18n.t("Not released yet") : "Senada " + rel.modelData.version
+                            font.pixelSize: 15
+                            font.weight: Font.Bold
+                        }
+                        Pill { visible: rel.installed; text: I18n.t("On this device") }
+                        Pill {
+                            visible: !rel.upcoming && rel.modelData.version === wn.info.version && wn.info.ahead > 0
+                            text: I18n.t("Latest release")
+                        }
+                        Item { Layout.fillWidth: true }
+                        Label { text: rel.modelData.date; color: Theme.dim; font.pixelSize: 12 }
+                    }
+                    Label {
+                        visible: rel.upcoming
+                        Layout.fillWidth: true
+                        text: I18n.t("Already on this device; everyone else gets it with the next release.")
+                        color: Theme.dim
+                        font.pixelSize: 12
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
+                        visible: rel.modelData.new.length > 0
+                        Layout.topMargin: 2
+                        text: I18n.t("New").toUpperCase()
+                        color: Theme.faint
+                        font.pixelSize: 11
+                        font.weight: Font.Bold
+                        font.letterSpacing: 0.6
+                    }
+                    Repeater {
+                        model: rel.modelData.new
+                        Bullet { required property string modelData; text: modelData }
+                    }
+                    Label {
+                        visible: rel.modelData.fixed.length > 0
+                        Layout.topMargin: 2
+                        text: I18n.t("Fixes").toUpperCase()
+                        color: Theme.faint
+                        font.pixelSize: 11
+                        font.weight: Font.Bold
+                        font.letterSpacing: 0.6
+                    }
+                    Repeater {
+                        model: rel.modelData.fixed
+                        Bullet { required property string modelData; text: modelData }
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
         id: aboutPage
         ColumnLayout {
             spacing: 0
@@ -862,13 +1084,18 @@ Popup {
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 2
-                    Label { text: "Senada"; font.pixelSize: 22; font.weight: Font.Black }
+                    Label { text: "Senada " + updater.versionInfo.version; font.pixelSize: 22; font.weight: Font.Black }
                     Label {
                         Layout.fillWidth: true
-                        text: updater.currentLabel
+                        text: updater.versionInfo.summary
                         color: Theme.dim
                         font.pixelSize: 13
                         wrapMode: Text.WordWrap
+                    }
+                    LinkLabel {
+                        text: I18n.t("See what's new")
+                        font.pixelSize: 13
+                        onClicked: dlg.section = "whatsnew"
                     }
                 }
             }

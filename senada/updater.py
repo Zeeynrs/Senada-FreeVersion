@@ -7,6 +7,7 @@ runs it silently and quits; the installer replaces the files and starts Senada a
 
 import hashlib
 import json
+import platform
 import re
 import shutil
 import subprocess
@@ -15,10 +16,10 @@ import urllib.request
 from datetime import datetime
 from pathlib import Path
 
-from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
+from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot, qVersion
 
-from . import __version__, net
-from .i18n import tr
+from . import __version__, changelog, net
+from .i18n import language, tr, trn
 from .config import CACHE_DIR, FROZEN, IS_WINDOWS, NO_WINDOW, ROOT
 
 REPO = "Zeeynrs/Senada-FreeVersion"
@@ -119,6 +120,8 @@ class Updater(QObject):
         self._updating = False
         self._current_hash = ""
         self._current_msg = ""
+        self._current_date = ""  # commit date of a git checkout (YYYY-MM-DD)
+        self._ahead = 0  # commits of a git checkout past the release tag; -1 when unknown
         self._remote_hash = ""
         self._remote_msg = ""
         self._commits_behind = 0
@@ -151,9 +154,14 @@ class Updater(QObject):
         try:
             self._current_hash = _git("rev-parse", "--short", "HEAD", timeout=3)
             self._current_msg = _git("log", "-1", "--format=%s", "HEAD", timeout=3)
+            self._current_date = _git("log", "-1", "--format=%cs", "HEAD", timeout=3)
         except Exception:
             self._current_hash = "unknown"
             self._current_msg = ""
+        try:  # how far this checkout is past the release it says it is
+            self._ahead = int(_git("rev-list", "--count", f"v{__version__}..HEAD", timeout=3))
+        except Exception:
+            self._ahead = -1  # the tag is not here (shallow clone, no tags fetched)
 
     @Property(bool, notify=changed)
     def checking(self):
@@ -227,6 +235,48 @@ class Updater(QObject):
             return tr("Current version: {version}", version=self._current_hash)
         return (tr("Current commit: {commit}", commit=tr(self._current_hash))
                 + (f" — {tr(self._current_msg)}" if self._current_msg else ""))
+
+    @Property("QVariantMap", notify=changed)
+    def versionInfo(self):
+        """Which Senada runs here and how it got here, for Settings → What's new / About."""
+        version = __version__
+        if self._release_mode:
+            kind, source = "installer", tr("Windows installer")
+            summary = tr("This device has Senada {version}, installed with the Windows installer.", version=version)
+        elif self._is_git_repo:
+            kind, source = "git", tr("Source code (git)")
+            if self._ahead > 0:
+                summary = trn("This device has Senada {version} plus {n} newer change that is not in a release yet, "
+                              "run from the source code.",
+                              "This device has Senada {version} plus {n} newer changes that are not in a release yet, "
+                              "run from the source code.", self._ahead, version=version)
+            elif self._ahead == 0:
+                summary = tr("This device has Senada {version}, run from the source code.", version=version)
+            else:
+                summary = tr("This device has Senada {version} or newer, run from the source code.", version=version)
+        else:
+            kind, source = "package", tr("System package")
+            summary = tr("This device has Senada {version}, installed from a system package.", version=version)
+        commit = ""
+        if kind == "git" and self._current_hash not in ("", "unknown"):
+            date = changelog.format_date(self._current_date, language())
+            commit = self._current_hash + (f" · {date}" if date else "")
+        return {
+            "version": version,
+            "kind": kind,
+            "source": source,
+            "summary": summary,
+            "commit": commit,
+            "commitMessage": self._current_msg if kind == "git" else "",
+            "ahead": self._ahead if kind == "git" else 0,
+            "system": f"{platform.system()} · Python {platform.python_version()} · Qt {qVersion()}",
+        }
+
+    @Property("QVariantList", notify=changed)
+    def history(self):
+        """Settings → What's new: the changes of each version, newest first. Changes that are not
+        released yet show only on a git checkout that already has them."""
+        return changelog.entries(language(), include_next=not self._release_mode and self._ahead > 0)
 
     @Slot(int)
     def _set_progress(self, pct: int):

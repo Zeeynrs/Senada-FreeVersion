@@ -1,0 +1,160 @@
+"""What changed in each version, shown in Settings → What's new (newest first).
+
+Kept in the app (not fetched) so it works offline and matches the code that is running.
+Each entry has the text in English and Indonesian. "next" collects what is on `main` but
+not in a release yet; when releasing, give it the new version number and date and start
+a fresh "next" entry.
+"""
+
+CHANGELOG = [
+    {
+        "version": "next",
+        "date": "",
+        "en": {
+            "new": [
+                "What's new: this page, with the version of Senada on this device.",
+                "Accent colors are easier to see: the playing song, the open page, the sung lyric line, chosen filters and a soft glow at the top of the pages. "
+                "Settings → Appearance → Accent strength turns the glow off.",
+            ],
+            "fixed": [
+                "A song that will not play is tried in another version from YouTube Music, and otherwise skipped, so the queue never gets stuck.",
+                "When YouTube limits requests from your network for a while, Senada says so and waits instead of skipping through the whole playlist.",
+                "Songs that are not on YouTube Music get a “?” mark in the list: click it to pick a version yourself.",
+                "The language dropdown in Settings showed English even when Indonesian was on.",
+            ],
+        },
+        "id": {
+            "new": [
+                "Apa yang baru: halaman ini, lengkap dengan versi Senada di perangkat ini.",
+                "Warna aksen lebih terasa: lagu yang diputar, halaman yang dibuka, baris lirik yang dinyanyikan, filter yang dipilih, dan cahaya lembut di atas halaman. "
+                "Pengaturan → Tampilan → Intensitas aksen bisa mematikan cahayanya.",
+            ],
+            "fixed": [
+                "Lagu yang gagal diputar dicoba dengan versi lain dari YouTube Music, atau dilewati, jadi antrean tidak pernah macet.",
+                "Saat YouTube sementara membatasi permintaan dari jaringanmu, Senada memberi tahu dan menunggu, tidak melompati seluruh playlist.",
+                "Lagu yang tidak ada di YouTube Music diberi tanda “?” di daftar: klik untuk memilih versinya sendiri.",
+                "Dropdown bahasa di Pengaturan menampilkan English walaupun bahasa Indonesia yang aktif.",
+            ],
+        },
+    },
+    {
+        "version": "1.0.4",
+        "date": "2026-11-13",
+        "en": {
+            "new": [
+                "Settings open as a window over the app, with sections and a search box on the left, theme cards and dropdowns.",
+                "Accent colors for the logo, play buttons, seek bar and other details: Mint, Indigo, Sky, Aurora, Sunset, Ocean, Forest, Berry, Amber, Rose, Carbon and Chrome.",
+            ],
+            "fixed": [
+                "Touchpad scrolling is smoother: lists keep gliding after you lift your fingers, and follow them a little faster.",
+            ],
+        },
+        "id": {
+            "new": [
+                "Pengaturan terbuka sebagai jendela di atas aplikasi, dengan kategori dan kolom cari di kiri, kartu tema, dan dropdown.",
+                "Warna aksen untuk logo, tombol putar, bilah lagu, dan detail lain: Mint, Indigo, Langit, Aurora, Senja, Samudra, Hutan, Beri, Amber, Mawar, Karbon, dan Krom.",
+            ],
+            "fixed": [
+                "Scroll touchpad lebih halus: daftar terus meluncur setelah jari diangkat dan sedikit lebih cepat mengikuti jari.",
+            ],
+        },
+    },
+    {
+        "version": "1.0.3",
+        "date": "2026-11-13",
+        "en": {
+            "new": [
+                "Two languages: English (default) and Indonesian, switched in Settings without a restart.",
+                "The Settings button (and Ctrl+,) closes Settings again.",
+            ],
+            "fixed": [
+                "Music starts much faster (2–3 seconds instead of about 8), and the next song is prepared ahead so changes have no gap.",
+                "Repeat one now really plays the song again from the start.",
+            ],
+        },
+        "id": {
+            "new": [
+                "Dua bahasa: Inggris (bawaan) dan Indonesia, diganti di Pengaturan tanpa mulai ulang.",
+                "Tombol Pengaturan (dan Ctrl+,) bisa menutup Pengaturan lagi.",
+            ],
+            "fixed": [
+                "Musik mulai jauh lebih cepat (2–3 detik, sebelumnya sekitar 8), dan lagu berikutnya disiapkan lebih dulu sehingga perpindahan tanpa jeda.",
+                "Mode ulangi satu lagu kini benar-benar mengulang lagu dari awal.",
+            ],
+        },
+    },
+    {
+        "version": "1.0.2",
+        "date": "2026-11-13",
+        "en": {
+            "fixed": [
+                "Transparent mode on Windows shows the blurred desktop behind the window instead of a flat grey or black sheet. Windows 10 gets a blur too.",
+            ],
+        },
+        "id": {
+            "fixed": [
+                "Mode Transparan di Windows kini memperlihatkan desktop yang di-blur di belakang jendela, bukan lembar abu-abu atau hitam. Windows 10 juga mendapat blur.",
+            ],
+        },
+    },
+    {
+        "version": "1.0.1",
+        "date": "2026-11-13",
+        "en": {
+            "fixed": [
+                "Importing a Spotify playlist on Windows no longer fails with “CERTIFICATE_VERIFY_FAILED”.",
+            ],
+        },
+        "id": {
+            "fixed": [
+                "Impor playlist Spotify di Windows tidak lagi gagal dengan pesan “CERTIFICATE_VERIFY_FAILED”.",
+            ],
+        },
+    },
+    {
+        "version": "1.0.0",
+        "date": "2026-11-12",
+        "en": {
+            "new": [
+                "The first release: no account needed. Music comes from YouTube Music, ad-free, and your library stays on this device.",
+                "Import whole Spotify playlists and albums by link; every song is matched to its YouTube Music version.",
+                "Glass effect, full-screen player with lyrics, and a Windows installer that updates itself.",
+            ],
+        },
+        "id": {
+            "new": [
+                "Rilis pertama: tanpa akun. Musik dari YouTube Music tanpa iklan, dan library tersimpan di perangkat ini.",
+                "Impor seluruh playlist dan album Spotify lewat link; setiap lagu dicocokkan ke versinya di YouTube Music.",
+                "Efek kaca, pemutar layar penuh dengan lirik, dan installer Windows yang memperbarui dirinya sendiri.",
+            ],
+        },
+    },
+]
+
+MONTHS = {
+    "en": ["January", "February", "March", "April", "May", "June", "July", "August",
+           "September", "October", "November", "December"],
+    "id": ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus",
+           "September", "Oktober", "November", "Desember"],
+}
+
+
+def format_date(iso: str, lang: str) -> str:
+    """'2026-11-13' -> '13 November 2026' (month in the language); '' stays ''."""
+    try:
+        year, month, day = (int(p) for p in iso.split("-"))
+        return f"{day} {MONTHS.get(lang, MONTHS['en'])[month - 1]} {year}"
+    except (ValueError, IndexError, AttributeError):
+        return ""
+
+
+def entries(lang: str, include_next: bool) -> list[dict]:
+    """The changelog in one language: [{version, date, new: [...], fixed: [...]}]."""
+    out = []
+    for e in CHANGELOG:
+        if e["version"] == "next" and not include_next:
+            continue
+        text = e.get(lang) or e["en"]
+        out.append({"version": e["version"], "date": format_date(e["date"], lang),
+                    "new": list(text.get("new", [])), "fixed": list(text.get("fixed", []))})
+    return out
