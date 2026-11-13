@@ -215,6 +215,7 @@ Senada streams audio from YouTube with `yt-dlp`.
 - If YouTube changed something recently, update `yt-dlp`:
   - Windows (installer): `"%LOCALAPPDATA%\Programs\Senada\bin\yt-dlp.exe" -U`
   - Linux: with your package manager, or `yt-dlp -U`
+- Still silent? **Settings → About → Logs → Open folder** shows `senada.log` and `mpv.log`; attach them when you report the problem.
 </details>
 
 <details>
@@ -230,6 +231,7 @@ Click **More info → Run anyway** on the SmartScreen prompt.
 | :--- | :--- | :--- |
 | Library & settings | `%APPDATA%\Senada` | `~/.config/senada` |
 | Cache | `%LOCALAPPDATA%\Senada\Cache` | `~/.cache/senada` |
+| Logs | `%LOCALAPPDATA%\Senada\logs` | `~/.cache/senada/logs` |
 </details>
 
 ### Senada vs Nada
@@ -467,6 +469,7 @@ Senada memutar audio dari YouTube lewat `yt-dlp`.
 - Kalau YouTube baru mengubah sesuatu, perbarui `yt-dlp`:
   - Windows (installer): `"%LOCALAPPDATA%\Programs\Senada\bin\yt-dlp.exe" -U`
   - Linux: lewat package manager-mu, atau `yt-dlp -U`
+- Masih tidak ada suara? **Pengaturan → Tentang → Log → Buka folder** berisi `senada.log` dan `mpv.log`; lampirkan saat melaporkan masalah.
 </details>
 
 <details>
@@ -482,6 +485,7 @@ Klik **More info → Run anyway** pada layar SmartScreen.
 | :--- | :--- | :--- |
 | Library & pengaturan | `%APPDATA%\Senada` | `~/.config/senada` |
 | Cache | `%LOCALAPPDATA%\Senada\Cache` | `~/.cache/senada` |
+| Log | `%LOCALAPPDATA%\Senada\logs` | `~/.cache/senada/logs` |
 </details>
 
 ### Senada vs Nada

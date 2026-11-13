@@ -10,6 +10,12 @@ CHANGELOG = [
     {
         "version": "next",
         "date": "",
+        "en": {"new": [], "fixed": []},
+        "id": {"new": [], "fixed": []},
+    },
+    {
+        "version": "1.0.6",
+        "date": "2026-11-13",
         "en": {
             "new": [
                 "Import playlists from YouTube Music too: paste a link to a public or unlisted playlist or album "
