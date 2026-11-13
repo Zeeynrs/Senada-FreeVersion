@@ -21,6 +21,9 @@ CHANGELOG = [
                 "around the record and each equalizer band is a spoke with a knob, next to a pitch fader with 33 / 45 buttons; "
                 "on the cassette the queue is a handwritten track list and the equalizer a tape deck panel with LED meters and faders.",
                 "Equalizer and tempo settings are kept after closing the panel or Senada, and are the same in every full view style.",
+                "The equalizer and tempo now change the sound: the six bands and presets (Bass Boost, Rock, Vocal…) shape the "
+                "music as it plays without a break while dragging, and the tempo plays songs faster or slower, with or without "
+                "keeping the original pitch. The equalizer starts flat.",
                 "Seek bar styles (Settings → Appearance → Seek bar): a line, a wave that ripples while the song plays, "
                 "a waveform of bars with its own shape for each song, or dots.",
                 "Three more full view styles: Poster (the cover large, the title huge and upright beside it, the sung line "
@@ -41,6 +44,9 @@ CHANGELOG = [
                 "mengelilingi piringan dan tiap pita equalizer berupa jari-jari dengan kenop, di samping fader pitch dengan tombol 33 / 45; "
                 "di kaset antrean berupa daftar lagu tulisan tangan dan equalizer berupa panel tape deck dengan meter LED dan fader.",
                 "Pengaturan equalizer dan tempo tetap tersimpan setelah panel atau Senada ditutup, dan sama di semua gaya tampilan penuh.",
+                "Equalizer dan tempo kini benar-benar mengubah suara: enam pita dan presetnya (Bass Boost, Rock, Vokal…) membentuk "
+                "musik saat diputar tanpa jeda ketika slider digeser, dan tempo memutar lagu lebih cepat atau lambat, dengan atau "
+                "tanpa mempertahankan nada asli. Equalizer dimulai datar.",
                 "Gaya bilah progres (Pengaturan → Tampilan → Bilah progres): garis, gelombang yang beriak saat lagu diputar, "
                 "bentuk gelombang dari batang-batang yang berbeda untuk tiap lagu, atau titik-titik.",
                 "Tiga gaya tampilan penuh baru: Poster (sampul besar, judul raksasa berdiri di sampingnya, baris yang dinyanyikan "

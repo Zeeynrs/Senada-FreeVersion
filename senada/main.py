@@ -91,7 +91,7 @@ def main():
 
     session.languageChanged.connect(on_language)
     lyrics = Lyrics(player, worker, settings, downloads)
-    effects = AudioEffects(settings)
+    effects = AudioEffects(settings, audio_engine)
     visualizer = Visualizer()
     updater = Updater(worker)
     updater.toast.connect(session.toast)

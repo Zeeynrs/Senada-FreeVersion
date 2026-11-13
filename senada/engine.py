@@ -31,6 +31,34 @@ MAX_PENDING = 50         # commands kept while not connected yet
 MAX_RESTARTS = 3         # mpv started again after it stopped by itself, before giving up
 
 
+# ---- equalizer ---------------------------------------------------------------------------
+# A lavfi filter graph: a pre-gain that makes room for the boosts, a low shelf, four peaking
+# bands, a high shelf, and a limiter that catches what still goes over full scale. Every band
+# is in the graph even at 0 dB so that its gain can be changed later by a filter command.
+
+EQ_LABEL = "senada-eq"
+# (filter, centre frequency in Hz, extra options) per band, in the order of effects.BANDS
+EQ_BANDS = (("bass", 60, ""), ("equalizer", 150, ":t=o:w=1.3"), ("equalizer", 400, ":t=o:w=1.3"),
+            ("equalizer", 1000, ":t=o:w=1.2"), ("equalizer", 2000, ":t=o:w=1.5"), ("treble", 15000, ""))
+
+
+def eq_preamp(gains_db) -> float:
+    """dB taken off before the bands: half the largest boost (the limiter handles the rest)."""
+    return -round(max(0.0, *gains_db) / 2, 2) or 0.0  # (never "-0")
+
+
+def eq_graph(gains_db) -> str:
+    bands = ",".join(f"{kind}@b{i}=f={freq}{extra}:g={g:g}"
+                     for i, ((kind, freq, extra), g) in enumerate(zip(EQ_BANDS, gains_db)))
+    return f"volume@pre=volume={eq_preamp(gains_db):g}dB,{bands},alimiter@limit=limit=1:level=0"
+
+
+def eq_commands(gains_db) -> list[tuple[str, str, str]]:
+    """(filter, command, value) that set the running graph to these gains."""
+    return ([("volume@pre", "volume", f"{eq_preamp(gains_db):g}dB")]
+            + [(f"{kind}@b{i}", "g", f"{g:g}") for i, ((kind, _f, _x), g) in enumerate(zip(EQ_BANDS, gains_db))])
+
+
 def find_tool(name: str) -> str | None:
     """A helper program (mpv, yt-dlp): bundled copy first, then PATH, then usual install places."""
     exe = name + (".exe" if IS_WINDOWS else "")
@@ -81,6 +109,11 @@ class AudioEngine(QObject):
         self._duration_ms = 0
         self._queued = ""    # url appended to mpv's playlist, played by mpv itself when the current file ends
         self._advanced = ""  # queued url mpv has already moved on to; the next play() of it is a no-op
+        self._eq: list[float] | None = None  # equalizer band gains in dB (see effects.py), None: no equalizer
+        self._eq_built = False   # mpv has the equalizer filter
+        self._eq_stale = False   # gains changed by filter commands since the filter was built
+        self._speed = 1.0
+        self._keep_pitch = True
 
         self.sock = QLocalSocket(self)
         self.sock.connected.connect(self._on_connected)
@@ -203,6 +236,10 @@ class AudioEngine(QObject):
                     ["observe_property", 3, "duration"],
                     ["observe_property", 4, "idle-active"]):
             self._send_command(cmd)
+        # a new mpv (first start, or started again) has none of the effects yet
+        self._eq_built = False
+        self._apply_tempo()
+        self._apply_eq()
         pending, self._pending = self._pending, []
         for line in pending:
             self.sock.write(line)
@@ -292,6 +329,10 @@ class AudioEngine(QObject):
         elif event == "playback-restart":  # a file started (or a seek finished)
             self._idle = False
             self._update_playing()
+            if self._eq_stale:
+                # a gapless next file in another sample rate rebuilds the filter from its
+                # original graph: give it the current gains again
+                self._send_eq_gains()
 
     def _update_playing(self):
         playing = not self._paused and not self._idle
@@ -311,6 +352,8 @@ class AudioEngine(QObject):
         self._advanced = self._queued = ""  # "replace" drops the rest of mpv's playlist
         self._duration_ms = 0
         self._last_pos_ms = 0
+        if self._eq_stale:
+            self._apply_eq()  # between songs a rebuilt filter is not heard
         # not the stream address itself: it is long and carries this network's IP address
         logger.info("play %s", "direct stream" if "googlevideo.com/" in url else url)
         self._send_command(["loadfile", url, "replace"])
@@ -340,6 +383,49 @@ class AudioEngine(QObject):
 
     def set_volume(self, pct: int):
         self._send_command(["set_property", "volume", max(0, min(100, pct))])
+
+    # ---- audio effects ----------------------------------------------------------------
+
+    def set_tempo(self, speed: float, keep_pitch: bool):
+        """Play faster or slower; without keep_pitch the key follows the speed like a record."""
+        speed, keep_pitch = float(speed), bool(keep_pitch)
+        if (speed, keep_pitch) != (self._speed, self._keep_pitch):
+            self._speed, self._keep_pitch = speed, keep_pitch
+            self._apply_tempo()
+
+    def _apply_tempo(self):
+        self._send_command(["set_property", "audio-pitch-correction", self._keep_pitch])
+        self._send_command(["set_property", "speed", self._speed])
+
+    def set_equalizer(self, gains_db: list[float] | None):
+        """Band gains in dB (one per EQ_BANDS entry), or None to take the equalizer out.
+
+        Once the filter is in, new gains go to the running filter as filter commands: the
+        sound goes on without the gap that rebuilding the filter would make on every step
+        of a dragged slider."""
+        gains = [round(float(g), 2) for g in gains_db] if gains_db else None
+        if gains == self._eq:
+            return
+        self._eq = gains
+        if gains is not None and self._eq_built:
+            self._send_eq_gains()
+            self._eq_stale = True
+        else:
+            self._apply_eq()
+
+    def _apply_eq(self):
+        self._eq_stale = False
+        if self._eq is None:
+            if self._eq_built:
+                self._send_command(["af", "clr", ""])
+            self._eq_built = False
+            return
+        self._send_command(["af", "set", f"@{EQ_LABEL}:lavfi=[{eq_graph(self._eq)}]"])
+        self._eq_built = True
+
+    def _send_eq_gains(self):
+        for target, command, arg in eq_commands(self._eq):
+            self._send_command(["af-command", EQ_LABEL, command, arg, target])
 
     def stop(self):
         self._advanced = self._queued = ""

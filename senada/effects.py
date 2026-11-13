@@ -3,7 +3,8 @@
 The full view draws these controls in several ways (the classic panel, the turntable's
 spokes, the cassette deck's faders); they all read and change this one object, so a change
 in one style shows in the others and survives a restart. Saving waits a moment so that
-dragging a slider does not write the settings file on every step.
+dragging a slider does not write the settings file on every step. Every change also goes
+straight to the audio engine (mpv): the bands as an equalizer filter, the tempo as its speed.
 """
 
 from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
@@ -17,16 +18,27 @@ PRESETS = {
     "Vocal": [-0.15, 0.05, 0.38, 0.48, 0.25, -0.05],
     "Flat": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
 }
+MAX_DB = 12
 TEMPO_MIN, TEMPO_MAX = 0.5, 2.0
-DEFAULTS = {"enabled": True, "preset": "Custom", "bands": PRESETS["Custom"], "tempo": 1.0, "keepPitch": False}
+# flat by default: the sound is left as it is until the user changes it
+DEFAULTS = {"enabled": True, "preset": "Flat", "bands": PRESETS["Flat"], "tempo": 1.0, "keepPitch": False}
+
+
+def gains_db(state: dict) -> list[float] | None:
+    """The equalizer's band gains in dB, or None when it is off or flat (no filter at all)."""
+    if not state["enabled"]:
+        return None
+    gains = [round(float(b) * MAX_DB, 2) for b in state["bands"]]
+    return gains if any(abs(g) >= 0.05 for g in gains) else None
 
 
 class AudioEffects(QObject):
     changed = Signal()
 
-    def __init__(self, settings, parent=None):
+    def __init__(self, settings, engine=None, parent=None):
         super().__init__(parent)
         self.settings = settings
+        self.engine = engine
         saved = settings["effects"] or {}
         self._state = {**DEFAULTS, **{k: v for k, v in saved.items() if k in DEFAULTS}}
         bands = self._state["bands"]
@@ -36,6 +48,13 @@ class AudioEffects(QObject):
         self._save_timer.setSingleShot(True)
         self._save_timer.setInterval(600)
         self._save_timer.timeout.connect(self._save)
+        self._apply()
+
+    def _apply(self):
+        if self.engine is None:
+            return
+        self.engine.set_tempo(self._state["tempo"], self._state["keepPitch"])
+        self.engine.set_equalizer(gains_db(self._state))
 
     def _save(self):
         self.settings["effects"] = dict(self._state)
@@ -45,6 +64,7 @@ class AudioEffects(QObject):
         if not changed:
             return
         self._state.update(changed)
+        self._apply()
         self.changed.emit()
         self._save_timer.start()
 
