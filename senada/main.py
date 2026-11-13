@@ -138,6 +138,10 @@ def main():
     player.start()
 
     ret = app.exec()
+    # the interface goes first: torn down after the objects it shows (lyrics, player, …),
+    # its bindings would read them as null and fill the log with errors
+    del window, ctx
+    del engine
     if restarting:
         if FROZEN:  # Senada.exe restarts itself
             args = [sys.executable, *sys.argv[1:]]
