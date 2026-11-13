@@ -14,7 +14,7 @@ Item {
     readonly property string currentKey: stack.currentItem ? stack.currentItem.pageKey : ""
     readonly property string libraryFilter: currentKey === "library" ? stack.currentItem.filter : ""
     // these replace each other instead of piling up
-    readonly property var topLevel: ["search", "library", "liked"]
+    readonly property var topLevel: ["search", "library", "liked", "offline"]
 
     function entryOf(item) {
         if (!item) return null
@@ -49,12 +49,12 @@ Item {
             return
         }
         const key = kind + ":" + itemId
-        const standalone = kind === "liked" || topLevel.indexOf(kind) >= 0
+        const standalone = kind === "liked" || kind === "offline" || topLevel.indexOf(kind) >= 0
         if (currentKey === key || currentKey === kind || (!standalone && !itemId))
             return
         if (topLevel.indexOf(kind) >= 0 && stack.depth > 1)
             stack.pop(null, StackView.Immediate)
-        if (kind === "playlist" || kind === "album" || kind === "liked")
+        if (kind === "playlist" || kind === "album" || kind === "liked" || kind === "offline")
             stack.push(collectionComp, { kind: kind, itemId: itemId })
         else if (kind === "artist")
             stack.push(artistComp, { itemId: itemId })

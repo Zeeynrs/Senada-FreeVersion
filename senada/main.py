@@ -15,6 +15,7 @@ from .config import BIN_DIR, FROZEN, IS_WINDOWS, ROOT, Settings
 from .engine import AudioEngine
 from .resolver import AudioResolver
 from .library import Library
+from .downloads import Downloads
 from .lyrics import Lyrics
 from .player import Player
 from .session import Session
@@ -75,9 +76,12 @@ def main():
     session = Session(settings, worker)
     audio_engine = AudioEngine()
     resolver = AudioResolver()
-    player = Player(worker, audio_engine, resolver, settings, store, catalog)
+    downloads = Downloads(resolver)
+    catalog.downloads = downloads
+    player = Player(worker, audio_engine, resolver, settings, store, catalog, downloads)
     library = Library(store, catalog, worker, session, player, resolver)
     library.toast.connect(session.toast)
+    downloads.toast.connect(session.toast)
 
     def on_language():  # text made in Python follows too: pages, Home shelves, update status
         catalog.clear()
@@ -85,7 +89,7 @@ def main():
         updater.changed.emit()
 
     session.languageChanged.connect(on_language)
-    lyrics = Lyrics(player, worker, settings)
+    lyrics = Lyrics(player, worker, settings, downloads)
     visualizer = Visualizer()
     updater = Updater(worker)
     updater.toast.connect(session.toast)
@@ -110,7 +114,7 @@ def main():
     engine.warnings.connect(lambda ws: [print("QML:", w.toString(), file=sys.stderr) for w in ws])
     ctx = engine.rootContext()
     for name, obj in (("session", session), ("player", player), ("library", library),
-                      ("lyrics", lyrics), ("visualizer", visualizer),
+                      ("lyrics", lyrics), ("visualizer", visualizer), ("downloads", downloads),
                       ("updater", updater)):
         ctx.setContextProperty(name, obj)
     engine.load(str(ROOT / "qml" / "Main.qml"))

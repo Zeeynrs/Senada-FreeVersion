@@ -24,6 +24,8 @@ Item {
             color: hover.hovered ? btn.hoverTint : btn.tint
             font.pixelSize: btn.fontSize
             text: {
+                if (lyrics.offline && lyrics.sourceName)
+                    return I18n.t("Lyrics source: {name}", { name: I18n.t("{name}, saved for offline", { name: lyrics.sourceName }) })
                 const name = lyrics.source === "auto"
                     ? I18n.t("Automatic") + (lyrics.sourceName ? " · " + lyrics.sourceName : "")
                     : lyrics.sources.find(s => s.key === lyrics.source).name

@@ -14,6 +14,9 @@ Item {
     property bool saved: false
     property bool canImport: false   // public Spotify page: copy into an own playlist
     property bool isLocal: false     // own playlist: rename / delete
+    property bool canDownload: false // songs can be kept for offline
+    property int downloadedCount: 0
+    property int trackCount: 0
     // the player is playing this collection right now (the pill becomes "Jeda")
     readonly property bool nowPlaying: !!player.state.contextUri
                                        && (player.state.contextUri === h.info.playUri || player.state.contextUri === h.info.uri)
@@ -21,6 +24,7 @@ Item {
     signal shuffleAll()
     signal saveToggled()
     signal importRequested()
+    signal downloadAll()
     signal renameRequested()
     signal deleteRequested()
 
@@ -154,6 +158,16 @@ Item {
                     tint: h.saved ? Theme.like : Theme.text
                     tip: h.saved ? I18n.t("Remove from Library") : I18n.t("Save to Library")
                     onClicked: h.saveToggled()
+                }
+                SquareButton {
+                    readonly property bool allDone: h.trackCount > 0 && h.downloadedCount >= h.trackCount
+                    visible: h.canDownload && !h.loading
+                    iconName: allDone ? "downloaded" : "download-circle"
+                    tint: allDone ? Theme.ok : Theme.text
+                    tip: allDone ? I18n.t("Every song is downloaded")
+                       : h.downloadedCount > 0 ? I18n.t("Download the other songs for offline ({done} of {total} downloaded)", { done: h.downloadedCount, total: h.trackCount })
+                       : I18n.t("Download all songs for offline")
+                    onClicked: if (!allDone) h.downloadAll()
                 }
                 NButton {
                     anchors.verticalCenter: parent.verticalCenter

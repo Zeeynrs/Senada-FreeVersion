@@ -65,8 +65,10 @@ class Player(QObject):
     historyChanged = Signal()
     trackMatched = Signal(str, "QVariantMap")  # uri, {imageSmall, image, imageLarge, matchScore}
 
-    def __init__(self, worker, engine: AudioEngine, resolver: AudioResolver, settings, store, catalog, parent=None):
+    def __init__(self, worker, engine: AudioEngine, resolver: AudioResolver, settings, store, catalog,
+                 downloads=None, parent=None):
         super().__init__(parent)
+        self.downloads = downloads  # songs saved for offline: played from the file, no internet needed
         self.store = store
         self.catalog = catalog
         self.worker = worker
@@ -214,6 +216,9 @@ class Player(QObject):
                 logger.info("no direct stream for %s: %s", info["v"], e)
         return info, url, problem
 
+    def _local_file(self, uri: str) -> str | None:
+        return self.downloads.path_for(uri) if self.downloads is not None and uri else None
+
     def _current_track(self) -> dict | None:
         if 0 <= self._queue_index < len(self._queue):
             return self._queue[self._queue_index]
@@ -276,6 +281,10 @@ class Player(QObject):
         uri = (track or {}).get("uri", "")
         if not uri or self._started[0] != self._play_token:  # nothing next, or a track change is under way
             self.engine.queue_next("")
+            return
+        local = self._local_file(uri)
+        if local:
+            self.engine.queue_next(local)
             return
         video_id = (self.resolver.cached(uri) or {}).get("v") or (uri.split(":", 2)[2] if uri.startswith("yt:track:") else "")
         url = self.streams.cached(video_id) if video_id else None
@@ -402,6 +411,14 @@ class Player(QObject):
         self.queueChanged.emit()
 
         self._on_track_changed(track)
+
+        # a downloaded song plays from its file; should that fail, it is streamed after all
+        # (_on_load_failed falls back to the YouTube upload it was downloaded from)
+        local = self._local_file(track.get("uri", ""))
+        if local:
+            self._started = (token, self.downloads.video_id_for(track["uri"]))
+            self.engine.play(local)
+            return
 
         # Resolve stream URL and play (imported tracks are matched to a YouTube Music upload first)
         def on_resolved(found):

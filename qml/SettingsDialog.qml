@@ -49,7 +49,7 @@ Popup {
           words: ["Keyboard shortcuts", "Play / pause", "Search", "Volume up / down", "Next / previous song", "Mini player"] },
         { group: "Preferences", key: "profile", icon: "person", title: "Profile & Library",
           desc: "Your name and the music kept on this device.",
-          words: ["Display name", "Import a playlist", "Import from Spotify", "Spotify", "YouTube Music", "YouTube", "Import", "Playlist"] },
+          words: ["Offline songs", "Download", "Downloads", "Offline", "Open folder", "Display name", "Import a playlist", "Import from Spotify", "Spotify", "YouTube Music", "YouTube", "Import", "Playlist"] },
         { group: "App", key: "whatsnew", icon: "new", title: "What's new",
           desc: "What changed in each version, and which version is on this device.",
           words: ["Changelog", "Log", "Release", "Version", "On this device", "Version history"] },
@@ -870,6 +870,16 @@ Popup {
                         enabled: importField.text.trim().length > 0
                         onClicked: { library.importLink(importField.text.trim()); importField.text = "" }
                     }
+                }
+            }
+            Divider {}
+            SettingRow {
+                label: I18n.t("Offline songs")
+                hint: I18n.t("{n} downloaded ({size}), kept in {path}. They play without internet.",
+                             { n: downloads.count, size: downloads.sizeText, path: downloads.folderPath })
+                NButton {
+                    text: I18n.t("Open folder")
+                    onClicked: downloads.openFolder()
                 }
             }
             Divider {}

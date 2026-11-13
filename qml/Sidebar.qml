@@ -103,6 +103,12 @@ Rectangle {
                 width: parent.width
                 spacing: 0
                 NavEntry { sub: true; text: I18n.t("Liked songs"); current: side.currentKey === "liked:"; onClicked: Nav.go("liked") }
+                NavEntry {
+                    sub: true
+                    text: downloads.pending > 0 ? I18n.t("Offline songs") + "  ↓" + downloads.pending : I18n.t("Offline songs")
+                    current: side.currentKey === "offline:"
+                    onClicked: Nav.go("offline")
+                }
                 NavEntry { sub: true; text: I18n.t("Albums"); current: side.libraryFilter === "album"; onClicked: Nav.go("library", "album") }
                 NavEntry { sub: true; text: I18n.t("Artists"); current: side.libraryFilter === "artist"; onClicked: Nav.go("library", "artist") }
                 NavEntry { sub: true; text: I18n.t("Playlists"); current: side.libraryFilter === "playlist"; onClicked: Nav.go("library", "playlist") }

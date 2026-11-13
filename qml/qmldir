@@ -8,6 +8,7 @@ CircularSpectrum 1.0 CircularSpectrum.qml
 CollectionPage 1.0 CollectionPage.qml
 Cover 1.0 Cover.qml
 DevicesPopup 1.0 DevicesPopup.qml
+DownloadButton 1.0 DownloadButton.qml
 EqualizerView 1.0 EqualizerView.qml
 HomePage 1.0 HomePage.qml
 Icon 1.0 Icon.qml

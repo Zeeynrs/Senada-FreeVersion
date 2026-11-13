@@ -1,5 +1,6 @@
 """One place that knows where each collection comes from.
 
+kinds without id: liked (Liked Songs), offline (downloaded songs, see downloads.py)
 ids:  local-xxxx -> own playlist (LocalStore)
       sp-xxxx    -> public Spotify playlist/album (embed page)
       anything else -> YouTube Music (album MPREb_…, artist UC…, playlist PL…/RDCLAK…/OLAK…)
@@ -19,6 +20,7 @@ CACHE_TTL = 600  # seconds a remote page stays fresh
 class Catalog:
     def __init__(self, store: LocalStore):
         self.store = store
+        self.downloads = None  # set by main: the "Offline songs" page
         self._cache = {}
         self._lock = threading.Lock()
 
@@ -70,6 +72,10 @@ class Catalog:
     def load(self, kind: str, cid: str) -> dict:
         if kind == "liked":
             return self.liked_page()
+        if kind == "offline":
+            if self.downloads is None:
+                raise LookupError(tr("Downloads are not available."))
+            return self.downloads.page()
         if kind == "playlist" and cid.startswith("local-"):
             return self.local_page(cid)
         if cid.startswith("sp-"):

@@ -202,8 +202,9 @@ class Lyrics(QObject):
     currentChanged = Signal()
     sourceChanged = Signal()
 
-    def __init__(self, player, worker, settings, parent=None):
+    def __init__(self, player, worker, settings, downloads=None, parent=None):
         super().__init__(parent)
+        self.downloads = downloads  # lyrics saved with downloaded songs, used without internet
         self.player = player
         self.worker = worker
         self.settings = settings
@@ -215,6 +216,7 @@ class Lyrics(QObject):
         self._synced = False
         self._status = "idle"
         self._from = ""
+        self._offline = False  # the lyrics shown are the ones saved with a downloaded song
         self._current = -1
         player.trackChanged.connect(self._on_track)
         player.positionChanged.connect(self._on_position)
@@ -257,6 +259,11 @@ class Lyrics(QObject):
         """Name of the source the shown lyrics came from (empty when nothing is shown)."""
         return SOURCE_NAMES.get(self._from, "")
 
+    @Property(bool, notify=changed)
+    def offline(self):
+        """The lyrics shown were saved with the downloaded song (no internet needed)."""
+        return self._offline
+
     def _set(self, key, data, status):
         if key != self._key:
             return
@@ -264,6 +271,7 @@ class Lyrics(QObject):
         self._times = [l["t"] for l in self._lines]
         self._synced = data.get("synced", False)
         self._from = data.get("source", "") if self._lines else ""
+        self._offline = bool(data.get("offline")) and bool(self._lines)
         self._status = status if self._lines or status != "ready" else "none"
         self._current = -1
         self.changed.emit()
@@ -282,6 +290,13 @@ class Lyrics(QObject):
         if key in self._cache:
             self._set(key, self._cache[key], "ready")
             return
+        saved = self.downloads.lyrics_for(uri) if self.downloads is not None else None
+        if saved:
+            saved["offline"] = True
+        if saved and self._source in ("auto", saved.get("source")):
+            self._cache[key] = saved
+            self._set(key, saved, "ready")
+            return
         self._set(key, {}, "loading")
         track = dict(st)
         if uri.startswith("yt:track:"):
@@ -293,7 +308,12 @@ class Lyrics(QObject):
         def done(data):
             self._cache[key] = data
             self._set(key, data, "ready")
-        self.worker.run(lambda: fetch_lyrics(track, source), done, lambda e: self._set(key, {}, "error"))
+        def failed(e):  # offline: the lyrics saved with the download, from another source, still help
+            if saved:
+                self._set(key, saved, "ready")
+            else:
+                self._set(key, {}, "error")
+        self.worker.run(lambda: fetch_lyrics(track, source), done, failed)
 
     def _on_position(self):
         if not self._synced:

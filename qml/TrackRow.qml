@@ -21,6 +21,9 @@ Item {
     readonly property bool current: track.uri !== undefined && player.state.uri === track.uri
     readonly property bool playing: current && player.state.isPlaying
     readonly property bool liked: (library.likedRevision, library.isLiked(track.uri || ""))
+    // 101 downloaded, 0-100 downloading, -1 waiting, -2 not downloaded
+    readonly property int dl: (downloads.revision, downloads.progressRevision, downloads.stateOf(track.uri || ""))
+    readonly property bool downloadable: isYouTube || (track.uri || "").indexOf("spotify:track:") === 0
     readonly property bool imported: (track.uri || "").indexOf("spotify:track:") === 0
     readonly property bool unsure: imported && track.matchScore !== undefined && track.matchScore < library.matchThreshold
     readonly property bool wideTable: table && width - 2 * inset > 560
@@ -183,6 +186,14 @@ Item {
                         color: Theme.like
                     }
                     Badge { visible: !!row.track.explicit; text: "E" }
+                    DownloadButton {  // kept for offline, or on its way
+                        visible: row.dl !== -2
+                        track: row.track
+                        size: 14
+                        tint: row.dimInk
+                        implicitWidth: 16
+                        implicitHeight: 16
+                    }
                     Rectangle {  // the YouTube Music match for this imported song may be off
                         visible: row.unsure
                         width: 16; height: 16; radius: 8
@@ -309,6 +320,14 @@ Item {
                 onObjectAdded: (index, object) => addMenu.insertItem(index + 2, object)
                 onObjectRemoved: (index, object) => addMenu.removeItem(object)
             }
+        }
+        MenuItem {
+            visible: row.downloadable
+            height: visible ? implicitHeight : 0
+            text: row.dl === 101 ? I18n.t("Remove download")
+                : row.dl === -2 ? I18n.t("Download for offline")
+                : I18n.t("Cancel download")
+            onTriggered: row.dl === -2 ? downloads.download([row.track]) : downloads.remove(row.track.uri)
         }
         MenuItem {
             visible: row.imported

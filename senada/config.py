@@ -30,6 +30,9 @@ NO_WINDOW = subprocess.CREATE_NO_WINDOW if IS_WINDOWS else 0
 SETTINGS_FILE = CONFIG_DIR / "settings.json"
 LIBRARY_FILE = CONFIG_DIR / "library.json"
 AUDIO_CACHE = CACHE_DIR / "audio"
+# songs downloaded to play without internet: in the user's Music folder, easy to find and back up
+DOWNLOADS_DIR = Path(os.environ.get("SENADA_DOWNLOADS") or Path.home() / "Music" / "Senada")
+DOWNLOADS_FILE = CONFIG_DIR / "downloads.json"
 # senada.log and mpv.log: what happened, for when something does not work (%LOCALAPPDATA%\Senada\logs)
 LOG_DIR = CACHE_DIR.parent / "logs" if IS_WINDOWS else CACHE_DIR / "logs"
 

@@ -59,7 +59,7 @@ Rectangle {
                 implicitHeight: 26
                 Label {
                     id: titleLabel
-                    width: Math.max(0, Math.min(implicitWidth, titleRow.width - 32))
+                    width: Math.max(0, Math.min(implicitWidth, titleRow.width - 58))
                     anchors.verticalCenter: parent.verticalCenter
                     text: bar.hasTrack ? bar.s.name : I18n.t("Nothing playing yet")
                     elide: Text.ElideRight
@@ -78,6 +78,14 @@ Rectangle {
                     tint: bar.s.liked ? Theme.like : Theme.dim
                     tip: bar.s.liked ? I18n.t("Remove from Liked Songs") : I18n.t("Save to Liked Songs")
                     onClicked: player.toggleLike()
+                }
+                DownloadButton {
+                    x: titleLabel.width + 30
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: bar.hasTrack
+                    track: bar.s
+                    size: 15
+                    tint: Theme.dim
                 }
             }
             LinkLabel {

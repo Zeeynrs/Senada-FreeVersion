@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
-// Playlist, album and liked songs.
+// Playlist, album, liked songs and offline (downloaded) songs.
 Item {
     id: page
     property string kind
@@ -37,6 +37,14 @@ Item {
         else { sortKey = key; sortAsc = true }
     }
     readonly property bool isSpotify: itemId.indexOf("sp-") === 0
+    readonly property bool isOffline: kind === "offline"
+    // how many of these songs are downloaded, for the "download all" button
+    readonly property int downloadedCount: (downloads.revision, downloads.downloadedCount(tracks.map(t => t.uri)))
+
+    Connections {
+        target: downloads
+        function onChanged() { if (page.isOffline) library.load(page.kind, page.itemId) }
+    }
 
     Connections {
         target: library
@@ -104,8 +112,11 @@ Item {
             width: list.width
             info: page.info
             loading: page.loading
-            fallbackIcon: page.kind === "liked" ? "heart" : "note"
-            canSave: page.kind !== "liked" && !page.isLocal && !page.isSpotify && !page.info.error
+            fallbackIcon: page.kind === "liked" ? "heart" : page.isOffline ? "downloaded" : "note"
+            canSave: page.kind !== "liked" && !page.isOffline && !page.isLocal && !page.isSpotify && !page.info.error
+            canDownload: !page.isOffline && !page.info.error && page.tracks.length > 0
+            downloadedCount: page.downloadedCount
+            trackCount: page.tracks.length
             saved: (library.savedRevision, library.isSaved(page.kind, page.itemId))
             canImport: page.isSpotify && (page.info.tracks || []).length > 0
             isLocal: page.isLocal
@@ -113,8 +124,42 @@ Item {
             onShuffleAll: page.shuffleAll()
             onSaveToggled: library.toggleSaved(page.info)
             onImportRequested: library.importCollection(page.info)
+            onDownloadAll: downloads.download(page.tracks)
             onRenameRequested: Nav.renamePlaylist(page.itemId, page.info.name)
             onDeleteRequested: Nav.deletePlaylist(page.itemId, page.info.name)
+          }
+          // offline songs: what is downloading right now
+          Item {
+            id: downloadStrip
+            visible: page.isOffline && downloads.pending > 0
+            width: list.width
+            height: visible ? 44 : 0
+            Row {
+              x: 32
+              anchors.verticalCenter: parent.verticalCenter
+              spacing: 12
+              BusyIndicator {
+                anchors.verticalCenter: parent.verticalCenter
+                running: downloadStrip.visible
+                implicitWidth: 22
+                implicitHeight: 22
+              }
+              Label {
+                anchors.verticalCenter: parent.verticalCenter
+                text: downloads.current.name
+                      ? I18n.t("Downloading “{name}” — {p}%", { name: downloads.current.name, p: downloads.current.progress })
+                        + (downloads.pending > 1 ? "  ·  " + I18n.n("{n} more waiting", "{n} more waiting", downloads.pending - 1) : "")
+                      : I18n.t("Getting ready to download…")
+                color: Theme.dim
+                font.pixelSize: 13
+              }
+              LinkLabel {
+                anchors.verticalCenter: parent.verticalCenter
+                text: I18n.t("Cancel all")
+                font.pixelSize: 13
+                onClicked: downloads.cancelAll()
+              }
+            }
           }
           TrackTableHeader {
             visible: page.tracks.length > 0
