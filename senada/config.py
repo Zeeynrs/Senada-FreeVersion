@@ -38,7 +38,7 @@ LOG_DIR = CACHE_DIR.parent / "logs" if IS_WINDOWS else CACHE_DIR / "logs"
 
 # The Discord application whose name shows as "Listening to …" (discord.com/developers);
 # SENADA_DISCORD_APP_ID overrides it. Empty: no Rich Presence.
-DISCORD_APP_ID = (os.environ.get("SENADA_DISCORD_APP_ID") or "").strip()
+DISCORD_APP_ID = (os.environ.get("SENADA_DISCORD_APP_ID") or "1570939212226629734").strip()
 
 DEFAULTS = {
     "language": "en",  # "en" or "id" (see i18n.py)
