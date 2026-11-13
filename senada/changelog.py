@@ -26,6 +26,8 @@ CHANGELOG = [
                 "if the audio engine (mpv) stopped it is reported and started again on the next play, "
                 "and a song lookup that hangs is really stopped after 30 seconds instead of waiting forever.",
                 "Senada keeps a log (Settings → About → Logs) so a song that won't play can be looked into.",
+                "Windows: minimizing works again and the mini player shows; before, the window came straight back "
+                "because Windows hid the mini player together with it.",
             ],
         },
         "id": {
@@ -44,6 +46,8 @@ CHANGELOG = [
                 "kalau mesin audio (mpv) berhenti, itu dilaporkan dan mpv dinyalakan lagi saat putar ditekan, "
                 "dan pencarian lagu yang macet benar-benar dihentikan setelah 30 detik, tidak menunggu selamanya.",
                 "Senada kini menyimpan log (Pengaturan → Tentang → Log) supaya lagu yang tidak mau diputar bisa diselidiki.",
+                "Windows: jendela bisa diminimalkan lagi dan pemutar mini muncul; sebelumnya jendela langsung kembali "
+                "karena Windows ikut menyembunyikan pemutar mini bersamanya.",
             ],
         },
     },

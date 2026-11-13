@@ -35,6 +35,10 @@ Window {
     minimumHeight: height
     maximumHeight: height
     color: "transparent"
+    // not owned by the main window (a Window declared inside another one is, by default):
+    // Windows hides owned windows while their owner is minimized, which is exactly when the
+    // mini player shows, and Main.qml then took that for a close and brought the window back
+    transientParent: null
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus
            | (Qt.platform.os === "windows" ? Qt.Tool : 0)   // no second taskbar button
 

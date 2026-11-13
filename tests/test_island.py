@@ -19,6 +19,10 @@ class Rules(unittest.TestCase):
         margin = qml_int("margin")
         self.assertEqual(island.SIZE, (qml_int("wideW") + 2 * margin, qml_int("wideH") + 2 * margin))
 
+    def test_not_owned_by_the_main_window(self):
+        # an owned window is hidden by Windows while the main window is minimized
+        self.assertIn("transientParent: null", QML)
+
     def test_centred_between_the_bars(self):
         rule = island.lua_rule((34, 40, 0, 0))
         self.assertIn('move = {"(34+(monitor_w-34)*0.5-window_w*0.5)", "(40)"}', rule)
