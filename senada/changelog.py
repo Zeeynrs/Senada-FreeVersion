@@ -14,6 +14,36 @@ CHANGELOG = [
         "id": {"new": [], "fixed": []},
     },
     {
+        "version": "1.0.7",
+        "date": "2026-11-13",
+        "en": {
+            "new": [
+                "Download songs to listen without internet: right-click a song → Download for offline, the download button "
+                "next to the heart in the player bar, or the download button of a playlist, album or Liked Songs for all of them at once. "
+                "They gather in the new Offline songs playlist (sidebar, under Liked songs) and play from the file, with their cover and lyrics. "
+                "The files are kept in Music\\Senada; Settings → Profile & Library shows how much space they take and opens the folder.",
+                "Vinyl full view (Settings → Appearance → Full view style): a record spinning on the left edge with the cover as its label, "
+                "a tonearm that follows the song and can be dragged to seek, and the lyrics fanned out around the record.",
+                "More lyrics sources: besides LRCLIB, YouTube Music and NetEase. Automatic tries them in turn; "
+                "pick one in Settings → Lyrics or with the button under the lyrics.",
+            ],
+            "fixed": [],
+        },
+        "id": {
+            "new": [
+                "Unduh lagu untuk didengarkan tanpa internet: klik kanan lagu → Unduh untuk offline, tombol unduh di samping hati "
+                "di bilah pemutar, atau tombol unduh di playlist, album, atau Lagu disukai untuk semua lagunya sekaligus. "
+                "Lagunya terkumpul di playlist baru Lagu offline (sidebar, di bawah Lagu disukai) dan diputar dari file, lengkap dengan sampul dan liriknya. "
+                "File disimpan di Music\\Senada; Pengaturan → Profil & Library menampilkan ukurannya dan bisa membuka foldernya.",
+                "Tampilan penuh piringan hitam (Pengaturan → Tampilan → Gaya tampilan penuh): piringan berputar di sisi kiri dengan sampul sebagai labelnya, "
+                "lengan jarum yang mengikuti lagu dan bisa diseret untuk memajukan atau memundurkan, dan lirik yang menyebar mengelilingi piringan.",
+                "Sumber lirik bertambah: selain LRCLIB, ada YouTube Music dan NetEase. Otomatis mencobanya bergantian; "
+                "pilih salah satu di Pengaturan → Lirik atau lewat tombol di bawah lirik.",
+            ],
+            "fixed": [],
+        },
+    },
+    {
         "version": "1.0.6",
         "date": "2026-11-13",
         "en": {

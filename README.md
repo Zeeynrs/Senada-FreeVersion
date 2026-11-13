@@ -87,6 +87,7 @@ A free desktop music player for **Windows & Linux**, powered by the YouTube Musi
 - Home, search, albums, artists and playlists from the **YouTube Music** catalog: new releases, trending, charts and community mixes.
 - **Import** public playlists and albums from **Spotify** (each song is matched on YouTube Music) and from **YouTube Music** (songs play right away).
 - **Radio**: right-click a song → *Play radio from this song*.
+- **Offline songs**: download a song, playlist or album and play it without internet, with its cover and lyrics (*right-click → Download for offline*).
 - **Synced lyrics** from LRCLIB, YouTube Music or NetEase. Pick the source in *Settings → Lyrics* or from the button under the lyrics; *Automatic* tries all three in turn.
 - The next song is prepared in advance, so songs change without a gap.
 - If a song will not play, Senada tries another upload of it, and otherwise moves on: the queue never gets stuck.
@@ -100,7 +101,7 @@ A free desktop music player for **Windows & Linux**, powered by the YouTube Musi
 - Light and dark themes that follow Windows, KDE or GNOME, or that you pick yourself.
 - 12 accent colors: Mint, Indigo, Sky, Aurora, Sunset, Ocean, Forest, Berry, Amber, Rose, Carbon and Chrome.
 - Collapsible sidebar, a side panel for lyrics or the queue, and track lists you can sort by column.
-- **Full-screen player**: round cover inside a circular visualizer (*cava*), equalizer, tempo & pitch, queue and lyrics.
+- **Full-screen player**: round cover inside a circular visualizer (*cava*), equalizer, tempo & pitch, queue and lyrics — or a spinning **vinyl record** with a tonearm and the lyrics fanned out around it (*Settings → Appearance*).
 - **Mini player** ("dynamic island") while Senada is minimized.
 - **Glass effect** (optional): *Album cover* (every system) or *Transparent* (acrylic on Windows 11, blur on Hyprland / KDE).
 - Settings with search, and a **What's new** page with the version on your computer and the changes in each release.
@@ -230,6 +231,7 @@ Click **More info → Run anyway** on the SmartScreen prompt.
 | | Windows | Linux |
 | :--- | :--- | :--- |
 | Library & settings | `%APPDATA%\Senada` | `~/.config/senada` |
+| Offline songs | `%USERPROFILE%\Music\Senada` | `~/Music/Senada` |
 | Cache | `%LOCALAPPDATA%\Senada\Cache` | `~/.cache/senada` |
 | Logs | `%LOCALAPPDATA%\Senada\logs` | `~/.cache/senada/logs` |
 </details>
@@ -341,6 +343,7 @@ On GitHub Actions, add the `SENADA_SIGN_PFX_BASE64` and `SENADA_SIGN_PASSWORD` s
 - Beranda, pencarian, album, artis, dan playlist dari katalog **YouTube Music**: rilis baru, trending, tangga lagu, dan mix komunitas.
 - **Impor** playlist dan album publik dari **Spotify** (setiap lagu dicocokkan di YouTube Music) dan dari **YouTube Music** (lagu langsung bisa diputar).
 - **Radio**: klik kanan lagu → *Putar radio dari lagu ini*.
+- **Lagu offline**: unduh lagu, playlist, atau album lalu putar tanpa internet, lengkap dengan sampul dan liriknya (*klik kanan → Unduh untuk offline*).
 - **Lirik tersinkron** dari LRCLIB, YouTube Music, atau NetEase. Pilih sumbernya di *Pengaturan → Lirik* atau dari tombol di bawah lirik; *Otomatis* mencoba ketiganya bergantian.
 - Lagu berikutnya disiapkan lebih dulu, jadi perpindahan lagu tanpa jeda.
 - Kalau sebuah lagu gagal diputar, Senada mencoba versi unggahan lain, atau melewatinya: antrean tidak pernah macet.
@@ -354,7 +357,7 @@ On GitHub Actions, add the `SENADA_SIGN_PFX_BASE64` and `SENADA_SIGN_PASSWORD` s
 - Tema terang dan gelap yang mengikuti Windows, KDE, atau GNOME, atau dipilih sendiri.
 - 12 warna aksen: Mint, Indigo, Langit, Aurora, Senja, Samudra, Hutan, Beri, Amber, Mawar, Karbon, dan Krom.
 - Sidebar yang bisa disembunyikan, panel samping untuk lirik atau antrean, dan daftar lagu yang bisa diurutkan per kolom.
-- **Player layar penuh**: sampul bulat di tengah visualizer melingkar (*cava*), equalizer, tempo & pitch, antrean, dan lirik.
+- **Player layar penuh**: sampul bulat di tengah visualizer melingkar (*cava*), equalizer, tempo & pitch, antrean, dan lirik — atau **piringan hitam** yang berputar dengan lengan jarum dan lirik yang menyebar di sekelilingnya (*Pengaturan → Tampilan*).
 - **Pemutar mini** ("dynamic island") saat Senada diminimalkan.
 - **Efek kaca** (opsional): *Sampul album* (semua sistem) atau *Transparan* (acrylic di Windows 11, blur di Hyprland / KDE).
 - Pengaturan dengan kolom cari, dan halaman **Apa yang baru** berisi versi di komputermu serta perubahan di setiap rilis.
@@ -484,6 +487,7 @@ Klik **More info → Run anyway** pada layar SmartScreen.
 | | Windows | Linux |
 | :--- | :--- | :--- |
 | Library & pengaturan | `%APPDATA%\Senada` | `~/.config/senada` |
+| Lagu offline | `%USERPROFILE%\Music\Senada` | `~/Music/Senada` |
 | Cache | `%LOCALAPPDATA%\Senada\Cache` | `~/.cache/senada` |
 | Log | `%LOCALAPPDATA%\Senada\logs` | `~/.cache/senada/logs` |
 </details>
