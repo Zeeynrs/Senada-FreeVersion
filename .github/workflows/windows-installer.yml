@@ -39,6 +39,9 @@ jobs:
           # optional code signing: add these repository secrets to sign Senada.exe and the installer
           SENADA_SIGN_PFX_BASE64: ${{ secrets.SENADA_SIGN_PFX_BASE64 }}
           SENADA_SIGN_PASSWORD: ${{ secrets.SENADA_SIGN_PASSWORD }}
+          # Senada's Last.fm API account for scrobbling, kept out of the repository
+          SENADA_LASTFM_API_KEY: ${{ secrets.SENADA_LASTFM_API_KEY }}
+          SENADA_LASTFM_API_SECRET: ${{ secrets.SENADA_LASTFM_API_SECRET }}
         run: ./packaging/windows/build.ps1 -Python python
 
       - uses: actions/upload-artifact@v4

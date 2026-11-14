@@ -11,3 +11,5 @@ pkg/
 Senada-FreeVersion/
 bin/*
 !bin/README.txt
+# API keys written at build time (see senada/config.py)
+senada/_keys.py

@@ -40,10 +40,20 @@ LOG_DIR = CACHE_DIR.parent / "logs" if IS_WINDOWS else CACHE_DIR / "logs"
 # SENADA_DISCORD_APP_ID overrides it. Empty: no Rich Presence.
 DISCORD_APP_ID = (os.environ.get("SENADA_DISCORD_APP_ID") or "1570939212226629734").strip()
 
-# Last.fm answers only apps with their own key (https://www.last.fm/api/account/create);
-# empty: Last.fm is off and Libre.fm still works (see scrobble.py)
-LASTFM_API_KEY = (os.environ.get("SENADA_LASTFM_API_KEY") or "").strip()
-LASTFM_API_SECRET = (os.environ.get("SENADA_LASTFM_API_SECRET") or "").strip()
+# Senada's Last.fm API account, for scrobbling (scrobble.py). Not in git: the Windows build
+# writes senada/_keys.py from the repository's secrets (packaging/windows/build.ps1), and
+# SENADA_LASTFM_API_KEY / _SECRET in the environment take precedence. Without them Last.fm is
+# off and Libre.fm still works.
+def _build_key(name: str) -> str:
+    try:
+        from . import _keys
+    except ImportError:
+        return ""
+    return str(getattr(_keys, name, "") or "")
+
+
+LASTFM_API_KEY = (os.environ.get("SENADA_LASTFM_API_KEY") or _build_key("LASTFM_API_KEY")).strip()
+LASTFM_API_SECRET = (os.environ.get("SENADA_LASTFM_API_SECRET") or _build_key("LASTFM_API_SECRET")).strip()
 # never written to a backup file (see Settings.snapshot)
 PRIVATE_SETTINGS = ("scrobble_session", "remote_key")
 

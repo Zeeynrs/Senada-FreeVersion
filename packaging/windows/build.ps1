@@ -66,6 +66,23 @@ Run $Py @((Join-Path $Here "make_icon.py"), (Join-Path $Root "data\senada.png"),
 Step "Menyiapkan mpv, yt-dlp dan deno"
 Run $Py @((Join-Path $Here "fetch_tools.py"), $Tools)
 
+# Senada's Last.fm API account (scrobbling): from the build's secrets into senada\_keys.py,
+# which git ignores, so it is in the app but never in the repository (see senada\config.py)
+$Keys = Join-Path $Root "senada\_keys.py"
+if ($env:SENADA_LASTFM_API_KEY -and $env:SENADA_LASTFM_API_SECRET) {
+    $lines = @(
+        "# written by packaging/windows/build.ps1 from the build's secrets; not in git",
+        "LASTFM_API_KEY = `"$($env:SENADA_LASTFM_API_KEY.Trim())`"",
+        "LASTFM_API_SECRET = `"$($env:SENADA_LASTFM_API_SECRET.Trim())`""
+    )
+    [System.IO.File]::WriteAllLines($Keys, $lines)
+    Step "Kunci Last.fm dimasukkan"
+} elseif (Test-Path $Keys) {
+    Step "Kunci Last.fm dari senada\_keys.py"
+} else {
+    Step "Tanpa kunci Last.fm: hanya Libre.fm untuk scrobbling"
+}
+
 # 4. PyInstaller
 Step "Membekukan aplikasi dengan PyInstaller"
 $AppDir = Join-Path $Dist "Senada"
