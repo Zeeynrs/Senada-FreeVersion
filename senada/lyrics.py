@@ -1,6 +1,6 @@
 """Lyrics from several free sources, chosen in Settings or from the lyrics panel.
 
-  betterlyrics  BetterLyrics (https://better-lyrics.boidu.dev), timed word by word, often
+  betterlyrics  BetterLyrics (https://betterlyrics.org), timed word by word, often
                 with a romanization and an English translation of each line
   lrclib        LRCLIB (https://lrclib.net), a free public lyrics database
   kugou         KuGou Music, strong on Chinese, Japanese and Korean songs, word by word
