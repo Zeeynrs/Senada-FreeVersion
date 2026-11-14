@@ -10,8 +10,13 @@ CHANGELOG = [
     {
         "version": "next",
         "date": "",
-        "en": {"new": [], "fixed": []},
-        "id": {"new": [], "fixed": []},
+        "en": {"new": ["Poster full view: the lyrics fill the whole column, with the lines already sung fading out above "
+                       "the pull quote and the lines to come below it, like the body of an article; click a line to go to it."],
+               "fixed": []},
+        "id": {"new": ["Tampilan penuh Poster: lirik kini mengisi seluruh kolom, dengan baris yang sudah dinyanyikan memudar "
+                       "di atas kutipan dan baris berikutnya di bawahnya seperti badan artikel; klik sebuah baris untuk "
+                       "melompat ke sana."],
+               "fixed": []},
     },
     {
         "version": "1.0.9",

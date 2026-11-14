@@ -193,57 +193,119 @@ Item {
                 readonly property int at: lyrics.synced ? Math.max(-1, lyrics.current) : -1
                 readonly property bool quote: lyrics.synced && lines.length > 0
 
+                // the sung line as a big pull quote about a third of the way down the column, the
+                // lines already sung fading out above it and the lines to come filling the column
+                // below it like the body of an article; click a line to go to it
+                readonly property int before: 3
+                clip: true
+
                 Column {
+                    id: sungBefore
                     width: parent.width
-                    spacing: 14
+                    anchors.bottom: quoteRow.top
+                    anchors.bottomMargin: 16
+                    spacing: 10
                     visible: quoteBox.quote
-                    Label {
-                        width: parent.width
-                        text: quoteBox.at > 0 ? (quoteBox.lines[quoteBox.at - 1].text || "") : ""
-                        color: Qt.rgba(1, 1, 1, 0.35)
-                        font.family: pp.serif
-                        font.pixelSize: 17
-                        font.italic: true
-                        elide: Text.ElideRight
-                    }
-                    Row {
-                        width: parent.width
-                        spacing: 10
+                    Repeater {
+                        id: sungLines
+                        model: quoteBox.quote ? quoteBox.lines.slice(Math.max(0, quoteBox.at - quoteBox.before), Math.max(0, quoteBox.at)) : []
                         Label {
-                            text: "“"
-                            color: pp.accent
+                            required property var modelData
+                            required property int index
+                            readonly property int away: sungLines.count - index   // 1 = the line just sung
+                            width: sungBefore.width
+                            leftPadding: 60
+                            text: modelData.text || "♪"
+                            color: pastHover.hovered ? pp.ink : Qt.rgba(1, 1, 1, Math.max(0.1, 0.4 - 0.1 * away))
                             font.family: pp.serif
-                            font.pixelSize: 96
-                            font.weight: Font.Bold
-                            height: 70
-                        }
-                        Label {
-                            id: sung
-                            width: parent.width - 60
-                            text: quoteBox.at >= 0 ? (quoteBox.lines[quoteBox.at].text || "♪") : "♪"
-                            color: pp.ink
-                            font.family: pp.serif
-                            font.pixelSize: Math.round(Math.max(26, Math.min(48, body.width * 0.06)))
+                            font.pixelSize: 17
                             font.italic: true
-                            font.weight: Font.Bold
-                            wrapMode: Text.WordWrap
-                            topPadding: 14
-                            opacity: 1
-                            // fade in each new line
-                            onTextChanged: { opacity = 0.2; fadeIn.restart() }
-                            NumberAnimation { id: fadeIn; target: sung; property: "opacity"; to: 1; duration: 380 }
+                            elide: Text.ElideRight
+                            HoverHandler { id: pastHover; cursorShape: Qt.PointingHandCursor }
+                            TapHandler { onTapped: player.seek(modelData.t) }
                         }
                     }
+                }
+                Row {
+                    id: quoteRow
+                    width: parent.width
+                    // a third of the way down, but always below the lines already sung
+                    y: Math.max(sungBefore.implicitHeight + 16, Math.round(quoteBox.height * 0.3 - height / 2))
+                    spacing: 10
+                    visible: quoteBox.quote
+                    Behavior on y { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
                     Label {
-                        width: parent.width
-                        leftPadding: 60
-                        text: quoteBox.at + 1 < quoteBox.lines.length ? quoteBox.lines[quoteBox.at + 1].text : ""
-                        color: Qt.rgba(1, 1, 1, 0.55)
+                        text: "“"
+                        color: pp.accent
                         font.family: pp.serif
-                        font.pixelSize: 20
+                        font.pixelSize: 96
+                        font.weight: Font.Bold
+                        height: 70
+                    }
+                    Label {
+                        id: sung
+                        width: parent.width - 60
+                        text: quoteBox.at >= 0 ? (quoteBox.lines[quoteBox.at].text || "♪") : "♪"
+                        color: pp.ink
+                        font.family: pp.serif
+                        font.pixelSize: Math.round(Math.max(26, Math.min(48, body.width * 0.06)))
+                        font.italic: true
+                        font.weight: Font.Bold
                         wrapMode: Text.WordWrap
-                        maximumLineCount: 2
-                        elide: Text.ElideRight
+                        topPadding: 14
+                        opacity: 1
+                        // fade in each new line
+                        onTextChanged: { opacity = 0.2; fadeIn.restart() }
+                        NumberAnimation { id: fadeIn; target: sung; property: "opacity"; to: 1; duration: 380 }
+                    }
+                }
+                Column {
+                    id: comingUp
+                    width: parent.width
+                    anchors.top: quoteRow.bottom
+                    anchors.topMargin: 20
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 40   // the lyrics source button
+                    spacing: 12
+                    clip: true
+                    visible: quoteBox.quote
+                    // the last lines fade out instead of being cut in half
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        maskEnabled: true
+                        maskSource: comingFade
+                        maskThresholdMin: 0.5
+                        maskSpreadAtMin: 1.0
+                    }
+                    Repeater {
+                        // as many as can fit; those that do not are cut off by the clip
+                        model: quoteBox.quote ? quoteBox.lines.slice(quoteBox.at + 1, quoteBox.at + 1 + 24) : []
+                        Label {
+                            required property var modelData
+                            required property int index
+                            width: comingUp.width
+                            leftPadding: 60
+                            text: modelData.text || "♪"
+                            color: lineHover.hovered ? pp.ink : Qt.rgba(1, 1, 1, Math.max(0.12, 0.62 - 0.07 * index))
+                            font.family: pp.serif
+                            font.pixelSize: index === 0 ? 21 : 18
+                            wrapMode: Text.WordWrap
+                            maximumLineCount: 2
+                            elide: Text.ElideRight
+                            HoverHandler { id: lineHover; cursorShape: Qt.PointingHandCursor }
+                            TapHandler { onTapped: player.seek(modelData.t) }
+                        }
+                    }
+                }
+                Rectangle {
+                    id: comingFade
+                    anchors.fill: comingUp
+                    visible: false
+                    layer.enabled: true
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: "black" }
+                        GradientStop { position: Math.max(0.5, 1 - 90 / Math.max(1, comingFade.height)); color: "black" }
+                        GradientStop { position: 1; color: "transparent" }
                     }
                 }
                 // plain (unsynced) lyrics: the whole text as a column of verse
