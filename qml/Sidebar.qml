@@ -73,7 +73,7 @@ Rectangle {
     ColumnLayout {
         anchors.fill: parent
         anchors.topMargin: 12
-        anchors.bottomMargin: 10
+        anchors.bottomMargin: 10 + Theme.floatInset   // clear of the floating player bar
         anchors.leftMargin: 10
         anchors.rightMargin: 11
         spacing: 2

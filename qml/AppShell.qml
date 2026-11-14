@@ -256,8 +256,8 @@ Item {
         id: sidebar
         anchors.left: parent.left
         anchors.top: topBar.bottom
-        anchors.bottom: playerBar.top
-        anchors.bottomMargin: shell.floatingBar ? 12 : 0
+        // floating: runs on under the bar, which floats over it
+        anchors.bottom: shell.floatingBar ? parent.bottom : playerBar.top
         width: shell.sidebarOpen ? Theme.sidebarWidth : 0
         visible: width > 0
         currentKey: shell.currentKey
@@ -270,8 +270,8 @@ Item {
         id: rightPanel
         anchors.right: parent.right
         anchors.top: topBar.bottom
-        anchors.bottom: playerBar.top
-        anchors.bottomMargin: shell.floatingBar ? 12 : 0
+        // floating: runs on under the bar, which floats over it
+        anchors.bottom: shell.floatingBar ? parent.bottom : playerBar.top
         width: shell.panel !== "" ? Math.min(Theme.rightPanelWidth, shell.width * 0.3) : 0
         visible: width > 0
         panel: shell.panel || "lyrics"
@@ -285,8 +285,8 @@ Item {
         anchors.top: topBar.bottom
         anchors.left: sidebar.right
         anchors.right: rightPanel.left
-        anchors.bottom: playerBar.top
-        anchors.bottomMargin: shell.floatingBar ? 12 : 0
+        // floating: runs on under the bar, which floats over it
+        anchors.bottom: shell.floatingBar ? parent.bottom : playerBar.top
         clip: true
 
         StackView {
@@ -374,6 +374,11 @@ Item {
         }
     }
 
+    Binding {
+        target: Theme
+        property: "floatInset"
+        value: shell.floatingBar ? playerBar.height + playerBar.anchors.bottomMargin : 0
+    }
     RectangularShadow {
         anchors.fill: playerBar
         visible: shell.floatingBar

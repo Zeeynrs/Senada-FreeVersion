@@ -105,7 +105,10 @@ QtObject {
     readonly property bool lyricsSerif: lyricsFont === "serif"
     readonly property bool lyricsCentered: lyricsAlign === "center"
 
-    readonly property int dockSpace: 32      // bottom padding of scrolling pages
+    // how much of the bottom the floating player bar covers (AppShell sets it; 0 when docked):
+    // the pages, the sidebar and the side panel run on under the bar and keep this much room
+    property real floatInset: 0
+    readonly property int dockSpace: 32 + Math.round(floatInset)   // bottom padding of scrolling pages
     readonly property int sidebarWidth: 232
     readonly property int playerBarHeight: 88
     readonly property int rightPanelWidth: 340

@@ -50,6 +50,7 @@ Rectangle {
         anchors.leftMargin: 1
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: Theme.floatInset   // clear of the floating player bar
         sourceComponent: rp.panel === "queue" ? queueComp : lyricsComp
     }
 
