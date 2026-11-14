@@ -11,9 +11,13 @@ CHANGELOG = [
         "version": "next",
         "date": "",
         "en": {"new": ["The Search page shows recommendations before you type: songs, artists and albums based on the "
-                       "songs you play and like, or what is popular right now when you are new."], "fixed": ["Closing Senada no longer fills its log (Settings → About → Logs) with errors."]},
+                       "songs you play and like, or what is popular right now when you are new.",
+                       "The Cassette, Radio and Walkman full view styles are gone; if one of them was chosen, the full view "
+                       "is back to Visualizer. Vinyl record and Poster stay."], "fixed": ["Closing Senada no longer fills its log (Settings → About → Logs) with errors."]},
         "id": {"new": ["Halaman Cari langsung menampilkan rekomendasi sebelum mengetik: lagu, artis, dan album berdasarkan "
-                       "lagu yang kamu putar dan sukai, atau yang sedang populer kalau kamu baru mulai."], "fixed": ["Menutup Senada tidak lagi memenuhi log-nya (Pengaturan → Tentang → Log) dengan pesan error."]},
+                       "lagu yang kamu putar dan sukai, atau yang sedang populer kalau kamu baru mulai.",
+                       "Gaya tampilan penuh Kaset, Radio, dan Walkman dihapus; kalau salah satunya sedang dipakai, tampilan penuh "
+                       "kembali ke Visualizer. Piringan hitam dan Poster tetap ada."], "fixed": ["Menutup Senada tidak lagi memenuhi log-nya (Pengaturan → Tentang → Log) dengan pesan error."]},
     },
     {
         "version": "1.0.8",

@@ -27,6 +27,9 @@ def _os_user_name() -> str:
         return ""
 
 
+# full view styles (qml/ImmersivePlayer.qml); the first is the default
+IMMERSIVE_STYLES = ("visualizer", "vinyl", "poster")
+
 class Session(QObject):
     changed = Signal()
     languageChanged = Signal()
@@ -188,7 +191,15 @@ class Session(QObject):
     accentStrength = Property(str, *_setting("accent_strength"), notify=changed)
     visualizerEnabled = Property(bool, *_setting("visualizer"), notify=changed)
     visualizerStyle = Property(str, *_setting("visualizer_style"), notify=changed)
-    immersiveStyle = Property(str, *_setting("immersive_style"), notify=changed)
+    def _get_immersive_style(self):
+        style = self.settings["immersive_style"]
+        return style if style in IMMERSIVE_STYLES else IMMERSIVE_STYLES[0]  # e.g. a style that was removed
+
+    def _set_immersive_style(self, value):
+        self.settings["immersive_style"] = value if value in IMMERSIVE_STYLES else IMMERSIVE_STYLES[0]
+        self.changed.emit()
+
+    immersiveStyle = Property(str, _get_immersive_style, _set_immersive_style, notify=changed)
     seekStyle = Property(str, *_setting("seek_style"), notify=changed)
     miniPlayer = Property(bool, *_setting("mini_player"), notify=changed)
     del _setting

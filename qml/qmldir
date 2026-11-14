@@ -1,15 +1,12 @@
 AppShell 1.0 AppShell.qml
 ArtistPage 1.0 ArtistPage.qml
 Card 1.0 Card.qml
-CassettePlayer 1.0 CassettePlayer.qml
-CassetteTape 1.0 CassetteTape.qml
 CardGrid 1.0 CardGrid.qml
 Carousel 1.0 Carousel.qml
 Chip 1.0 Chip.qml
 CircularSpectrum 1.0 CircularSpectrum.qml
 CollectionPage 1.0 CollectionPage.qml
 Cover 1.0 Cover.qml
-DeckEqualizer 1.0 DeckEqualizer.qml
 DevicesPopup 1.0 DevicesPopup.qml
 DownloadButton 1.0 DownloadButton.qml
 EqualizerView 1.0 EqualizerView.qml
@@ -25,7 +22,6 @@ ImmersiveTransport 1.0 ImmersiveTransport.qml
 ImmersiveVolume 1.0 ImmersiveVolume.qml
 LibraryPage 1.0 LibraryPage.qml
 LinkLabel 1.0 LinkLabel.qml
-LyricsPaper 1.0 LyricsPaper.qml
 LyricsSourceButton 1.0 LyricsSourceButton.qml
 LyricsView 1.0 LyricsView.qml
 Main 1.0 Main.qml
@@ -33,7 +29,6 @@ MatchPicker 1.0 MatchPicker.qml
 MiniPlayer 1.0 MiniPlayer.qml
 singleton I18n 1.0 I18n.qml
 singleton Nav 1.0 Nav.qml
-PaperCard 1.0 PaperCard.qml
 NButton 1.0 NButton.qml
 NCombo 1.0 NCombo.qml
 NMenu 1.0 NMenu.qml
@@ -45,9 +40,7 @@ PageHeader 1.0 PageHeader.qml
 PlayerBar 1.0 PlayerBar.qml
 PosterPlayer 1.0 PosterPlayer.qml
 RightPanel 1.0 RightPanel.qml
-RotaryKnob 1.0 RotaryKnob.qml
 QueueView 1.0 QueueView.qml
-RadioPlayer 1.0 RadioPlayer.qml
 SearchPage 1.0 SearchPage.qml
 SeekBar 1.0 SeekBar.qml
 SeekTrack 1.0 SeekTrack.qml
@@ -57,7 +50,6 @@ SmoothScroll 1.0 SmoothScroll.qml
 singleton Theme 1.0 Theme.qml
 Toast 1.0 Toast.qml
 TopBar 1.0 TopBar.qml
-TracklistPaper 1.0 TracklistPaper.qml
 TrackRow 1.0 TrackRow.qml
 TrackSection 1.0 TrackSection.qml
 TrackTableHeader 1.0 TrackTableHeader.qml
@@ -66,4 +58,3 @@ VinylEqualizer 1.0 VinylEqualizer.qml
 VinylPlayer 1.0 VinylPlayer.qml
 VinylQueueFan 1.0 VinylQueueFan.qml
 VolumeControl 1.0 VolumeControl.qml
-WalkmanPlayer 1.0 WalkmanPlayer.qml

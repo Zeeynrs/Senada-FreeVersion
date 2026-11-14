@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // Equalizer & Tempo/Pitch panel of the classic full view. The values live in `effects`
-// (senada/effects.py), shared with the turntable and cassette styles.
+// (senada/effects.py), shared with the turntable and poster styles.
 Item {
     id: eqRoot
     readonly property bool eqEnabled: effects.enabled

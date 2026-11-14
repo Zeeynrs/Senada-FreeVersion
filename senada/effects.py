@@ -1,7 +1,7 @@
 """Equalizer and tempo settings shared by every full view style.
 
 The full view draws these controls in several ways (the classic panel, the turntable's
-spokes, the cassette deck's faders); they all read and change this one object, so a change
+spokes, the poster's fine sliders); they all read and change this one object, so a change
 in one style shows in the others and survives a restart. Saving waits a moment so that
 dragging a slider does not write the settings file on every step. Every change also goes
 straight to the audio engine (mpv): the bands as an equalizer filter, the tempo as its speed.

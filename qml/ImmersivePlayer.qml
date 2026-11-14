@@ -5,8 +5,8 @@ import QtQuick.Layouts
 
 // Full-window "now playing": round cover inside a circular visualizer (bars & wave),
 // seek and volume bars, synced lyrics, queue and equalizer, on the blurred cover art.
-// With another full view style (vinyl, cassette, poster, radio, walkman; wide windows) its
-// own player (VinylPlayer, CassettePlayer, …) takes the place of the cover and lyrics columns.
+// With the vinyl or poster full view style (wide windows) its own player (VinylPlayer,
+// PosterPlayer) takes the place of the cover and lyrics columns.
 Item {
     id: im
     objectName: "immersive"
@@ -19,7 +19,7 @@ Item {
     readonly property bool shown: y < height
     readonly property string fullStyle: session ? session.immersiveStyle : "visualizer"
     // a style with its own layout replaces the columns below
-    readonly property var stagedStyles: ["vinyl", "cassette", "poster", "radio", "walkman"]
+    readonly property var stagedStyles: ["vinyl", "poster"]
     readonly property bool staged: wide && stagedStyles.indexOf(fullStyle) >= 0
     signal close()
 
@@ -93,8 +93,7 @@ Item {
     Loader {
         anchors.fill: parent
         active: im.staged && im.shown
-        sourceComponent: ({ "cassette": cassetteComp, "poster": posterComp, "radio": radioComp,
-                            "walkman": walkmanComp })[im.fullStyle] || vinylComp
+        sourceComponent: im.fullStyle === "poster" ? posterComp : vinylComp
     }
     Component {
         id: vinylComp
@@ -106,35 +105,8 @@ Item {
         }
     }
     Component {
-        id: cassetteComp
-        CassettePlayer {
-            active: im.shown
-            panel: im.panel
-            showPanel: im.showPanel
-            onCloseRequested: im.close()
-        }
-    }
-    Component {
         id: posterComp
         PosterPlayer {
-            active: im.shown
-            panel: im.panel
-            showPanel: im.showPanel
-            onCloseRequested: im.close()
-        }
-    }
-    Component {
-        id: radioComp
-        RadioPlayer {
-            active: im.shown
-            panel: im.panel
-            showPanel: im.showPanel
-            onCloseRequested: im.close()
-        }
-    }
-    Component {
-        id: walkmanComp
-        WalkmanPlayer {
             active: im.shown
             panel: im.panel
             showPanel: im.showPanel

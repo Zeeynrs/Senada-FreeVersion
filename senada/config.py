@@ -51,7 +51,7 @@ DEFAULTS = {
     "device_name": "Senada",
     "visualizer": True,
     "visualizer_style": "bars",
-    "immersive_style": "visualizer",  # full view: "visualizer", "vinyl", "cassette", "poster", "radio", "walkman"
+    "immersive_style": "visualizer",  # full view: "visualizer", "vinyl", "poster" (see session.py)
     "seek_style": "line",  # seek bars: "line", "wave", "bars", "dots" (see qml/SeekTrack.qml)
     "mini_player": True,  # small player at the top of the screen while the window is minimized
     "audio_quality": "best",  # 'best', 'high', 'medium'

@@ -101,7 +101,7 @@ A free desktop music player for **Windows & Linux**, powered by the YouTube Musi
 - Light and dark themes that follow Windows, KDE or GNOME, or that you pick yourself.
 - 12 accent colors: Mint, Indigo, Sky, Aurora, Sunset, Ocean, Forest, Berry, Amber, Rose, Carbon and Chrome.
 - Collapsible sidebar, a side panel for lyrics or the queue, and track lists you can sort by column.
-- **Full-screen player** in six styles (*Settings → Appearance*): round cover inside a circular visualizer (*cava*), a spinning **vinyl record** with a tonearm, a **cassette**, a magazine **poster**, an old valve **radio** or a **Walkman**, each with its own lyrics, queue and equalizer.
+- **Full-screen player** in three styles (*Settings → Appearance*): round cover inside a circular visualizer (*cava*), a spinning **vinyl record** with a tonearm, or a magazine **poster**, each with its own lyrics, queue and equalizer.
 - **Equalizer** (six bands and presets) and **tempo** with or without keeping the pitch, applied to the sound as it plays.
 - **Seek bar styles**: a line, a wave, a waveform or dots.
 - **Mini player** ("dynamic island") while Senada is minimized.
@@ -360,7 +360,7 @@ On GitHub Actions, add the `SENADA_SIGN_PFX_BASE64` and `SENADA_SIGN_PASSWORD` s
 - Tema terang dan gelap yang mengikuti Windows, KDE, atau GNOME, atau dipilih sendiri.
 - 12 warna aksen: Mint, Indigo, Langit, Aurora, Senja, Samudra, Hutan, Beri, Amber, Mawar, Karbon, dan Krom.
 - Sidebar yang bisa disembunyikan, panel samping untuk lirik atau antrean, dan daftar lagu yang bisa diurutkan per kolom.
-- **Player layar penuh** dengan enam gaya (*Pengaturan → Tampilan*): sampul bulat di tengah visualizer melingkar (*cava*), **piringan hitam** yang berputar dengan lengan jarum, **kaset**, **poster** majalah, **radio** tabung lawas, atau **Walkman**, masing-masing dengan lirik, antrean, dan equalizer sendiri.
+- **Player layar penuh** dengan tiga gaya (*Pengaturan → Tampilan*): sampul bulat di tengah visualizer melingkar (*cava*), **piringan hitam** yang berputar dengan lengan jarum, atau **poster** majalah, masing-masing dengan lirik, antrean, dan equalizer sendiri.
 - **Equalizer** (enam pita dan preset) dan **tempo** dengan atau tanpa mempertahankan nada, langsung diterapkan ke suara.
 - **Gaya bilah progres**: garis, gelombang, bentuk gelombang, atau titik-titik.
 - **Pemutar mini** ("dynamic island") saat Senada diminimalkan.
