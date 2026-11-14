@@ -31,6 +31,7 @@ def _os_user_name() -> str:
 IMMERSIVE_STYLES = ("visualizer", "vinyl", "poster", "cinema")
 # mini player styles (qml/MiniPlayer.qml); the first is the default
 ISLAND_STYLES = ("classic", "wave", "lyrics", "glass")
+ISLAND_DOCK_MIN, ISLAND_DOCK_MAX, ISLAND_DOCK_DEFAULT = 5, 15, 10
 
 class Session(QObject):
     changed = Signal()
@@ -214,4 +215,19 @@ class Session(QObject):
         self.changed.emit()
 
     islandStyle = Property(str, _get_island_style, _set_island_style, notify=changed)
+
+    def _get_island_dock(self):
+        try:
+            seconds = int(self.settings["island_dock"])
+        except (TypeError, ValueError):
+            return ISLAND_DOCK_DEFAULT
+        return 0 if seconds <= 0 else max(ISLAND_DOCK_MIN, min(ISLAND_DOCK_MAX, seconds))
+
+    def _set_island_dock(self, value):
+        seconds = int(value)
+        self.settings["island_dock"] = 0 if seconds <= 0 else max(ISLAND_DOCK_MIN, min(ISLAND_DOCK_MAX, seconds))
+        self.changed.emit()
+
+    # seconds before the mini player tucks into the top edge of the screen; 0: never
+    islandDock = Property(int, _get_island_dock, _set_island_dock, notify=changed)
     del _setting

@@ -14,6 +14,11 @@ import QtQuick.Shapes
 //   lyrics   the sung line slides in under the title, a thin progress line along the bottom
 //   glass    the album cover blurred behind the pill, lit with the song's colour
 //
+// Left alone for a few seconds (Settings: 5 to 15, or never), the island tucks into the top edge
+// of the screen: it rises to the edge, its top corners go square and curve out into the edge
+// like a notch, and it slims down to the cover, the title and sound bars. Pointing at it (or a
+// new song) brings it back down.
+//
 // The window keeps one size and the pill animates inside it: a Wayland window cannot move
 // itself to stay centred. Only the pill takes clicks (session.setInputArea), and on Hyprland
 // the rules in senada/island.py, matched on the fixed title, float it at the top centre.
@@ -38,6 +43,14 @@ Window {
     readonly property int compactH: 60
     readonly property int wideW: 480           // senada/island.py SIZE = wideW/H + 2 * margin
     readonly property int wideH: 430
+    readonly property int topGap: margin + 2   // between the floating island and the screen's top
+    readonly property int dockedW: 320
+    readonly property int dockedH: 40
+    readonly property int ear: 12              // the inward curves where the docked island meets the edge
+    readonly property int dockAfter: session.islandDock   // seconds; 0: it never docks
+    property bool docked: false
+    onExpandedChanged: if (expanded) docked = false
+    onDockAfterChanged: if (dockAfter <= 0) docked = false
 
     title: "Senada mini player"
     width: wideW + 2 * margin
@@ -63,14 +76,14 @@ Window {
         if (onScreen)
             screen = onScreen
         x = screen.virtualX + Math.round((screen.width - width) / 2)
-        y = screen.virtualY + 2
+        y = screen.virtualY   // the pill keeps its distance from the edge itself (topGap)
     }
 
     function updateInputArea() {
         if (visible)
             session.setInputArea(island, pill.x, pill.y, pill.width, pill.height)
     }
-    onVisibleChanged: updateInputArea()
+    onVisibleChanged: { updateInputArea(); if (!visible) docked = false }
 
     // ---- glass: the cover, blurred and cut to the pill's shape -------------------------------
     Item {
@@ -91,6 +104,8 @@ Window {
         layer.enabled: true
         x: pill.x; y: pill.y; width: pill.width; height: pill.height
         radius: pill.radius
+        topLeftRadius: pill.topLeftRadius
+        topRightRadius: pill.topRightRadius
         color: "black"
     }
     MultiEffect {
@@ -113,14 +128,20 @@ Window {
         id: pill
         objectName: "islandPill"
         x: Math.round((island.width - width) / 2)
-        y: island.margin
-        width: island.expanded ? island.wideW : island.compactW
-        height: island.expanded ? island.wideH : island.compactH
-        radius: island.expanded ? 28 : island.compactH / 2
+        y: island.docked ? 0 : island.topGap
+        width: island.expanded ? island.wideW : island.docked ? island.dockedW : island.compactW
+        height: island.expanded ? island.wideH : island.docked ? island.dockedH : island.compactH
+        radius: island.expanded ? 28 : island.docked ? island.dockedH / 2 : island.compactH / 2
+        // docked: the top corners go square against the edge of the screen
+        topLeftRadius: island.docked ? 0 : radius
+        topRightRadius: island.docked ? 0 : radius
+        Behavior on y { NumberAnimation { duration: 420; easing.type: Easing.OutCubic } }
+        Behavior on topLeftRadius { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
+        Behavior on topRightRadius { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
         // glass: a dark veil over the blurred cover, lit from the left with the song's colour
         color: island.style === "glass" ? "transparent" : "#0b0b0c"
         gradient: island.style === "glass" ? glassVeil : null
-        border.width: 1
+        border.width: island.docked ? 0 : 1
         border.color: island.style === "glass" ? Qt.rgba(1, 1, 1, 0.16)
                     : island.playing ? Theme.alpha(Theme.mix(Theme.accent, Qt.rgba(1, 1, 1, 1), 0.35), 0.35) : Qt.rgba(1, 1, 1, 0.09)
         antialiasing: true
@@ -148,6 +169,13 @@ Window {
         onWidthChanged: island.updateInputArea()
         onHeightChanged: island.updateInputArea()
         onXChanged: island.updateInputArea()
+        onYChanged: island.updateInputArea()
+
+        // pointing at the docked island brings it back down; leaving it starts the wait again
+        HoverHandler {
+            id: pillHover
+            onHoveredChanged: if (hovered) island.docked = false
+        }
 
         // ---- the always-visible row ------------------------------------------------------
         Item {
@@ -155,7 +183,7 @@ Window {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            height: island.compactH
+            height: island.docked ? island.dockedH : island.compactH
 
             // drag to move it, double-click to open Senada again
             DragHandler {
@@ -171,9 +199,9 @@ Window {
                 spacing: 10
 
                 Cover {
-                    Layout.preferredWidth: 40
-                    Layout.preferredHeight: 40
-                    radius: island.expanded ? 10 : 20
+                    Layout.preferredWidth: island.docked ? 26 : 40
+                    Layout.preferredHeight: island.docked ? 26 : 40
+                    radius: island.expanded ? 10 : island.docked ? 7 : 20
                     Behavior on radius { NumberAnimation { duration: 300 } }
                     source: island.s.imageSmall || island.s.image || ""
                     fallbackIcon: "music"
@@ -190,12 +218,12 @@ Window {
                         text: island.hasTrack ? island.s.name : I18n.t("Nothing playing yet")
                         elide: Text.ElideRight
                         color: parent.ticker ? Qt.rgba(1, 1, 1, 0.6) : "#ffffff"
-                        font.pixelSize: parent.ticker ? 11 : 13
+                        font.pixelSize: parent.ticker ? (island.docked ? 10 : 11) : (island.docked ? 12 : 13)
                         font.weight: parent.ticker ? Font.Normal : Font.DemiBold
                     }
                     Label {
                         Layout.fillWidth: true
-                        visible: island.hasTrack && !parent.ticker
+                        visible: island.hasTrack && !parent.ticker && !island.docked
                         text: island.s.artists || ""
                         elide: Text.ElideRight
                         color: Qt.rgba(1, 1, 1, 0.6)
@@ -210,7 +238,7 @@ Window {
                 }
 
                 Label {
-                    visible: island.hasTrack && !island.expanded && (island.style === "classic" || island.style === "glass")
+                    visible: island.hasTrack && !island.expanded && !island.docked && (island.style === "classic" || island.style === "glass")
                     text: Theme.fmt(player.position) + " / " + Theme.fmt(island.s.durationMs)
                     color: Qt.rgba(1, 1, 1, island.style === "glass" ? 0.75 : 0.6)
                     font.pixelSize: 11
@@ -218,9 +246,10 @@ Window {
                 }
 
                 SoundBars {
-                    visible: island.style === "wave" && island.hasTrack && !island.expanded
-                    Layout.preferredWidth: 34
-                    Layout.preferredHeight: 22
+                    // the wave style, and every style while docked
+                    visible: (island.style === "wave" || island.docked) && island.hasTrack && !island.expanded
+                    Layout.preferredWidth: island.docked ? 28 : 34
+                    Layout.preferredHeight: island.docked ? 16 : 22
                     running: visible && island.visible
                     playing: island.playing
                     color: island.glow
@@ -229,7 +258,7 @@ Window {
                 // play / pause inside a ring that fills up as the song plays
                 AbstractButton {
                     id: playButton
-                    visible: !island.expanded
+                    visible: !island.expanded && !island.docked
                     Layout.preferredWidth: 38
                     Layout.preferredHeight: 38
                     enabled: island.hasTrack || player.queue.length > 0
@@ -274,6 +303,7 @@ Window {
 
                 IconButton {
                     objectName: "islandChevron"
+                    visible: !island.docked
                     iconName: "chevron-down"
                     size: 20
                     tint: Qt.rgba(1, 1, 1, 0.8)
@@ -283,6 +313,7 @@ Window {
                 }
                 IconButton {
                     iconName: "open-app"
+                    visible: !island.docked
                     size: 17
                     tint: Qt.rgba(1, 1, 1, 0.8)
                     onClicked: island.restore()
@@ -291,7 +322,7 @@ Window {
 
             // lyrics: how far the song is, a thin line along the bottom of the pill
             Rectangle {
-                visible: island.style === "lyrics" && island.hasTrack && !island.expanded
+                visible: island.style === "lyrics" && island.hasTrack && !island.expanded && !island.docked
                 x: island.compactH / 2
                 y: parent.height - 5
                 width: parent.width - island.compactH
@@ -487,6 +518,57 @@ Window {
                     color: sb.color
                 }
             }
+        }
+    }
+
+    // ---- tucking into the top edge -------------------------------------------------------------
+    Timer {
+        interval: Math.max(1, island.dockAfter) * 1000
+        running: island.visible && island.dockAfter > 0 && island.hasTrack && !island.docked
+                 && !island.expanded && !pillHover.hovered
+        onTriggered: island.docked = true
+    }
+    // a new song shows itself before the island tucks away again
+    Connections {
+        target: player
+        function onTrackChanged() { island.docked = false }
+    }
+    // the inward curves on either side, where the island flows into the edge of the screen
+    readonly property color earColor: style === "glass" ? Qt.rgba(0, 0, 0, 0.62) : "#0b0b0c"
+    Shape {
+        x: pill.x - island.ear
+        y: pill.y
+        width: island.ear
+        height: island.ear
+        opacity: island.docked ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 260 } }
+        preferredRendererType: Shape.CurveRenderer
+        ShapePath {
+            fillColor: island.earColor
+            strokeColor: "transparent"
+            startX: 0; startY: 0
+            PathLine { x: island.ear; y: 0 }
+            PathLine { x: island.ear; y: island.ear }
+            PathArc { x: 0; y: 0; radiusX: island.ear; radiusY: island.ear; direction: PathArc.Counterclockwise }
+        }
+    }
+    Shape {
+        x: pill.x + pill.width
+        y: pill.y
+        width: island.ear
+        height: island.ear
+        opacity: island.docked ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 260 } }
+        preferredRendererType: Shape.CurveRenderer
+        ShapePath {
+            fillColor: island.earColor
+            strokeColor: "transparent"
+            startX: island.ear; startY: 0
+            PathLine { x: 0; y: 0 }
+            PathLine { x: 0; y: island.ear }
+            PathArc { x: island.ear; y: 0; radiusX: island.ear; radiusY: island.ear; direction: PathArc.Clockwise }
         }
     }
 

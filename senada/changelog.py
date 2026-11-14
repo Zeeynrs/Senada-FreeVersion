@@ -13,13 +13,17 @@ CHANGELOG = [
         "en": {"new": ["Poster full view: the lyrics fill the whole column, with the lines already sung fading out above "
                        "the pull quote and the lines to come below it, like the body of an article; click a line to go to it.",
                        "Vinyl record, Poster and Cinema full views: the volume is an upright rail on the right edge of the "
-                       "screen (drag it, scroll on it, or click the speaker to mute) instead of a bar in the bottom strip."],
+                       "screen (drag it, scroll on it, or click the speaker to mute) instead of a bar in the bottom strip.",
+                       "The mini player tucks into the top edge of the screen like a notch after a few seconds without the "
+                       "pointer on it (5 to 15, Settings → Appearance → Tuck into the top edge); point at it to bring it back."],
                "fixed": []},
         "id": {"new": ["Tampilan penuh Poster: lirik kini mengisi seluruh kolom, dengan baris yang sudah dinyanyikan memudar "
                        "di atas kutipan dan baris berikutnya di bawahnya seperti badan artikel; klik sebuah baris untuk "
                        "melompat ke sana.",
                        "Tampilan penuh Piringan hitam, Poster, dan Bioskop: volume kini berupa rel tegak di tepi kanan layar "
-                       "(seret, scroll, atau klik ikon speaker untuk membisukan), bukan bilah di strip bawah."],
+                       "(seret, scroll, atau klik ikon speaker untuk membisukan), bukan bilah di strip bawah.",
+                       "Pemutar mini menyatu dengan tepi atas layar seperti notch setelah beberapa detik tanpa kursor di atasnya "
+                       "(5 sampai 15 detik, Pengaturan → Tampilan → Menyatu dengan tepi atas); arahkan kursor untuk memunculkannya lagi."],
                "fixed": []},
     },
     {

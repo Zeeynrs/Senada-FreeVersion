@@ -41,7 +41,7 @@ Popup {
                   "Cinema", "Movie", "Subtitles",
                   "Seek bar", "Progress bar", "Wave", "Waveform", "Dots",
                   "Mini player", "Dynamic island", "Minimize", "Mini player style", "Classic", "Sound wave",
-                  "Running lyrics", "Cover glass"] },
+                  "Running lyrics", "Cover glass", "Tuck into the top edge", "Notch"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
           words: ["Engine status", "Device name", "Audio quality", "MPV", "Audio engine & streaming (MPV)"] },
@@ -915,6 +915,37 @@ Popup {
                     IslandStyleCard { islandStyle: "wave"; label: I18n.t("Sound wave") }
                     IslandStyleCard { islandStyle: "lyrics"; label: I18n.t("Running lyrics") }
                     IslandStyleCard { islandStyle: "glass"; label: I18n.t("Cover glass") }
+                }
+            }
+            SettingRow {
+                Layout.topMargin: 0
+                opacity: session.miniPlayer ? 1 : 0.5
+                label: I18n.t("Tuck into the top edge")
+                hint: session.islandDock > 0
+                      ? I18n.t("After {n} seconds without the pointer on it, the island rises into the top edge of the screen like a notch. Point at it to bring it back.", { n: session.islandDock })
+                      : I18n.t("The island stays where it is.")
+                NSlider {
+                    id: dockSlider
+                    Layout.preferredWidth: 150
+                    enabled: session.islandDock > 0
+                    opacity: enabled ? 1 : 0.4
+                    from: 5
+                    to: 15
+                    stepSize: 1
+                    snapMode: Slider.SnapAlways
+                    value: session.islandDock > 0 ? session.islandDock : 10
+                    onMoved: session.islandDock = Math.round(value)
+                }
+                Label {
+                    Layout.preferredWidth: 34
+                    text: Math.round(dockSlider.value) + " s"
+                    color: session.islandDock > 0 ? Theme.text : Theme.dim
+                    font.pixelSize: 13
+                    font.features: { "tnum": 1 }
+                }
+                NSwitch {
+                    checked: session.islandDock > 0
+                    onToggled: session.islandDock = checked ? Math.round(dockSlider.value) : 0
                 }
             }
         }
