@@ -395,7 +395,8 @@ Item {
     Binding {
         target: visualizer
         property: "active"
-        value: shell.immersive && session.visualizerEnabled && shell.Window.visibility !== Window.Minimized
+        value: (shell.immersive && session.visualizerEnabled && shell.Window.visibility !== Window.Minimized)
+               || (!!shell.Window.window && shell.Window.window.miniMode && session.islandStyle === "wave")
     }
 
     Component { id: collectionComp; CollectionPage {} }

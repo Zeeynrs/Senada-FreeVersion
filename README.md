@@ -104,7 +104,7 @@ A free desktop music player for **Windows & Linux**, powered by the YouTube Musi
 - **Full-screen player** in three styles (*Settings → Appearance*): round cover inside a circular visualizer (*cava*), a spinning **vinyl record** with a tonearm, or a magazine **poster**, each with its own lyrics, queue and equalizer.
 - **Equalizer** (six bands and presets) and **tempo** with or without keeping the pitch, applied to the sound as it plays.
 - **Seek bar styles**: a line, a wave, a waveform or dots.
-- **Mini player** ("dynamic island") while Senada is minimized.
+- **Mini player** ("dynamic island") while Senada is minimized, in four styles: classic, sound wave, running lyrics or cover glass.
 - **Glass effect** (optional): *Album cover* (every system) or *Transparent* (acrylic on Windows 11, blur on Hyprland / KDE).
 - Settings with search, and a **What's new** page with the version on your computer and the changes in each release.
 
@@ -363,7 +363,7 @@ On GitHub Actions, add the `SENADA_SIGN_PFX_BASE64` and `SENADA_SIGN_PASSWORD` s
 - **Player layar penuh** dengan tiga gaya (*Pengaturan → Tampilan*): sampul bulat di tengah visualizer melingkar (*cava*), **piringan hitam** yang berputar dengan lengan jarum, atau **poster** majalah, masing-masing dengan lirik, antrean, dan equalizer sendiri.
 - **Equalizer** (enam pita dan preset) dan **tempo** dengan atau tanpa mempertahankan nada, langsung diterapkan ke suara.
 - **Gaya bilah progres**: garis, gelombang, bentuk gelombang, atau titik-titik.
-- **Pemutar mini** ("dynamic island") saat Senada diminimalkan.
+- **Pemutar mini** ("dynamic island") saat Senada diminimalkan, dengan empat gaya: klasik, gelombang suara, lirik berjalan, atau kaca sampul.
 - **Efek kaca** (opsional): *Sampul album* (semua sistem) atau *Transparan* (acrylic di Windows 11, blur di Hyprland / KDE).
 - Pengaturan dengan kolom cari, dan halaman **Apa yang baru** berisi versi di komputermu serta perubahan di setiap rilis.
 

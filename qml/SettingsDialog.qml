@@ -39,7 +39,8 @@ Popup {
                   "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer",
                   "Full view style", "Vinyl record", "Turntable", "Full view", "Poster", "Magazine",
                   "Seek bar", "Progress bar", "Wave", "Waveform", "Dots",
-                  "Mini player", "Dynamic island", "Minimize"] },
+                  "Mini player", "Dynamic island", "Minimize", "Mini player style", "Classic", "Sound wave",
+                  "Running lyrics", "Cover glass"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
           words: ["Engine status", "Device name", "Audio quality", "MPV", "Audio engine & streaming (MPV)"] },
@@ -435,6 +436,45 @@ Popup {
     }
 
     // a seek bar style, shown live (moving and rippling) on a small card
+    component IslandStyleCard: AbstractButton {
+        id: ic
+        property string islandStyle
+        property string label
+        readonly property bool selected: session.islandStyle === islandStyle
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        implicitHeight: islandFrame.height + 28
+        hoverEnabled: true
+        focusPolicy: Qt.NoFocus
+        onClicked: session.islandStyle = islandStyle
+
+        contentItem: Item {}
+        background: Item {
+            Rectangle {
+                id: islandFrame
+                width: parent.width
+                height: 58
+                radius: 10
+                color: Theme.dark ? "#1a1a1d" : "#d9dadf"   // a strip of screen behind the island
+                border.width: ic.selected ? 2 : 1
+                border.color: ic.selected ? Theme.primary : ic.hovered ? Theme.lineStrong : Theme.line
+                IslandPreview {
+                    anchors.fill: parent
+                    anchors.margins: 12
+                    style: ic.islandStyle
+                    live: ic.hovered || ic.selected
+                }
+            }
+            Label {
+                y: islandFrame.height + 8
+                text: ic.label
+                font.pixelSize: 13
+                font.weight: ic.selected ? Font.Bold : Font.Normal
+                color: ic.selected || ic.hovered ? Theme.text : Theme.dim
+            }
+        }
+    }
+
     component SeekStyleCard: AbstractButton {
         id: sc
         property string seekStyle
@@ -854,6 +894,24 @@ Popup {
                 NSwitch {
                     checked: session.miniPlayer
                     onToggled: session.miniPlayer = checked
+                }
+            }
+            SettingBlock {
+                Layout.topMargin: 0
+                opacity: session.miniPlayer ? 1 : 0.5
+                label: I18n.t("Mini player style")
+                hint: ({
+                    "wave": I18n.t("Sound bars in the song's colour move with the music (live with cava, otherwise to a steady rhythm)."),
+                    "lyrics": I18n.t("The sung line slides in under the title; a thin line along the bottom shows how far the song is."),
+                    "glass": I18n.t("The album cover, blurred, behind the island and lit with the song's colour.")
+                })[session.islandStyle] || I18n.t("A black island with the time and play / pause in a ring that fills up as the song plays.")
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 14
+                    IslandStyleCard { islandStyle: "classic"; label: I18n.t("Classic") }
+                    IslandStyleCard { islandStyle: "wave"; label: I18n.t("Sound wave") }
+                    IslandStyleCard { islandStyle: "lyrics"; label: I18n.t("Running lyrics") }
+                    IslandStyleCard { islandStyle: "glass"; label: I18n.t("Cover glass") }
                 }
             }
         }

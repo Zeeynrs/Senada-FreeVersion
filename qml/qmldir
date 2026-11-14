@@ -15,6 +15,7 @@ HomePage 1.0 HomePage.qml
 Icon 1.0 Icon.qml
 LogoMark 1.0 LogoMark.qml
 IconButton 1.0 IconButton.qml
+IslandPreview 1.0 IslandPreview.qml
 ImmersiveBar 1.0 ImmersiveBar.qml
 ImmersivePlayer 1.0 ImmersivePlayer.qml
 ImmersiveSeek 1.0 ImmersiveSeek.qml

@@ -1,11 +1,18 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Shapes
 
-// The mini player ("dynamic island"): a black pill at the top of the screen while the main
-// window is minimized. It shows the song, how far along it is, play / pause and a button back
-// to the full window; the arrow opens it wider, with the controls and the lyrics.
+// The mini player ("dynamic island"): a pill at the top of the screen while the main window
+// is minimized. It shows the song, how far along it is, play / pause and a button back to the
+// full window; the arrow opens it wider, with the controls and the lyrics.
+//
+// Styles (Settings → Appearance → Mini player, session.islandStyle):
+//   classic  black pill, the time, play / pause in a ring that fills up as the song plays
+//   wave     black pill with sound bars in the song's colour (live with cava, else a rhythm)
+//   lyrics   the sung line slides in under the title, a thin progress line along the bottom
+//   glass    the album cover blurred behind the pill, lit with the song's colour
 //
 // The window keeps one size and the pill animates inside it: a Wayland window cannot move
 // itself to stay centred. Only the pill takes clicks (session.setInputArea), and on Hyprland
@@ -20,6 +27,11 @@ Window {
     readonly property bool playing: hasTrack && s.isPlaying === true
     readonly property real progress: hasTrack && s.durationMs > 0 ? Math.min(1, player.position / s.durationMs) : 0
     readonly property color ink: Theme.accented ? Theme.accentInkOn(true) : "#ffffff"
+    readonly property string style: session.islandStyle
+    // the song's colour, bright enough to read on black
+    readonly property color glow: Theme.mix(Theme.accent, Qt.rgba(1, 1, 1, 1), 0.25)
+    readonly property string sungLine: lyrics.synced && lyrics.current >= 0 && lyrics.current < lyrics.lines.length
+                                       ? (lyrics.lines[lyrics.current].text || "♪") : ""
 
     readonly property int margin: 12           // see-through room around the pill
     readonly property int compactW: 380
@@ -60,6 +72,42 @@ Window {
     }
     onVisibleChanged: updateInputArea()
 
+    // ---- glass: the cover, blurred and cut to the pill's shape -------------------------------
+    Item {
+        id: glassArt
+        visible: false
+        x: pill.x; y: pill.y; width: pill.width; height: pill.height
+        Image {
+            anchors.fill: parent
+            source: island.style === "glass" ? (island.s.image || island.s.imageSmall || "") : ""
+            fillMode: Image.PreserveAspectCrop
+            sourceSize: Qt.size(256, 256)
+            asynchronous: true
+        }
+    }
+    Rectangle {
+        id: glassShape
+        visible: false
+        layer.enabled: true
+        x: pill.x; y: pill.y; width: pill.width; height: pill.height
+        radius: pill.radius
+        color: "black"
+    }
+    MultiEffect {
+        visible: island.style === "glass"
+        x: pill.x; y: pill.y; width: pill.width; height: pill.height
+        source: glassArt
+        autoPaddingEnabled: false   // the blur stays inside the pill, so the mask lines up with it
+        blurEnabled: true
+        blur: 1.0
+        blurMax: 48
+        saturation: 0.7
+        brightness: -0.08
+        maskEnabled: true
+        maskSource: glassShape
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
+    }
 
     Rectangle {
         id: pill
@@ -69,11 +117,22 @@ Window {
         width: island.expanded ? island.wideW : island.compactW
         height: island.expanded ? island.wideH : island.compactH
         radius: island.expanded ? 28 : island.compactH / 2
-        color: "#0b0b0c"
+        // glass: a dark veil over the blurred cover, lit from the left with the song's colour
+        color: island.style === "glass" ? "transparent" : "#0b0b0c"
+        gradient: island.style === "glass" ? glassVeil : null
         border.width: 1
-        border.color: island.playing ? Theme.alpha(Theme.mix(Theme.accent, Qt.rgba(1, 1, 1, 1), 0.35), 0.35) : Qt.rgba(1, 1, 1, 0.09)
+        border.color: island.style === "glass" ? Qt.rgba(1, 1, 1, 0.16)
+                    : island.playing ? Theme.alpha(Theme.mix(Theme.accent, Qt.rgba(1, 1, 1, 1), 0.35), 0.35) : Qt.rgba(1, 1, 1, 0.09)
         antialiasing: true
         clip: true
+
+        Gradient {
+            id: glassVeil
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0; color: Theme.alpha(Theme.mix(Theme.accent, Qt.rgba(0, 0, 0, 1), 0.3), 0.45) }
+            GradientStop { position: 0.55; color: Qt.rgba(0, 0, 0, 0.3) }
+            GradientStop { position: 1; color: Qt.rgba(0, 0, 0, 0.45) }
+        }
 
         palette.windowText: "#f5f5f5"
         palette.text: "#f5f5f5"
@@ -120,34 +179,51 @@ Window {
                     fallbackIcon: "music"
                 }
 
+                // title and artist (lyrics: the title, then the sung line)
                 ColumnLayout {
                     Layout.fillWidth: true
                     Layout.minimumWidth: 40
                     spacing: 1
+                    readonly property bool ticker: island.style === "lyrics" && island.hasTrack && island.sungLine !== ""
                     Label {
                         Layout.fillWidth: true
                         text: island.hasTrack ? island.s.name : I18n.t("Nothing playing yet")
                         elide: Text.ElideRight
-                        color: "#ffffff"
-                        font.pixelSize: 13
-                        font.weight: Font.DemiBold
+                        color: parent.ticker ? Qt.rgba(1, 1, 1, 0.6) : "#ffffff"
+                        font.pixelSize: parent.ticker ? 11 : 13
+                        font.weight: parent.ticker ? Font.Normal : Font.DemiBold
                     }
                     Label {
                         Layout.fillWidth: true
-                        visible: island.hasTrack
+                        visible: island.hasTrack && !parent.ticker
                         text: island.s.artists || ""
                         elide: Text.ElideRight
                         color: Qt.rgba(1, 1, 1, 0.6)
                         font.pixelSize: 11
                     }
+                    Ticker {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 18
+                        visible: parent.ticker
+                        text: island.sungLine
+                    }
                 }
 
                 Label {
-                    visible: island.hasTrack && !island.expanded
+                    visible: island.hasTrack && !island.expanded && (island.style === "classic" || island.style === "glass")
                     text: Theme.fmt(player.position) + " / " + Theme.fmt(island.s.durationMs)
-                    color: Qt.rgba(1, 1, 1, 0.6)
+                    color: Qt.rgba(1, 1, 1, island.style === "glass" ? 0.75 : 0.6)
                     font.pixelSize: 11
                     font.features: { "tnum": 1 }
+                }
+
+                SoundBars {
+                    visible: island.style === "wave" && island.hasTrack && !island.expanded
+                    Layout.preferredWidth: 34
+                    Layout.preferredHeight: 22
+                    running: visible && island.visible
+                    playing: island.playing
+                    color: island.glow
                 }
 
                 // play / pause inside a ring that fills up as the song plays
@@ -167,6 +243,7 @@ Window {
                     contentItem: Item {
                         Shape {
                             anchors.fill: parent
+                            visible: island.style !== "lyrics"   // that style draws the progress along the bottom
                             preferredRendererType: Shape.CurveRenderer
                             ShapePath {
                                 strokeColor: Qt.rgba(1, 1, 1, 0.14)
@@ -175,7 +252,7 @@ Window {
                                 PathAngleArc { centerX: 19; centerY: 19; radiusX: 17; radiusY: 17; startAngle: 0; sweepAngle: 360 }
                             }
                             ShapePath {
-                                strokeColor: island.ink
+                                strokeColor: island.style === "wave" ? island.glow : island.ink
                                 strokeWidth: 2.5
                                 fillColor: "transparent"
                                 capStyle: ShapePath.RoundCap
@@ -209,6 +286,23 @@ Window {
                     size: 17
                     tint: Qt.rgba(1, 1, 1, 0.8)
                     onClicked: island.restore()
+                }
+            }
+
+            // lyrics: how far the song is, a thin line along the bottom of the pill
+            Rectangle {
+                visible: island.style === "lyrics" && island.hasTrack && !island.expanded
+                x: island.compactH / 2
+                y: parent.height - 5
+                width: parent.width - island.compactH
+                height: 2
+                radius: 1
+                color: Qt.rgba(1, 1, 1, 0.12)
+                Rectangle {
+                    width: parent.width * island.progress
+                    height: parent.height
+                    radius: 1
+                    color: island.glow
                 }
             }
         }
@@ -261,36 +355,136 @@ Window {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.topMargin: 4
-                clip: true
 
-                LyricsView {
-                    id: islandLyrics
+                // lines fade out at the edges instead of being cut (a mask, so it works on
+                // the black pill and on the glass alike)
+                Item {
+                    id: lyricsBox
                     anchors.fill: parent
-                    textSize: 17
-                    lineGap: 8
-                    followHeight: true   // the lyrics open at the sung line as the pill grows
-                    showSource: false
-                }
-                // lines fade out at the edges instead of being cut
-                Rectangle {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    height: 28
-                    gradient: Gradient {
-                        GradientStop { position: 0; color: pill.color }
-                        GradientStop { position: 1; color: Theme.alpha(pill.color, 0) }
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        maskEnabled: true
+                        maskSource: lyricsFade
+                        maskThresholdMin: 0.5
+                        maskSpreadAtMin: 1.0
+                    }
+                    LyricsView {
+                        id: islandLyrics
+                        anchors.fill: parent
+                        textSize: 17
+                        lineGap: 8
+                        followHeight: true   // the lyrics open at the sung line as the pill grows
+                        showSource: false
                     }
                 }
                 Rectangle {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    height: 36
+                    id: lyricsFade
+                    anchors.fill: parent
+                    visible: false
+                    layer.enabled: true
                     gradient: Gradient {
-                        GradientStop { position: 0; color: Theme.alpha(pill.color, 0) }
-                        GradientStop { position: 1; color: pill.color }
+                        GradientStop { position: 0; color: "transparent" }
+                        GradientStop { position: Math.min(0.45, 28 / Math.max(1, lyricsFade.height)); color: "black" }
+                        GradientStop { position: Math.max(0.55, 1 - 36 / Math.max(1, lyricsFade.height)); color: "black" }
+                        GradientStop { position: 1; color: "transparent" }
                     }
+                }
+            }
+        }
+    }
+
+    // ---- lyrics: the sung line slides up and the next one comes in from below -----------------
+    component Ticker: Item {
+        id: tk
+        property string text
+        clip: true
+        onTextChanged: {
+            slide.complete()
+            outgoing.text = incoming.text
+            incoming.text = tk.text
+            slide.start()
+        }
+        Label {
+            id: outgoing
+            width: parent.width
+            elide: Text.ElideRight
+            color: "#ffffff"
+            font.pixelSize: 13
+            font.weight: Font.DemiBold
+        }
+        Label {
+            id: incoming
+            width: parent.width
+            elide: Text.ElideRight
+            color: "#ffffff"
+            font.pixelSize: 13
+            font.weight: Font.DemiBold
+            Component.onCompleted: text = tk.text
+        }
+        ParallelAnimation {
+            id: slide
+            NumberAnimation { target: outgoing; property: "y"; from: 0; to: -tk.height; duration: 320; easing.type: Easing.InCubic }
+            NumberAnimation { target: outgoing; property: "opacity"; from: 1; to: 0; duration: 260 }
+            NumberAnimation { target: incoming; property: "y"; from: tk.height; to: 0; duration: 380; easing.type: Easing.OutCubic }
+            NumberAnimation { target: incoming; property: "opacity"; from: 0; to: 1; duration: 380 }
+        }
+    }
+
+    // ---- wave: bars that move with the music --------------------------------------------------
+    // From cava when it runs (visualizer.active, see AppShell.qml); without it, a calm rhythm
+    // that only moves while the song plays.
+    component SoundBars: Item {
+        id: sb
+        property bool running: false
+        property bool playing: false
+        property color color: "white"
+        readonly property int count: 5
+        property var levels: [0.2, 0.2, 0.2, 0.2, 0.2]
+        property var targets: [0.2, 0.2, 0.2, 0.2, 0.2]
+        property real clock: 0
+        FrameAnimation {
+            running: sb.running && (sb.playing || sb.levels.some(v => v > 0.16))
+            onTriggered: {
+                const dt = Math.min(0.05, frameTime)
+                sb.clock += dt
+                const live = visualizer && visualizer.active ? (visualizer.bars || []) : []
+                const next = sb.levels.slice()
+                const targets = sb.targets.slice()
+                for (let i = 0; i < sb.count; i++) {
+                    let goal
+                    if (!sb.playing) {
+                        goal = 0.15
+                    } else if (live.length > 0) {
+                        // a band of the spectrum per bar, low on the left
+                        const from = Math.floor(i * live.length / sb.count)
+                        const to = Math.max(from + 1, Math.floor((i + 1) * live.length / sb.count))
+                        let peak = 0
+                        for (let j = from; j < to; j++) peak = Math.max(peak, live[j] || 0)
+                        goal = 0.15 + 0.85 * Math.min(1, peak * 1.4)
+                    } else {
+                        // a new random height for a bar every so often, each at its own pace
+                        if (Math.random() < dt * (3 + i))
+                            targets[i] = 0.25 + Math.random() * 0.75
+                        goal = targets[i]
+                    }
+                    next[i] += (goal - next[i]) * Math.min(1, dt * 14)
+                }
+                sb.targets = targets
+                sb.levels = next
+            }
+        }
+        Row {
+            anchors.centerIn: parent
+            spacing: 3
+            Repeater {
+                model: sb.count
+                Rectangle {
+                    required property int index
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 4
+                    height: Math.max(4, sb.height * sb.levels[index])
+                    radius: 2
+                    color: sb.color
                 }
             }
         }

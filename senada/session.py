@@ -29,6 +29,8 @@ def _os_user_name() -> str:
 
 # full view styles (qml/ImmersivePlayer.qml); the first is the default
 IMMERSIVE_STYLES = ("visualizer", "vinyl", "poster")
+# mini player styles (qml/MiniPlayer.qml); the first is the default
+ISLAND_STYLES = ("classic", "wave", "lyrics", "glass")
 
 class Session(QObject):
     changed = Signal()
@@ -202,4 +204,14 @@ class Session(QObject):
     immersiveStyle = Property(str, _get_immersive_style, _set_immersive_style, notify=changed)
     seekStyle = Property(str, *_setting("seek_style"), notify=changed)
     miniPlayer = Property(bool, *_setting("mini_player"), notify=changed)
+
+    def _get_island_style(self):
+        style = self.settings["island_style"]
+        return style if style in ISLAND_STYLES else ISLAND_STYLES[0]
+
+    def _set_island_style(self, value):
+        self.settings["island_style"] = value if value in ISLAND_STYLES else ISLAND_STYLES[0]
+        self.changed.emit()
+
+    islandStyle = Property(str, _get_island_style, _set_island_style, notify=changed)
     del _setting
