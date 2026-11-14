@@ -217,6 +217,15 @@ class Session(QObject):
 
     # ---- mini player ("dynamic island") -------------------------------------------
 
+    @Slot(QObject)
+    def minimize(self, window):
+        """Minimize, keeping a maximized window maximized for when it comes back. QWindow's
+        showMinimized() drops the maximized state, so the taskbar or Alt+Tab brought it back
+        at its normal size."""
+        if isinstance(window, QWindow):
+            kept = window.windowStates() & Qt.WindowState.WindowMaximized
+            window.setWindowStates(kept | Qt.WindowState.WindowMinimized)
+
     @Slot()
     def prepareMiniPlayer(self):
         """Window rules that float the mini player at the top of the screen (Hyprland)."""

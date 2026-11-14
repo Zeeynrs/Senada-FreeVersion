@@ -68,7 +68,7 @@ ApplicationWindow {
             return
         miniMode = true
         if (hidesToMini) win.hide()
-        else win.showMinimized()
+        else session.minimize(win)  // (stays maximized for the taskbar and Alt+Tab)
     }
     function leaveMiniPlayer() {
         miniMode = false

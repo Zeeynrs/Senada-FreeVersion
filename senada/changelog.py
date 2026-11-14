@@ -35,6 +35,8 @@ CHANGELOG = [
                 "Starting Senada while it is already running brings the open window forward instead of starting "
                 "a second one.",
                 "Play after the last song of the queue starts it again instead of doing nothing.",
+                "A maximized window sent to the mini player (Ctrl+M or its button) comes back maximized from "
+                "the taskbar or Alt+Tab, not at a smaller size.",
             ],
         },
         "id": {
@@ -63,6 +65,8 @@ CHANGELOG = [
                 "Membuka Senada saat sudah berjalan sekarang memunculkan jendela yang sudah terbuka, bukan "
                 "menjalankan Senada kedua.",
                 "Menekan putar setelah lagu terakhir di antrean selesai sekarang memutarnya lagi, bukan diam saja.",
+                "Jendela yang maximized lalu masuk ke pemutar mini (Ctrl+M atau tombolnya) kembali maximized saat "
+                "dibuka dari taskbar atau Alt+Tab, bukan mengecil.",
             ],
         },
     },
