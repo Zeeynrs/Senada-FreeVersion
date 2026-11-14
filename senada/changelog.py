@@ -16,14 +16,18 @@ CHANGELOG = [
                        "is back to Visualizer. Vinyl record and Poster stay.",
                        "Mini player styles (Settings → Appearance → Mini player style): Classic, Sound wave (bars in the "
                        "song's colour that move with the music), Running lyrics (the sung line slides in under the title) "
-                       "and Cover glass (the blurred cover behind the island)."], "fixed": ["Closing Senada no longer fills its log (Settings → About → Logs) with errors."]},
+                       "and Cover glass (the blurred cover behind the island)."], "fixed": [
+                       "Clicking the artist of a song imported from Spotify now opens the artist page (found by name on "
+                       "YouTube Music); before, nothing happened.","Closing Senada no longer fills its log (Settings → About → Logs) with errors."]},
         "id": {"new": ["Halaman Cari langsung menampilkan rekomendasi sebelum mengetik: lagu, artis, dan album berdasarkan "
                        "lagu yang kamu putar dan sukai, atau yang sedang populer kalau kamu baru mulai.",
                        "Gaya tampilan penuh Kaset, Radio, dan Walkman dihapus; kalau salah satunya sedang dipakai, tampilan penuh "
                        "kembali ke Visualizer. Piringan hitam dan Poster tetap ada.",
                        "Gaya pemutar mini (Pengaturan → Tampilan → Gaya pemutar mini): Klasik, Gelombang suara (batang "
                        "berwarna lagu yang bergerak mengikuti musik), Lirik berjalan (baris yang dinyanyikan bergeser masuk "
-                       "di bawah judul), dan Kaca sampul (sampul yang diburamkan di belakang island)."], "fixed": ["Menutup Senada tidak lagi memenuhi log-nya (Pengaturan → Tentang → Log) dengan pesan error."]},
+                       "di bawah judul), dan Kaca sampul (sampul yang diburamkan di belakang island)."], "fixed": [
+                       "Mengklik nama artis pada lagu yang diimpor dari Spotify kini membuka halaman artisnya (dicari "
+                       "berdasarkan nama di YouTube Music); sebelumnya tidak terjadi apa-apa.","Menutup Senada tidak lagi memenuhi log-nya (Pengaturan → Tentang → Log) dengan pesan error."]},
     },
     {
         "version": "1.0.8",

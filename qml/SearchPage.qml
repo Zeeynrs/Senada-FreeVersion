@@ -272,7 +272,7 @@ Item {
                                 Layout.fillWidth: true
                                 text: (topCard.hit.artists || "") + (topCard.hit.album ? " • " + topCard.hit.album : "")
                                 font.pixelSize: 14
-                                onClicked: if (topCard.hit.artistId) Nav.go("artist", topCard.hit.artistId)
+                                onClicked: Nav.goArtist(topCard.hit)
                             }
                             IconButton {
                                 iconName: "play"

@@ -399,6 +399,16 @@ Item {
                || (!!shell.Window.window && shell.Window.window.miniMode && session.islandStyle === "wave")
     }
 
+    // the artist of a song without an artist id, found by name (Nav.goArtist)
+    Connections {
+        target: Nav
+        function onFindArtist(names) { library.findArtist(names) }
+    }
+    Connections {
+        target: library
+        function onArtistFound(artistId) { Nav.go("artist", artistId) }
+    }
+
     Component { id: collectionComp; CollectionPage {} }
     Component { id: artistComp; ArtistPage {} }
     Component { id: searchComp; SearchPage {} }

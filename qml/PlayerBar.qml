@@ -92,7 +92,7 @@ Rectangle {
                 Layout.fillWidth: true
                 font.pixelSize: 12
                 text: bar.hasTrack ? bar.s.artists : I18n.t("Pick a song to start")
-                onClicked: if (bar.s.artistId) Nav.go("artist", bar.s.artistId)
+                onClicked: Nav.goArtist(bar.s)
             }
         }
     }

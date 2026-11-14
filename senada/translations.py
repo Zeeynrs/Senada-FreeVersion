@@ -124,6 +124,7 @@ ID = {
     "Listen on YouTube Music": "Dengarkan di YouTube Music",
     "Open on Spotify": "Buka di Spotify",
     "Poster": "Poster",
+    "{name} was not found on YouTube Music.": "{name} tidak ditemukan di YouTube Music.",
     "Mini player style": "Gaya pemutar mini",
     "Classic": "Klasik",
     "Sound wave": "Gelombang suara",

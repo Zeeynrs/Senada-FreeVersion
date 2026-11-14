@@ -27,6 +27,20 @@ class ImportLinkError(Exception):
     pass
 
 
+def best_artist(names: str, cards: list[dict]) -> dict | None:
+    """The first artist of a song's "A, B" list among the cards a search for that list found.
+
+    A name can hold a comma itself ("Tyler, The Creator", "Earth, Wind & Fire"), so the list is
+    not split: the card whose name the list starts with (case, accents and punctuation aside)
+    wins, the longest one if several do. Otherwise the first card."""
+    full = matching.normalize(names)
+    starts = [c for c in cards if (n := matching.normalize(c.get("name", "")))
+              and (full == n or full.startswith(n + " "))]
+    if starts:
+        return max(starts, key=lambda c: len(matching.normalize(c["name"])))
+    return cards[0] if cards else None
+
+
 def _yt_link(text: str, list_first: bool = False) -> tuple[str, str] | None:
     """(kind, id) for a YouTube / YouTube Music link. `list_first`: a song played from a
     playlist (watch?v=…&list=…) stands for the playlist (for importing)."""
@@ -82,6 +96,7 @@ class Library(QObject):
     loaded = Signal(str, "QVariantMap")  # page key, data
     searchFinished = Signal(str, "QVariantMap")  # query, results
     discoverChanged = Signal()
+    artistFound = Signal(str)  # YouTube Music artist id for findArtist()
     playlistCreated = Signal(str)  # new playlist id (e.g. after an import)
     matchCandidatesReady = Signal(str, "QVariantList")  # uri, scored YouTube Music candidates
     toast = Signal(str)
@@ -103,6 +118,8 @@ class Library(QObject):
         self._discover = {"tracks": [], "artists": [], "albums": [], "personal": False, "loading": False, "error": ""}
         self._discover_seeds = None
         self._discover_at = 0.0
+        self._artist_ids = {}      # normalised name -> artist id found by findArtist()
+        self._artist_request = 0
         session.changed.connect(self.meChanged)
         if player is not None:
             player.likedChanged.connect(lambda *_: self._bump_liked())
@@ -264,6 +281,34 @@ class Library(QObject):
             self.discoverChanged.emit()
 
         self.worker.run(lambda: discover.build(picked, home_sections, played), ok, fail)
+
+    # ---- artist by name -----------------------------------------------------------
+
+    @Slot(str)
+    def findArtist(self, names):
+        """The artist page for a song that has no YouTube Music artist id (songs imported from
+        Spotify): look the first artist up by name; artistFound gives the id to open."""
+        name = (names or "").strip()
+        key = matching.normalize(name)
+        if not key:
+            return
+        if key in self._artist_ids:
+            self.artistFound.emit(self._artist_ids[key])
+            return
+        self._artist_request += 1
+        request = self._artist_request
+
+        def ok(card):
+            if request != self._artist_request:  # another artist was clicked meanwhile
+                return
+            if card:
+                self._artist_ids[key] = card["id"]
+                self.artistFound.emit(card["id"])
+            else:
+                self.toast.emit(tr("{name} was not found on YouTube Music.", name=name))
+
+        self.worker.run(lambda: best_artist(name, ytmusic.search_artists(name)), ok,
+                        lambda e: self.toast.emit(str(e)))
 
     # ---- search --------------------------------------------------------------
 

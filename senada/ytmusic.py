@@ -401,6 +401,12 @@ def _search_shelf(query: str, params: str) -> tuple[list, list]:
     return tracks, cards
 
 
+def search_artists(query: str) -> list[dict]:
+    """Artist cards matching a name, best first."""
+    _, cards = _search_shelf(query, FILTER_ARTISTS)
+    return [c for c in cards if c["kind"] == "artist"]
+
+
 def search_tracks(query: str, videos: bool = False) -> list[dict]:
     """Songs (official audio) or videos matching a query; used to match imported tracks."""
     tracks, _ = _search_shelf(query, FILTER_VIDEOS if videos else FILTER_SONGS)

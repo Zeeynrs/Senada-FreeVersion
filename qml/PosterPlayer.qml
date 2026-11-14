@@ -137,7 +137,7 @@ Item {
                 font.pixelSize: Math.round(Math.max(28, Math.min(52, column.width * 0.075)))
                 font.weight: Font.Bold
                 elide: Text.ElideRight
-                onClicked: if (pp.s.artistId) { pp.closeRequested(); Nav.go("artist", pp.s.artistId) }
+                onClicked: if (pp.s.artistId || pp.s.artists) { pp.closeRequested(); Nav.goArtist(pp.s) }
             }
             RowLayout {
                 Layout.fillWidth: true

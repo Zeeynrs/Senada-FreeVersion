@@ -65,6 +65,11 @@ def _squash(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def normalize(text: str) -> str:
+    """For comparing names: no case, accents or punctuation."""
+    return _squash(_fold(text))
+
+
 def version_tags(text: str) -> set[str]:
     folded = _fold(text)
     return {tag for tag, rx in TAG_RES.items() if rx.search(folded)}

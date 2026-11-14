@@ -46,7 +46,7 @@ Item {
                     font.pixelSize: 14
                     color: Qt.rgba(1, 1, 1, 0.72)
                     elide: Text.ElideRight
-                    onClicked: if (bar.s.artistId) { bar.closeRequested(); Nav.go("artist", bar.s.artistId) }
+                    onClicked: if (bar.s.artistId || bar.s.artists) { bar.closeRequested(); Nav.goArtist(bar.s) }
                 }
                 IconButton {
                     visible: !!bar.s.hasTrack

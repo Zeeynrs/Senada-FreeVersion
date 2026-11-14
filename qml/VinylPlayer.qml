@@ -560,7 +560,7 @@ Item {
                     font.pixelSize: 20
                     color: Qt.rgba(1, 1, 1, 0.8)
                     elide: Text.ElideRight
-                    onClicked: if (vp.s.artistId) { vp.closeRequested(); Nav.go("artist", vp.s.artistId) }
+                    onClicked: if (vp.s.artistId || vp.s.artists) { vp.closeRequested(); Nav.goArtist(vp.s) }
                 }
                 IconButton {
                     visible: !!vp.s.hasTrack

@@ -392,7 +392,7 @@ Item {
                         text: im.s.artists || ""
                         font.pixelSize: 16
                         color: Qt.rgba(1, 1, 1, 0.72)
-                        onClicked: if (im.s.artistId) { im.close(); Nav.go("artist", im.s.artistId) }
+                        onClicked: if (im.s.artistId || im.s.artists) { im.close(); Nav.goArtist(im.s) }
                     }
                     IconButton {
                         visible: !!im.s.hasTrack

@@ -213,7 +213,7 @@ Item {
                 Layout.fillWidth: true
                 text: row.track.artists || ""
                 font.pixelSize: 12
-                onClicked: if (row.track.artistId) Nav.go("artist", row.track.artistId)
+                onClicked: Nav.goArtist(row.track)
             }
         }
 
@@ -228,7 +228,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(implicitWidth, parent.width)
                 text: row.track.artists || ""
-                onClicked: if (row.track.artistId) Nav.go("artist", row.track.artistId)
+                onClicked: Nav.goArtist(row.track)
             }
         }
         Item {
@@ -342,7 +342,7 @@ Item {
             onTriggered: row.remove()
         }
         MenuItem { text: I18n.t("Go to album"); enabled: !!row.track.albumId; onTriggered: Nav.go("album", row.track.albumId) }
-        MenuItem { text: I18n.t("Go to artist"); enabled: !!row.track.artistId; onTriggered: Nav.go("artist", row.track.artistId) }
+        MenuItem { text: I18n.t("Go to artist"); enabled: !!(row.track.artistId || row.track.artists); onTriggered: Nav.goArtist(row.track) }
         MenuItem {
             text: I18n.t("Copy song link")
             onTriggered: session.copy(row.isYouTube ? "https://music.youtube.com/watch?v=" + row.track.id
