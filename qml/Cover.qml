@@ -13,6 +13,9 @@ Item {
     property real scallopDepth: 0.038
     property bool simple: false  // plain square image, cheaper for long lists
     property string fallbackIcon: "note"
+    property url fallback                 // shown instead when `source` cannot be loaded
+    property bool failed: false
+    onSourceChanged: failed = false
     readonly property bool ready: img.status === Image.Ready
     readonly property real cornerRadius: (round || scalloped) ? width / 2 : radius
     readonly property int loadSize: Math.ceil(Math.max(width, height) * Screen.devicePixelRatio)
@@ -69,7 +72,8 @@ Item {
     Image {
         id: img
         anchors.fill: parent
-        source: root.source
+        source: root.failed && root.fallback.toString() !== "" ? root.fallback : root.source
+        onStatusChanged: if (status === Image.Error && !root.failed) root.failed = true
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
         sourceSize.width: root.loadSize

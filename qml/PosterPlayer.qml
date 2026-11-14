@@ -62,7 +62,8 @@ Item {
         Cover {
             anchors.fill: parent
             radius: 2
-            source: pp.s.imageLarge || pp.s.image || ""
+            source: Theme.hiRes(pp.s.imageLarge || pp.s.image, 1200)
+            fallback: pp.s.imageLarge || pp.s.image || ""
         }
         // issue line across the top of the cover, like a magazine
         Rectangle {

@@ -100,6 +100,19 @@ QtObject {
     function alpha(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }
     function mix(a, b, t) { return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1) }
 
+    // a sharper copy of a cover for a big view: YouTube Music art `px` wide, and a music video's
+    // still at full size (the 400×225 thumbnail YouTube lists songs with is far too small);
+    // other art as it is. A video can lack the full size still: give the original as fallback.
+    function hiRes(url, px) {
+        url = String(url || "")
+        const video = url.match(/^https?:\/\/i\.ytimg\.com\/vi\/([\w-]{11})\//)
+        if (video)
+            return "https://i.ytimg.com/vi/" + video[1] + "/maxresdefault.jpg"
+        if (url.indexOf("googleusercontent.com") >= 0 || url.indexOf("ggpht.com") >= 0)
+            return url.replace(/=w\d+-h\d+/, "=w" + px + "-h" + px).replace(/=s\d+/, "=s" + px)
+        return url
+    }
+
     function fmt(ms) {
         const total = Math.max(0, Math.floor((ms || 0) / 1000))
         const s = total % 60

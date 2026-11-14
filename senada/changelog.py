@@ -21,7 +21,9 @@ CHANGELOG = [
                        "as the song plays; each song opens with its title credits, the lyrics are the subtitles and the queue "
                        "is a board of showtimes with the time each song starts."], "fixed": [
                        "Clicking the artist of a song imported from Spotify now opens the artist page (found by name on "
-                       "YouTube Music); before, nothing happened.","Closing Senada no longer fills its log (Settings → About → Logs) with errors."]},
+                       "YouTube Music); before, nothing happened.",
+                       "Music videos look sharp in the big full views: their full-size still is used instead of the small "
+                       "400×225 thumbnail, and the cinema keeps its 16:9 shape instead of cutting it square.","Closing Senada no longer fills its log (Settings → About → Logs) with errors."]},
         "id": {"new": ["Halaman Cari langsung menampilkan rekomendasi sebelum mengetik: lagu, artis, dan album berdasarkan "
                        "lagu yang kamu putar dan sukai, atau yang sedang populer kalau kamu baru mulai.",
                        "Gaya tampilan penuh Kaset, Radio, dan Walkman dihapus; kalau salah satunya sedang dipakai, tampilan penuh "
@@ -33,7 +35,9 @@ CHANGELOG = [
                        "ke bawah mengikuti lagu; tiap lagu dibuka dengan kredit judul, liriknya menjadi subtitle, dan antrean "
                        "menjadi papan jadwal tayang dengan jam mulai tiap lagu."], "fixed": [
                        "Mengklik nama artis pada lagu yang diimpor dari Spotify kini membuka halaman artisnya (dicari "
-                       "berdasarkan nama di YouTube Music); sebelumnya tidak terjadi apa-apa.","Menutup Senada tidak lagi memenuhi log-nya (Pengaturan → Tentang → Log) dengan pesan error."]},
+                       "berdasarkan nama di YouTube Music); sebelumnya tidak terjadi apa-apa.",
+                       "Video musik kini tajam di tampilan penuh: gambar ukuran penuhnya dipakai, bukan thumbnail kecil "
+                       "400×225, dan layar bioskop mempertahankan bentuk 16:9-nya alih-alih memotongnya menjadi persegi.","Menutup Senada tidak lagi memenuhi log-nya (Pengaturan → Tentang → Log) dengan pesan error."]},
     },
     {
         "version": "1.0.8",

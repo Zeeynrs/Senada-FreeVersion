@@ -135,7 +135,8 @@ Item {
                 width: vp.labelR * 2
                 height: width
                 round: true
-                source: vp.s.imageLarge || vp.s.image || ""
+                source: Theme.hiRes(vp.s.imageLarge || vp.s.image, 1200)
+                fallback: vp.s.imageLarge || vp.s.image || ""
             }
         }
         FrameAnimation {

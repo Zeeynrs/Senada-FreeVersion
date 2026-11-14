@@ -371,7 +371,8 @@ Item {
                     width: coverStage.coverSide
                     height: coverStage.coverSide
                     round: true
-                    source: im.s.imageLarge || im.s.image || ""
+                    source: Theme.hiRes(im.s.imageLarge || im.s.image, 1200)
+                    fallback: im.s.imageLarge || im.s.image || ""
                     scale: im.s.isPlaying ? 1.0 : 0.95
                     Behavior on scale { NumberAnimation { duration: 500; easing.type: Easing.OutBack } }
                 }

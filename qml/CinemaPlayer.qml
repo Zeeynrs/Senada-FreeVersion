@@ -81,16 +81,23 @@ Item {
                 anchors.fill: parent
                 Image {
                     id: still
-                    // a little wider than the picture, so it can drift sideways too
-                    width: picture.width * 1.06
-                    height: width   // the cover is square: much taller than the picture
-                    x: -picture.width * 0.03 + drift.offset
-                    // the camera pans from the top of the cover to the bottom as the song plays
+                    readonly property string original: cp.s.imageLarge || cp.s.image || ""
+                    property bool failed: false
+                    onOriginalChanged: failed = false
+                    // a little wider than the picture, so it can drift sideways too; as tall as the
+                    // art's own shape (a square cover, or a music video's 16:9 still) at that width,
+                    // and never less than the picture
+                    readonly property real aspect: implicitWidth > 0 ? implicitHeight / implicitWidth : 1
+                    width: Math.max(picture.width * 1.06, picture.height * 1.06 / aspect)
+                    height: width * aspect
+                    x: (picture.width - width) / 2 + drift.offset
+                    // the camera pans from the top of the art to the bottom as the song plays
                     y: -(height - picture.height) * (0.08 + 0.84 * cp.progress)
                     Behavior on y { NumberAnimation { duration: 1200; easing.type: Easing.OutCubic } }
-                    source: cp.s.imageLarge || cp.s.image || ""
-                    fillMode: Image.PreserveAspectCrop
-                    sourceSize: Qt.size(1200, 1200)
+                    source: failed ? original : Theme.hiRes(original, 2000)
+                    onStatusChanged: if (status === Image.Error && !failed) failed = true
+                    fillMode: Image.Stretch   // the box already has the art's shape
+                    sourceSize.width: 2000
                     asynchronous: true
                     opacity: status === Image.Ready ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: 700 } }
