@@ -11,13 +11,13 @@ Lyrics that follow the singer word by word, a dynamic island, and a player that 
 <br><br>
 *Musikmu, tanpa akun dan tanpa iklan. Pemutar musik desktop gratis untuk Windows & Linux.*
 
-[![Latest release](https://img.shields.io/github/v/release/Zeeynrs/Senada-FreeVersion?label=release&color=111111)](https://github.com/Zeeynrs/Senada-FreeVersion/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/Zeeynrs/Senada-FreeVersion/total?color=111111)](https://github.com/Zeeynrs/Senada-FreeVersion/releases)
+[![Latest release](https://img.shields.io/github/v/release/Zeeynrs/Senada?label=release&color=111111)](https://github.com/Zeeynrs/Senada/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Zeeynrs/Senada/total?color=111111)](https://github.com/Zeeynrs/Senada/releases)
 [![GPL-3.0 License](https://img.shields.io/badge/license-GPL--3.0-111111)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20%7C%20Linux-111111)
 ![Made with](https://img.shields.io/badge/made%20with-Python%20%2B%20Qt%20Quick-111111)
 
-[![Download for Windows](https://img.shields.io/badge/Download%20for-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Zeeynrs/Senada-FreeVersion/releases/latest)
+[![Download for Windows](https://img.shields.io/badge/Download%20for-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Zeeynrs/Senada/releases/latest)
 &nbsp;
 [![Install on Linux](https://img.shields.io/badge/Install%20on-Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](#en-linux)
 
@@ -149,7 +149,7 @@ Lyrics that follow the singer word by word, a dynamic island, and a player that 
 
 #### 🪟 Windows 10 / 11
 
-1. Download **`Senada-Setup-<version>.exe`** from the [**latest release**](https://github.com/Zeeynrs/Senada-FreeVersion/releases/latest).
+1. Download **`Senada-Setup-<version>.exe`** from the [**latest release**](https://github.com/Zeeynrs/Senada/releases/latest).
 2. Run it. If *"Windows protected your PC"* (SmartScreen) appears, click **More info → Run anyway**: the installer is not signed with a code-signing certificate yet.
 3. Choose **Install for me only** (no admin rights needed) and follow the wizard.
 4. Open **Senada** from the Start menu.
@@ -167,7 +167,7 @@ Everything is included: Python, PySide6, **mpv**, **yt-dlp** and **deno** (which
 **Quick install (every distro, recommended):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Zeeynrs/Senada-FreeVersion/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Zeeynrs/Senada/main/install.sh | bash
 ```
 
 The script installs what Senada needs with your package manager (pacman, apt, dnf, zypper, xbps, apk), then adds the `senada` command and a menu entry. Remove it any time with `./install.sh --uninstall`.
@@ -176,8 +176,8 @@ The script installs what Senada needs with your package manager (pacman, apt, dn
 <summary><b>Manual clone</b></summary>
 
 ```bash
-git clone https://github.com/Zeeynrs/Senada-FreeVersion.git
-cd Senada-FreeVersion
+git clone https://github.com/Zeeynrs/Senada.git
+cd Senada
 ./install.sh
 ```
 </details>
@@ -186,8 +186,8 @@ cd Senada-FreeVersion
 <summary><b>Arch Linux & derivatives</b> (EndeavourOS, CachyOS, Manjaro, …)</summary>
 
 ```bash
-git clone https://github.com/Zeeynrs/Senada-FreeVersion.git
-cd Senada-FreeVersion
+git clone https://github.com/Zeeynrs/Senada.git
+cd Senada
 makepkg -si
 ```
 </details>
@@ -330,7 +330,7 @@ Senada is Python + Qt Quick (PySide6 / QML). App code is in `senada/`, the inter
 <summary><b>Run from source on Windows</b></summary>
 
 1. Install **Python 3.11+** from [python.org](https://www.python.org/downloads/) (tick *Add python.exe to PATH*).
-2. `git clone https://github.com/Zeeynrs/Senada-FreeVersion.git`
+2. `git clone https://github.com/Zeeynrs/Senada.git`
 3. Put `mpv.exe` and `yt-dlp.exe` in `bin\`, or install them with [Scoop](https://scoop.sh): `scoop bucket add extras`, then `scoop install mpv yt-dlp`.
 4. Double-click **`senada.bat`**. The first time, it creates `.venv` and installs PySide6 (and the packages for the Windows media controls).
 
@@ -477,7 +477,7 @@ Senada stands on great free software and services: [mpv](https://mpv.io), [yt-dl
 
 #### 🪟 Windows 10 / 11
 
-1. Unduh **`Senada-Setup-<versi>.exe`** dari [**rilis terbaru**](https://github.com/Zeeynrs/Senada-FreeVersion/releases/latest).
+1. Unduh **`Senada-Setup-<versi>.exe`** dari [**rilis terbaru**](https://github.com/Zeeynrs/Senada/releases/latest).
 2. Jalankan. Kalau muncul *"Windows protected your PC"* (SmartScreen), klik **More info → Run anyway**: installer-nya belum ditandatangani dengan sertifikat code signing.
 3. Pilih **Install for me only** (tidak perlu hak admin) dan ikuti wizard-nya.
 4. Buka **Senada** dari Start menu.
@@ -495,7 +495,7 @@ Semua sudah termasuk: Python, PySide6, **mpv**, **yt-dlp**, dan **deno** (yang d
 **Instalasi cepat (semua distro, direkomendasikan):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Zeeynrs/Senada-FreeVersion/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Zeeynrs/Senada/main/install.sh | bash
 ```
 
 Skrip ini memasang yang dibutuhkan Senada lewat package manager-mu (pacman, apt, dnf, zypper, xbps, apk), lalu menambahkan perintah `senada` dan entri di menu aplikasi. Hapus kapan saja dengan `./install.sh --uninstall`.
@@ -504,8 +504,8 @@ Skrip ini memasang yang dibutuhkan Senada lewat package manager-mu (pacman, apt,
 <summary><b>Clone manual</b></summary>
 
 ```bash
-git clone https://github.com/Zeeynrs/Senada-FreeVersion.git
-cd Senada-FreeVersion
+git clone https://github.com/Zeeynrs/Senada.git
+cd Senada
 ./install.sh
 ```
 </details>
@@ -514,8 +514,8 @@ cd Senada-FreeVersion
 <summary><b>Arch Linux & turunannya</b> (EndeavourOS, CachyOS, Manjaro, …)</summary>
 
 ```bash
-git clone https://github.com/Zeeynrs/Senada-FreeVersion.git
-cd Senada-FreeVersion
+git clone https://github.com/Zeeynrs/Senada.git
+cd Senada
 makepkg -si
 ```
 </details>
@@ -658,7 +658,7 @@ Senada ditulis dengan Python + Qt Quick (PySide6 / QML). Kode aplikasi ada di `s
 <summary><b>Menjalankan dari source di Windows</b></summary>
 
 1. Pasang **Python 3.11+** dari [python.org](https://www.python.org/downloads/) (centang *Add python.exe to PATH*).
-2. `git clone https://github.com/Zeeynrs/Senada-FreeVersion.git`
+2. `git clone https://github.com/Zeeynrs/Senada.git`
 3. Taruh `mpv.exe` dan `yt-dlp.exe` di `bin\`, atau pasang lewat [Scoop](https://scoop.sh): `scoop bucket add extras`, lalu `scoop install mpv yt-dlp`.
 4. Klik dua kali **`senada.bat`**. Saat pertama kali, skrip ini membuat `.venv` dan memasang PySide6 (serta paket untuk kontrol media Windows).
 

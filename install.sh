@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Installer multi-distro untuk Senada Music Player (gratis, bebas iklan, tanpa akun)
 # Dapat dijalankan langsung (./install.sh) atau via curl:
-#   curl -fsSL https://raw.githubusercontent.com/Zeeynrs/Senada-FreeVersion/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Zeeynrs/Senada/main/install.sh | bash
 set -euo pipefail
 
-REPO_URL="https://github.com/Zeeynrs/Senada-FreeVersion.git"
+REPO_URL="https://github.com/Zeeynrs/Senada.git"
 DEFAULT_INSTALL_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/senada"
 BIN_DIR="$HOME/.local/bin"
 APP_DIR_DESKTOP="$HOME/.local/share/applications"

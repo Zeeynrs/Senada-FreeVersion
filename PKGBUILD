@@ -5,22 +5,22 @@ pkgver=r7.758ae35
 pkgrel=1
 pkgdesc="Pemutar musik gratis & tanpa iklan tanpa akun untuk Linux desktop (Wayland/Hyprland) dengan Qt Quick & MPV"
 arch=('any')
-url="https://github.com/Zeeynrs/Senada-FreeVersion"
+url="https://github.com/Zeeynrs/Senada"
 license=('GPL-3.0-only')
 depends=('python' 'pyside6' 'mpv' 'yt-dlp' 'python-dbus' 'python-mutagen' 'cava' 'hicolor-icon-theme')
 makedepends=('git')
 provides=('senada-music-player')
 conflicts=('senada-music-player')
-source=("git+$url.git")
+source=("senada-src::git+$url.git")  # its own folder name: "Senada" would clash with senada/ on case-insensitive disks
 sha256sums=('SKIP')
 
 pkgver() {
-    cd "$srcdir/Senada-FreeVersion"
+    cd "$srcdir/senada-src"
     printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 package() {
-    cd "$srcdir/Senada-FreeVersion"
+    cd "$srcdir/senada-src"
 
     install -dm755 "$pkgdir/usr/lib/$_pkgname"
     cp -r senada qml data run.py "$pkgdir/usr/lib/$_pkgname/"

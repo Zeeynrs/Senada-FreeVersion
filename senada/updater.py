@@ -22,7 +22,7 @@ from . import __version__, changelog, net
 from .i18n import language, tr, trn
 from .config import CACHE_DIR, FROZEN, IS_WINDOWS, NO_WINDOW, ROOT
 
-REPO = "Zeeynrs/Senada-FreeVersion"
+REPO = "Zeeynrs/Senada"
 RELEASES_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 NOT_GIT_HINT = "Senada was installed from a system package. Use the package manager or ./install.sh to update it."
 CHECK_INTERVAL_MS = 180_000  # 3 minutes (git checkout)

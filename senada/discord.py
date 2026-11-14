@@ -30,7 +30,7 @@ logger = logging.getLogger("senada.discord")
 
 OP_HANDSHAKE, OP_FRAME, OP_CLOSE, OP_PING, OP_PONG = range(5)
 ACTIVITY_LISTENING = 2
-LOGO_URL = "https://raw.githubusercontent.com/Zeeynrs/Senada-FreeVersion/main/qml/icons/logo.png"
+LOGO_URL = "https://raw.githubusercontent.com/Zeeynrs/Senada/main/qml/icons/logo.png"
 MIN_INTERVAL_MS = 4000   # between two activity updates (Discord: 5 per 20 s)
 SETTLE_MS = 600          # wait this long for more changes before sending (a skip sends one update)
 RETRY_MS = 15000         # look for Discord again after it was not found or went away

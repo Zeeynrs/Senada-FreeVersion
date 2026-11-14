@@ -8,7 +8,8 @@ __pycache__/
 src/
 pkg/
 *.pkg.tar*
-Senada-FreeVersion/
+# makepkg's clone of the source (see PKGBUILD)
+/senada-src/
 bin/*
 !bin/README.txt
 # API keys written at build time (see senada/config.py)

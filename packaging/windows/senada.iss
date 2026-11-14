@@ -12,7 +12,7 @@
 #endif
 #define AppName "Senada"
 #define AppExe "Senada.exe"
-#define AppUrl "https://github.com/Zeeynrs/Senada-FreeVersion"
+#define AppUrl "https://github.com/Zeeynrs/Senada"
 
 [Setup]
 AppId={{6A0C1F3E-7B52-4C8E-9D1A-5E3F2B8C4D71}
