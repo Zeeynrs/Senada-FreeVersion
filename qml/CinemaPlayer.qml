@@ -9,7 +9,8 @@ import QtQuick.Layouts
 // A new song opens with its title credits over the picture. The lyrics are the subtitles, in
 // the bar under the picture (closed panel: no subtitles, the title in the bar); the queue is the
 // board of showtimes beside the screen, each song with the time it starts; the equalizer the
-// fine lines of the poster view. Controls sit in a strip along the bottom.
+// fine lines of the poster view. Both sit on a dark glass card as tall as the screen. Controls
+// sit in a strip along the bottom.
 Item {
     id: cp
     property bool active: true            // the full view is on screen
@@ -37,6 +38,42 @@ Item {
     // ---- the screen ------------------------------------------------------------------------------
     readonly property real availW: (side ? width * 0.6 : width) - 2 * 88   // clear of the volume rail
     readonly property real screenW: Math.max(320, Math.min(availW, (areaH - 24) * 16 / 9))
+
+    // the light of the picture falling on the walls and the floor around the screen: the film,
+    // drawn at an eighth of its size, blurred into the transparent room around it and blown up
+    // again, so it reaches far and fades out softly on every side (a blurred rectangle the size
+    // of the light left hard edges in the room, right across the showtimes)
+    Item {
+        id: roomLight
+        readonly property real k: 8
+        x: screen.x
+        y: screen.y
+        width: screen.width / k
+        height: screen.height / k
+        scale: k
+        transformOrigin: Item.TopLeft
+        opacity: cp.playing ? 0.85 : 0.35
+        Behavior on opacity { NumberAnimation { duration: 900 } }
+        ShaderEffectSource {
+            id: lightSource
+            anchors.centerIn: parent
+            width: parent.width
+            height: Math.round(parent.width / 2.39)
+            sourceItem: film
+            textureSize: Qt.size(96, 40)
+            visible: false
+        }
+        MultiEffect {
+            anchors.fill: lightSource
+            source: lightSource
+            autoPaddingEnabled: true   // room for the blur to fade into
+            blurEnabled: true
+            blur: 1.0
+            blurMax: 48
+            saturation: 0.15
+        }
+    }
+
     Item {
         id: screen
         x: cp.side ? 56 : (cp.width - width) / 2
@@ -45,20 +82,6 @@ Item {
         height: width * 9 / 16
         Behavior on x { NumberAnimation { duration: 480; easing.type: Easing.OutCubic } }
         Behavior on width { NumberAnimation { duration: 480; easing.type: Easing.OutCubic } }
-
-        // the light of the picture falling on the walls and the floor around the screen
-        MultiEffect {
-            x: -width * 0.12
-            y: -height * 0.1
-            width: parent.width * 1.24
-            height: parent.height * 1.35
-            source: film
-            blurEnabled: true
-            blur: 1.0
-            blurMax: 64
-            opacity: cp.playing ? 0.5 : 0.25
-            Behavior on opacity { NumberAnimation { duration: 900 } }
-        }
 
         Rectangle {  // the screen itself, black where the film has no picture
             anchors.fill: parent
@@ -281,15 +304,26 @@ Item {
     Component.onCompleted: rollTitles()
 
     // ---- beside the screen: the showtimes or the equalizer -------------------------------------------
-    Item {
-        id: sidePanel
-        x: screen.x + screen.width + 44
-        y: cp.topSpace + 8
-        width: cp.width - x - 92   // the volume rail is on the right edge
-        height: cp.areaH - 16
-        visible: cp.side
+    Rectangle {
+        id: sideCard
+        x: screen.x + screen.width + 40
+        width: cp.width - x - 96   // the volume rail is on the right edge
+        height: Math.min(cp.areaH - 16, Math.max(screen.height, 520))
+        y: cp.topSpace + (cp.areaH - height) / 2
+        radius: 18
+        color: Qt.rgba(1, 1, 1, 0.035)
+        border.color: Qt.rgba(1, 1, 1, 0.08)
+        visible: opacity > 0
         opacity: cp.side ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 300 } }
+    }
+    Item {
+        id: sidePanel
+        anchors.fill: sideCard
+        anchors.margins: 26
+        visible: sideCard.visible
+        opacity: sideCard.opacity
+        clip: true
 
         // the queue as the board of showtimes --------------------------------------------------
         Item {
@@ -326,8 +360,14 @@ Item {
                     width: parent.width
                     height: 64
                     spacing: 16
+                    Rectangle {
+                        Layout.preferredWidth: 3
+                        Layout.preferredHeight: 36
+                        radius: 1.5
+                        color: cp.accent
+                    }
                     Label {
-                        Layout.preferredWidth: 78
+                        Layout.preferredWidth: 72
                         text: I18n.t("NOW")
                         color: cp.accent
                         font.pixelSize: 15
@@ -375,11 +415,20 @@ Item {
                     id: show
                     required property var modelData
                     required property int index
-                    width: board.width - 12
+                    width: board.width - 14
                     height: 58
+                    Rectangle {  // the row being pointed at
+                        anchors.fill: parent
+                        anchors.topMargin: 3
+                        anchors.bottomMargin: 3
+                        radius: 10
+                        color: Qt.rgba(1, 1, 1, showHover.hovered ? 0.06 : 0)
+                        Behavior on color { ColorAnimation { duration: 140 } }
+                    }
                     Label {
+                        x: 19
                         anchors.verticalCenter: parent.verticalCenter
-                        width: 78
+                        width: 72
                         text: showtimes.startsAt(show.index)
                         color: showHover.hovered ? cp.accent : "#ffffff"
                         font.pixelSize: 22
@@ -387,8 +436,8 @@ Item {
                         font.features: { "tnum": 1 }
                     }
                     Column {
-                        x: 94
-                        width: parent.width - 94 - 52
+                        x: 107
+                        width: parent.width - 107 - 64
                         anchors.verticalCenter: parent.verticalCenter
                         Label {
                             width: parent.width
@@ -411,6 +460,7 @@ Item {
                     }
                     Label {
                         anchors.right: parent.right
+                        anchors.rightMargin: 12
                         anchors.verticalCenter: parent.verticalCenter
                         text: show.modelData.durationMs ? Theme.fmt(show.modelData.durationMs) : ""
                         color: Qt.rgba(1, 1, 1, 0.4)

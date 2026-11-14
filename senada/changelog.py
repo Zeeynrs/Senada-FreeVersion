@@ -33,6 +33,8 @@ CHANGELOG = [
                 "The mini player tucked into the top edge of the screen is bigger: a larger cover and title.",
                 "The floating player bar takes on the song: its cover, blurred, and its colour from the left, "
                 "with rounder corners and a deeper shadow.",
+                "The cinema full view is tidier: the showtimes and the equalizer sit on a glass card beside the "
+                "screen, and the screen's light fades softly into the room instead of ending in a hard edge.",
             ],
             "fixed": [
                 "Starting Senada while it is already running brings the open window forward instead of starting "
@@ -66,6 +68,8 @@ CHANGELOG = [
                 "Pemutar mini yang terselip di tepi atas layar lebih besar: cover dan judulnya lebih besar.",
                 "Player bar mengambang ikut berwarna lagu: cover-nya diburamkan dan warnanya mengalir dari kiri, "
                 "dengan sudut lebih bulat dan bayangan lebih dalam.",
+                "Tampilan penuh bioskop lebih rapi: jadwal tayang dan equalizer ada di kartu kaca di samping "
+                "layar, dan cahaya layar memudar lembut ke ruangan, bukan berakhir di tepi yang tegas.",
             ],
             "fixed": [
                 "Membuka Senada saat sudah berjalan sekarang memunculkan jendela yang sudah terbuka, bukan "
