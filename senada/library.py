@@ -180,6 +180,13 @@ class Library(QObject):
     def savedRevision(self):
         return self._saved_rev
 
+    def reload(self):
+        """The whole library was replaced (a backup restored): everything shown from it follows."""
+        self._bump_liked()
+        self._saved_rev += 1
+        self.savedChanged.emit()
+        self.refreshAll()
+
     # ---- internal ----------------------------------------------------------
 
     def _bump_liked(self):

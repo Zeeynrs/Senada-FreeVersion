@@ -10,8 +10,24 @@ CHANGELOG = [
     {
         "version": "next",
         "date": "",
-        "en": {"new": [], "fixed": []},
-        "id": {"new": [], "fixed": []},
+        "en": {
+            "new": [
+                "Back up and restore (Settings → Profile & Library): liked songs, playlists, saved albums and "
+                "artists, history and settings in one file. Restoring adds what is missing, or replaces the "
+                "library, and Senada keeps a copy of your library first.",
+                "Automatic backups: once a week Senada keeps a copy of your library (the last 5).",
+            ],
+            "fixed": [],
+        },
+        "id": {
+            "new": [
+                "Cadangkan dan pulihkan (Pengaturan → Profil & Library): lagu disukai, playlist, album dan artis "
+                "tersimpan, riwayat, serta pengaturan dalam satu file. Memulihkan menambahkan yang belum ada, atau "
+                "mengganti library, dan Senada menyalin library-mu dulu.",
+                "Cadangan otomatis: seminggu sekali Senada menyimpan salinan library-mu (5 terakhir).",
+            ],
+            "fixed": [],
+        },
     },
     {
         "version": "1.0.11",

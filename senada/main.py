@@ -17,6 +17,7 @@ from .resolver import AudioResolver
 from .library import Library
 from .downloads import Downloads
 from .discord import DiscordPresence
+from .backup import Backup
 from .effects import AudioEffects
 from .instance import Instance, ask_running_to_show
 from .lyrics import Lyrics
@@ -113,6 +114,10 @@ def main():
         session.quit()
 
     updater.restartRequested.connect(request_restart)
+    backup = Backup(store, settings)
+    backup.toast.connect(session.toast)
+    backup.restored.connect(library.reload)
+    backup.restartRequested.connect(request_restart)  # restored settings apply from the next start
     updater.quitRequested.connect(session.quit)
     media_controls = None
 
@@ -131,7 +136,7 @@ def main():
     ctx = engine.rootContext()
     for name, obj in (("session", session), ("player", player), ("library", library),
                       ("lyrics", lyrics), ("visualizer", visualizer), ("downloads", downloads), ("effects", effects), ("discord", discord),
-                      ("updater", updater)):
+                      ("updater", updater), ("backup", backup)):
         ctx.setContextProperty(name, obj)
     engine.load(str(ROOT / "qml" / "Main.qml"))
     if not engine.rootObjects():
@@ -154,6 +159,7 @@ def main():
 
     library.refreshAll()
     player.start()
+    backup.weekly()
 
     ret = app.exec()
     # the interface goes first: torn down after the objects it shows (lyrics, player, …),

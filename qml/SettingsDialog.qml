@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Dialogs as Dialogs
 import QtQuick.Controls
 import QtQuick.Effects
 import QtQuick.Layouts
@@ -61,7 +62,7 @@ Popup {
           words: ["Keyboard shortcuts", "Play / pause", "Search", "Volume up / down", "Next / previous song", "Mini player"] },
         { group: "Preferences", key: "profile", icon: "person", title: "Profile & Library",
           desc: "Your name and the music kept on this device.",
-          words: ["Offline songs", "Download", "Downloads", "Offline", "Open folder", "Display name", "Import a playlist", "Import from Spotify", "Spotify", "YouTube Music", "YouTube", "Import", "Playlist"] },
+          words: ["Backup", "Back up", "Restore", "Automatic backups", "Offline songs", "Download", "Downloads", "Offline", "Open folder", "Display name", "Import a playlist", "Import from Spotify", "Spotify", "YouTube Music", "YouTube", "Import", "Playlist"] },
         { group: "App", key: "whatsnew", icon: "new", title: "What's new",
           desc: "What changed in each version, and which version is on this device.",
           words: ["Changelog", "Log", "Release", "Version", "On this device", "Version history"] },
@@ -1417,6 +1418,47 @@ Popup {
                     onClicked: downloads.openFolder()
                 }
             }
+            Divider {}
+            SettingRow {
+                label: I18n.t("Backup")
+                hint: I18n.t("Liked songs, playlists, saved albums and artists, history and settings in one file, to keep safe or to move to another computer. Offline songs are not in it.")
+                NButton {
+                    text: I18n.t("Back up…")
+                    onClicked: saveBackup.open()
+                }
+                NButton {
+                    text: I18n.t("Restore…")
+                    onClicked: openBackup.open()
+                }
+            }
+            SettingRow {
+                Layout.topMargin: 0
+                label: I18n.t("Automatic backups")
+                hint: I18n.t("Once a week, and before every restore, Senada keeps a copy of your library (the last 5).")
+                NButton {
+                    text: I18n.t("Open folder")
+                    onClicked: backup.openAutoFolder()
+                }
+            }
+            Dialogs.FileDialog {
+                id: saveBackup
+                title: I18n.t("Back up")
+                fileMode: Dialogs.FileDialog.SaveFile
+                nameFilters: [I18n.t("Senada backup") + " (*.json)"]
+                defaultSuffix: "json"
+                currentFolder: backup.suggestedFolder
+                selectedFile: backup.suggestedFolder + "/" + backup.suggestedName
+                onAccepted: backup.exportTo(selectedFile)
+            }
+            Dialogs.FileDialog {
+                id: openBackup
+                title: I18n.t("Restore a backup")
+                fileMode: Dialogs.FileDialog.OpenFile
+                nameFilters: [I18n.t("Senada backup") + " (*.json)"]
+                currentFolder: backup.suggestedFolder
+                onAccepted: restoreDialog.openFor(selectedFile)
+            }
+            RestoreDialog { id: restoreDialog }
             Divider {}
             Note {
                 text: I18n.t("Senada needs no account. Music comes from YouTube Music; liked songs, playlists and history are stored on this device ({path}).", { path: session.libraryPath })

@@ -102,6 +102,15 @@ class Settings:
     def __getitem__(self, key):
         return self._data.get(key, DEFAULTS.get(key))
 
+    def snapshot(self) -> dict:
+        """The settings as saved (for a backup)."""
+        return json.loads(json.dumps(self._data))
+
+    def restore(self, data: dict):
+        """Take the settings of a backup; the app reads most of them at start, so it restarts after."""
+        self._data = {**DEFAULTS, **{k: v for k, v in data.items() if k in DEFAULTS}}
+        write_private(SETTINGS_FILE, self._data)
+
     def __setitem__(self, key, value):
         if self._data.get(key) != value:
             self._data[key] = value

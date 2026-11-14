@@ -117,6 +117,7 @@ Lyrics that follow the singer word by word, a dynamic island, and a player that 
 **📚 Your library**
 - Liked songs, your own playlists, saved albums / artists / playlists and history.
 - Stored on your computer: `%APPDATA%\Senada\library.json` (Windows) or `~/.config/senada/library.json` (Linux).
+- **Back up and restore** (*Settings → Profile & Library*): everything above plus your settings in one file, to keep safe or move to another computer. Restoring adds what is missing or replaces the library. Senada also keeps a weekly copy on its own.
 
 **🎨 Look and feel**
 - English (default) and Indonesian, switched without a restart.
@@ -294,6 +295,7 @@ Click **More info → Run anyway** on the SmartScreen prompt.
 | | Windows | Linux |
 | :--- | :--- | :--- |
 | Library & settings | `%APPDATA%\Senada` | `~/.config/senada` |
+| Automatic backups | `%APPDATA%\Senada\backups` | `~/.config/senada/backups` |
 | Offline songs | `%USERPROFILE%\Music\Senada` | `~/Music/Senada` |
 | Shared lyrics pictures | `%USERPROFILE%\Pictures\Senada` | `~/Pictures/Senada` |
 | Cache | `%LOCALAPPDATA%\Senada\Cache` | `~/.cache/senada` |
@@ -437,6 +439,7 @@ Senada stands on great free software and services: [mpv](https://mpv.io), [yt-dl
 **📚 Library-mu**
 - Lagu disukai, playlist buatan sendiri, album / artis / playlist yang disimpan, dan riwayat putar.
 - Tersimpan di komputermu: `%APPDATA%\Senada\library.json` (Windows) atau `~/.config/senada/library.json` (Linux).
+- **Cadangkan dan pulihkan** (*Pengaturan → Profil & Library*): semua di atas plus pengaturanmu dalam satu file, untuk disimpan dengan aman atau dipindahkan ke komputer lain. Memulihkan menambahkan yang belum ada atau mengganti library. Senada juga menyimpan salinan mingguan dengan sendirinya.
 
 **🎨 Tampilan**
 - Bahasa Inggris (bawaan) dan Indonesia, diganti tanpa mulai ulang.
@@ -614,6 +617,7 @@ Klik **More info → Run anyway** pada layar SmartScreen.
 | | Windows | Linux |
 | :--- | :--- | :--- |
 | Library & pengaturan | `%APPDATA%\Senada` | `~/.config/senada` |
+| Cadangan otomatis | `%APPDATA%\Senada\backups` | `~/.config/senada/backups` |
 | Lagu offline | `%USERPROFILE%\Music\Senada` | `~/Music/Senada` |
 | Gambar lirik yang dibagikan | `%USERPROFILE%\Pictures\Senada` | `~/Pictures/Senada` |
 | Cache | `%LOCALAPPDATA%\Senada\Cache` | `~/.cache/senada` |

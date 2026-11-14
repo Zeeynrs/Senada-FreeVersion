@@ -65,3 +65,4 @@ VolumeControl 1.0 VolumeControl.qml
 VolumeRail 1.0 VolumeRail.qml
 SleepTimerButton 1.0 SleepTimerButton.qml
 ShareLyricsDialog 1.0 ShareLyricsDialog.qml
+RestoreDialog 1.0 RestoreDialog.qml

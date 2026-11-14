@@ -42,6 +42,19 @@ class LocalStore:
     def _save(self):
         write_private(self.path, self._data)
 
+    # ---- backup (see backup.py) --------------------------------------------
+
+    def snapshot(self) -> dict:
+        """A copy of the whole library."""
+        with self._lock:
+            return copy.deepcopy(self._data)
+
+    def replace(self, data: dict):
+        """Swap the whole library for `data` (a restored backup) and save it."""
+        with self._lock:
+            self._data = {k: copy.deepcopy(data.get(k) or []) for k in ("liked", "playlists", "saved", "history")}
+            self._save()
+
     # ---- liked songs -----------------------------------------------------
 
     def liked(self) -> list[dict]:
