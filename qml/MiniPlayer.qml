@@ -44,9 +44,9 @@ Window {
     readonly property int wideW: 480           // senada/island.py SIZE = wideW/H + 2 * margin
     readonly property int wideH: 430
     readonly property int topGap: margin + 2   // between the floating island and the screen's top
-    readonly property int dockedW: 320
-    readonly property int dockedH: 40
-    readonly property int ear: 12              // the inward curves where the docked island meets the edge
+    readonly property int dockedW: 380
+    readonly property int dockedH: 52
+    readonly property int ear: 14              // the inward curves where the docked island meets the edge
     readonly property int dockAfter: session.islandDock   // seconds; 0: it never docks
     property bool docked: false
     onExpandedChanged: if (expanded) docked = false
@@ -199,9 +199,9 @@ Window {
                 spacing: 10
 
                 Cover {
-                    Layout.preferredWidth: island.docked ? 26 : 40
-                    Layout.preferredHeight: island.docked ? 26 : 40
-                    radius: island.expanded ? 10 : island.docked ? 7 : 20
+                    Layout.preferredWidth: island.docked ? 36 : 40
+                    Layout.preferredHeight: island.docked ? 36 : 40
+                    radius: island.expanded ? 10 : island.docked ? 9 : 20
                     Behavior on radius { NumberAnimation { duration: 300 } }
                     source: island.s.imageSmall || island.s.image || ""
                     fallbackIcon: "music"
@@ -218,7 +218,7 @@ Window {
                         text: island.hasTrack ? island.s.name : I18n.t("Nothing playing yet")
                         elide: Text.ElideRight
                         color: parent.ticker ? Qt.rgba(1, 1, 1, 0.6) : "#ffffff"
-                        font.pixelSize: parent.ticker ? (island.docked ? 10 : 11) : (island.docked ? 12 : 13)
+                        font.pixelSize: parent.ticker ? 11 : (island.docked ? 14 : 13)
                         font.weight: parent.ticker ? Font.Normal : Font.DemiBold
                     }
                     Label {
@@ -248,8 +248,8 @@ Window {
                 SoundBars {
                     // the wave style, and every style while docked
                     visible: (island.style === "wave" || island.docked) && island.hasTrack && !island.expanded
-                    Layout.preferredWidth: island.docked ? 28 : 34
-                    Layout.preferredHeight: island.docked ? 16 : 22
+                    Layout.preferredWidth: island.docked ? 32 : 34
+                    Layout.preferredHeight: island.docked ? 20 : 22
                     running: visible && island.visible
                     playing: island.playing
                     color: island.glow

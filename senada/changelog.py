@@ -30,6 +30,7 @@ CHANGELOG = [
                 "Romanization or translation under each line (Settings → Lyrics): Japanese and Korean in Latin "
                 "letters, English translations from BetterLyrics, and if you switch it on, Google Translate into "
                 "the app's language.",
+                "The mini player tucked into the top edge of the screen is bigger: a larger cover and title.",
             ],
             "fixed": [
                 "Starting Senada while it is already running brings the open window forward instead of starting "
@@ -60,6 +61,7 @@ CHANGELOG = [
                 "Romanisasi atau terjemahan di bawah tiap baris (Pengaturan → Lirik): lirik Jepang dan Korea dalam "
                 "huruf Latin, terjemahan bahasa Inggris dari BetterLyrics, dan jika dinyalakan, Google Translate "
                 "ke bahasa aplikasi.",
+                "Pemutar mini yang terselip di tepi atas layar lebih besar: cover dan judulnya lebih besar.",
             ],
             "fixed": [
                 "Membuka Senada saat sudah berjalan sekarang memunculkan jendela yang sudah terbuka, bukan "
