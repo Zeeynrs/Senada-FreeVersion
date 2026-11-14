@@ -72,6 +72,10 @@ class Catalog:
     def load(self, kind: str, cid: str) -> dict:
         if kind == "liked":
             return self.liked_page()
+        if kind == "local":
+            if getattr(self, "localfiles", None) is None:
+                raise LookupError(tr("Local files are not available."))
+            return self.localfiles.page()
         if kind == "offline":
             if self.downloads is None:
                 raise LookupError(tr("Downloads are not available."))

@@ -16,7 +16,7 @@ Item {
     readonly property string currentKey: stack.currentItem ? stack.currentItem.pageKey : ""
     readonly property string libraryFilter: currentKey === "library" ? stack.currentItem.filter : ""
     // these replace each other instead of piling up
-    readonly property var topLevel: ["search", "library", "liked", "offline"]
+    readonly property var topLevel: ["search", "library", "liked", "offline", "local", "stats"]
 
     function entryOf(item) {
         if (!item) return null
@@ -51,12 +51,12 @@ Item {
             return
         }
         const key = kind + ":" + itemId
-        const standalone = kind === "liked" || kind === "offline" || topLevel.indexOf(kind) >= 0
+        const standalone = kind === "liked" || kind === "offline" || kind === "local" || topLevel.indexOf(kind) >= 0
         if (currentKey === key || currentKey === kind || (!standalone && !itemId))
             return
         if (topLevel.indexOf(kind) >= 0 && stack.depth > 1)
             stack.pop(null, StackView.Immediate)
-        if (kind === "playlist" || kind === "album" || kind === "liked" || kind === "offline")
+        if (kind === "playlist" || kind === "album" || kind === "liked" || kind === "offline" || kind === "local")
             stack.push(collectionComp, { kind: kind, itemId: itemId })
         else if (kind === "artist")
             stack.push(artistComp, { itemId: itemId })
@@ -64,6 +64,8 @@ Item {
             stack.push(searchComp)
         else if (kind === "library")
             stack.push(libraryComp, { filter: itemId || "all" })
+        else if (kind === "stats")
+            stack.push(statsComp)
     }
 
     function goBack() {
@@ -438,6 +440,7 @@ Item {
     Component { id: artistComp; ArtistPage {} }
     Component { id: searchComp; SearchPage {} }
     Component { id: libraryComp; LibraryPage {} }
+    Component { id: statsComp; StatsPage {} }
 
     Shortcut { sequence: "Space"; onActivated: player.togglePlay() }
     Shortcut { sequence: "Ctrl+Right"; onActivated: player.next() }

@@ -48,7 +48,7 @@ Popup {
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
           words: ["Engine status", "Device name", "Audio quality", "MPV", "Audio engine & streaming (MPV)",
-                  "Even out loudness", "Normalize", "Loudness", "Volume", "Skip silence", "Silence"] },
+                  "Even out loudness", "Normalize", "Loudness", "Volume", "Skip silence", "Silence", "Crossfade", "Gapless"] },
         { group: "Preferences", key: "lyrics", icon: "lyrics", title: "Lyrics",
           desc: "Where synced lyrics come from.",
           words: ["Lyrics source", "Automatic", "BetterLyrics", "LRCLIB", "KuGou", "YouTube Music", "NetEase", "Synced lyrics",
@@ -57,12 +57,18 @@ Popup {
         { group: "Preferences", key: "discord", icon: "presence", title: "Discord",
           desc: "Show what you are listening to on your Discord profile.",
           words: ["Rich Presence", "Discord", "Listening to", "Show the song on Discord", "While paused", "Status"] },
+        { group: "Preferences", key: "scrobble", icon: "stats", title: "Scrobbling",
+          desc: "Add the songs you play to your Last.fm or Libre.fm profile.",
+          words: ["Scrobbling", "Scrobble", "Last.fm", "Libre.fm", "Connect", "Disconnect"] },
+        { group: "Preferences", key: "remote", icon: "smartphone", title: "Phone remote",
+          desc: "Control Senada from your phone's browser.",
+          words: ["Phone", "Remote", "QR", "Phone remote", "Control from your phone", "New link", "Copy link"] },
         { group: "Preferences", key: "shortcuts", icon: "keyboard", title: "Shortcuts",
           desc: "Keyboard shortcuts that work anywhere in the app.",
           words: ["Keyboard shortcuts", "Play / pause", "Search", "Volume up / down", "Next / previous song", "Mini player"] },
         { group: "Preferences", key: "profile", icon: "person", title: "Profile & Library",
           desc: "Your name and the music kept on this device.",
-          words: ["Backup", "Back up", "Restore", "Automatic backups", "Offline songs", "Download", "Downloads", "Offline", "Open folder", "Display name", "Import a playlist", "Import from Spotify", "Spotify", "YouTube Music", "YouTube", "Import", "Playlist"] },
+          words: ["Music folders", "Local files", "Add folder", "Scan again", "Backup", "Back up", "Restore", "Automatic backups", "Offline songs", "Download", "Downloads", "Offline", "Open folder", "Display name", "Import a playlist", "Import from Spotify", "Spotify", "YouTube Music", "YouTube", "Import", "Playlist"] },
         { group: "App", key: "whatsnew", icon: "new", title: "What's new",
           desc: "What changed in each version, and which version is on this device.",
           words: ["Changelog", "Log", "Release", "Version", "On this device", "Version history"] },
@@ -843,6 +849,8 @@ Popup {
                     sourceComponent: dlg.section === "audio" ? audioPage
                                    : dlg.section === "lyrics" ? lyricsPage
                                    : dlg.section === "discord" ? discordPage
+                                   : dlg.section === "scrobble" ? scrobblePage
+                                   : dlg.section === "remote" ? remotePage
                                    : dlg.section === "shortcuts" ? shortcutsPage
                                    : dlg.section === "profile" ? profilePage
                                    : dlg.section === "updates" ? updatesPage
@@ -1137,6 +1145,29 @@ Popup {
             }
             SettingRow {
                 Layout.topMargin: 0
+                label: I18n.t("Crossfade")
+                hint: effects.crossfade > 0
+                      ? I18n.t("The next song fades in over the last {n} seconds of the one playing.", { n: effects.crossfade })
+                      : I18n.t("Off: songs follow each other without a gap.")
+                NSlider {
+                    id: fadeSlider
+                    Layout.preferredWidth: 150
+                    from: 0
+                    to: 12
+                    stepSize: 1
+                    snapMode: Slider.SnapAlways
+                    value: effects.crossfade
+                    onMoved: effects.setCrossfade(Math.round(value))
+                }
+                Label {
+                    Layout.preferredWidth: 34
+                    text: Math.round(fadeSlider.value) > 0 ? Math.round(fadeSlider.value) + " s" : I18n.t("Off")
+                    color: Math.round(fadeSlider.value) > 0 ? Theme.text : Theme.dim
+                    font.pixelSize: 13
+                }
+            }
+            SettingRow {
+                Layout.topMargin: 0
                 label: I18n.t("Skip silence")
                 hint: I18n.t("Long silences (at the start or end of a song, or before a hidden track) go by in a flash. The lyrics stay in time.")
                 NSwitch {
@@ -1315,6 +1346,116 @@ Popup {
     }
 
     Component {
+        id: remotePage
+        ColumnLayout {
+            spacing: 0
+            SettingRow {
+                label: I18n.t("Control from your phone")
+                hint: I18n.t("Scan a code with your phone's camera and a remote opens in its browser: play, pause, skip, seek, volume and like. The phone has to be on the same Wi-Fi.")
+                NSwitch {
+                    checked: remote.enabled
+                    onToggled: remote.enabled = checked
+                }
+            }
+            SettingBlock {
+                visible: remote.enabled
+                Layout.topMargin: 0
+                label: I18n.t("Scan with your phone")
+                hint: I18n.t("Only this code or link opens the remote. A new link stops the old one, also on phones that kept it.")
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 22
+                    Rectangle {
+                        visible: remote.qr !== ""
+                        implicitWidth: 196
+                        implicitHeight: 196
+                        radius: 14
+                        color: "#ffffff"
+                        Image {
+                            anchors.fill: parent
+                            anchors.margins: 8
+                            source: remote.qr
+                            sourceSize: Qt.size(180, 180)
+                            smooth: false
+                        }
+                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+                        Label {
+                            Layout.fillWidth: true
+                            text: remote.url
+                            wrapMode: Text.WrapAnywhere
+                            font.pixelSize: 13
+                            color: Theme.dim
+                        }
+                        RowLayout {
+                            spacing: 10
+                            NButton { text: I18n.t("Copy link"); onClicked: session.copy(remote.url) }
+                            NButton { text: I18n.t("New link"); onClicked: remote.newLink() }
+                        }
+                    }
+                }
+            }
+            Divider {}
+            Note {
+                text: I18n.t("The first time, Windows may ask whether Senada may use the network: allow it on private networks. The remote works while Senada is open, and only on your own network.")
+            }
+        }
+    }
+
+    Component {
+        id: scrobblePage
+        ColumnLayout {
+            spacing: 0
+            SettingRow {
+                label: scrobbler.connected ? scrobbler.serviceName : I18n.t("Your account")
+                hint: scrobbler.connected
+                      ? I18n.t("Scrobbling as {user}.", { user: scrobbler.user })
+                        + (scrobbler.waiting > 0 ? " " + I18n.n("{n} scrobble waits to be sent.", "{n} scrobbles wait to be sent.", scrobbler.waiting) : "")
+                      : scrobbler.connecting
+                        ? I18n.t("Allow Senada on the page that opened in your browser. This page updates by itself.")
+                        : I18n.t("Not connected. Connect an account to add the songs you play to your profile.")
+                Rectangle {
+                    implicitWidth: 8; implicitHeight: 8; radius: 4
+                    color: scrobbler.connected ? Theme.ok : scrobbler.connecting ? Theme.warn : Theme.dim
+                }
+                NButton {
+                    visible: scrobbler.connected
+                    text: I18n.t("Disconnect")
+                    onClicked: scrobbler.disconnect()
+                }
+                NButton {
+                    visible: scrobbler.connecting
+                    text: I18n.t("Cancel")
+                    onClicked: scrobbler.cancelConnect()
+                }
+            }
+            SettingRow {
+                visible: !scrobbler.connected && !scrobbler.connecting
+                Layout.topMargin: 0
+                label: I18n.t("Connect")
+                hint: scrobbler.lastfmAvailable
+                      ? I18n.t("Opens the service's page in your browser to allow Senada. Your password stays with the service.")
+                      : I18n.t("Opens the service's page in your browser to allow Senada. Last.fm is not available in this version of Senada; Libre.fm is.")
+                NButton {
+                    text: "Last.fm"
+                    enabled: scrobbler.lastfmAvailable
+                    onClicked: scrobbler.connectTo("lastfm")
+                }
+                NButton {
+                    text: "Libre.fm"
+                    onClicked: scrobbler.connectTo("librefm")
+                }
+            }
+            Divider {}
+            Note {
+                text: I18n.t("A song is scrobbled once heard for half its length or 4 minutes, and shows as playing now while it plays. Senada sends the service the title, artist, album and length; scrobbles made without internet are sent later.")
+            }
+        }
+    }
+
+    Component {
         id: discordPage
         ColumnLayout {
             id: discordCol
@@ -1417,6 +1558,41 @@ Popup {
                     text: I18n.t("Open folder")
                     onClicked: downloads.openFolder()
                 }
+            }
+            Divider {}
+            SettingBlock {
+                label: I18n.t("Music folders")
+                hint: (localfiles.folders.length
+                       ? I18n.n("{n} song found. ", "{n} songs found. ", localfiles.count)
+                       : "")
+                      + I18n.t("The music files in these folders play in Senada next to YouTube Music, under Your Library → Local files.")
+                      + (localfiles.readsTags ? "" : " " + I18n.t("Titles come from the file names (install mutagen to read the tags)."))
+                Repeater {
+                    model: localfiles.folders
+                    delegate: RowLayout {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: 10
+                        Icon { glyph: "library"; size: 16; color: Theme.dim }
+                        Label { Layout.fillWidth: true; text: modelData; elide: Text.ElideMiddle; font.pixelSize: 13 }
+                        IconButton { iconName: "close"; size: 14; tint: Theme.dim; tip: I18n.t("Remove"); onClicked: localfiles.removeFolder(modelData) }
+                    }
+                }
+                RowLayout {
+                    spacing: 10
+                    NButton { text: I18n.t("Add folder…"); iconName: "add"; onClicked: musicFolder.open() }
+                    NButton {
+                        visible: localfiles.folders.length > 0
+                        text: localfiles.scanning ? I18n.t("Looking for songs…") : I18n.t("Scan again")
+                        enabled: !localfiles.scanning
+                        onClicked: localfiles.rescan()
+                    }
+                }
+            }
+            Dialogs.FolderDialog {
+                id: musicFolder
+                title: I18n.t("Add a music folder")
+                onAccepted: localfiles.addFolder(selectedFolder)
             }
             Divider {}
             SettingRow {

@@ -61,6 +61,10 @@ Item {
                 library.load(page.kind, page.itemId)
         }
     }
+    Connections {  // the music folders were scanned again
+        target: localfiles
+        function onChanged() { if (page.kind === "local") library.load(page.kind, page.itemId) }
+    }
 
     function playAt(i) {
         if (sortKey) {  // sorted view: play in the order shown
@@ -114,7 +118,7 @@ Item {
             loading: page.loading
             fallbackIcon: page.kind === "liked" ? "heart" : page.isOffline ? "downloaded" : "note"
             canSave: page.kind !== "liked" && !page.isOffline && !page.isLocal && !page.isSpotify && !page.info.error
-            canDownload: !page.isOffline && !page.info.error && page.tracks.length > 0
+            canDownload: !page.isOffline && page.kind !== "local" && !page.info.error && page.tracks.length > 0
             downloadedCount: page.downloadedCount
             trackCount: page.tracks.length
             saved: (library.savedRevision, library.isSaved(page.kind, page.itemId))

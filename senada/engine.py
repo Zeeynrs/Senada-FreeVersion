@@ -110,15 +110,19 @@ class AudioEngine(QObject):
     loadFailed = Signal()            # the file could not be opened or broke off
     errorOccurred = Signal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, tag=""):
+        """tag: names a second mpv next to the first (the crossfade's), with its own IPC
+        endpoint and log file."""
         super().__init__(parent)
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        self.tag = tag
+        name = f"senada-mpv-{os.getpid()}" + (f"-{tag}" if tag else "")
         if IS_WINDOWS:
-            self.ipc_path = rf"\\.\pipe\senada-mpv-{os.getpid()}"
+            self.ipc_path = rf"\\.\pipe\{name}"
         else:
             # short path: Unix sockets are limited to ~108 characters
             runtime = os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir()
-            self.ipc_path = os.path.join(runtime, f"senada-mpv-{os.getpid()}.sock")
+            self.ipc_path = os.path.join(runtime, f"{name}.sock")
         self.proc = None
         self._buf = b""
         self._pending: list[bytes] = []
@@ -194,7 +198,8 @@ class AudioEngine(QObject):
             script_opts.append(f"ytdl_hook-ytdl_path={ytdlp}")
         cmd.append("--script-opts=" + ",".join(script_opts))
         if LOG_DIR.is_dir():
-            cmd.append(f"--log-file={MPV_LOG_FILE}")  # rewritten each start
+            log = MPV_LOG_FILE.with_name(f"mpv-{self.tag}.log") if self.tag else MPV_LOG_FILE
+            cmd.append(f"--log-file={log}")  # rewritten each start
         logger.info("starting mpv: %s (yt-dlp: %s)", mpv_bin, ytdlp)
         self._exit_reported = False
         try:

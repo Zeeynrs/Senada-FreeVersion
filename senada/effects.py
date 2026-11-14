@@ -23,7 +23,8 @@ MAX_DB = 12
 TEMPO_MIN, TEMPO_MAX = 0.5, 2.0
 # flat by default: the sound is left as it is until the user changes it
 DEFAULTS = {"enabled": True, "preset": "Flat", "bands": PRESETS["Flat"], "tempo": 1.0, "keepPitch": False,
-            "normalize": False, "skipSilence": False}
+            "normalize": False, "skipSilence": False, "crossfade": 0}
+CROSSFADE_MAX = 12  # seconds (see crossfade.py)
 
 
 def gains_db(state: dict) -> list[float] | None:
@@ -59,6 +60,8 @@ class AudioEffects(QObject):
         self.engine.set_equalizer(gains_db(self._state))
         self.engine.set_normalize(bool(self._state["normalize"]))
         self.engine.set_skip_silence(bool(self._state["skipSilence"]))
+        if hasattr(self.engine, "set_crossfade"):
+            self.engine.set_crossfade(int(self._state["crossfade"] or 0))
 
     def _save(self):
         self.settings["effects"] = dict(self._state)
@@ -148,3 +151,12 @@ class AudioEffects(QObject):
     @Slot(bool)
     def setSkipSilence(self, on):
         self._update(skipSilence=bool(on))
+
+    @Property(int, notify=changed)
+    def crossfade(self):
+        """Seconds the next song fades in over the end of this one (0: off, gapless)."""
+        return int(self._state["crossfade"] or 0)
+
+    @Slot(int)
+    def setCrossfade(self, seconds):
+        self._update(crossfade=max(0, min(CROSSFADE_MAX, int(seconds))))

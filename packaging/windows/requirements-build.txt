@@ -9,3 +9,7 @@ winrt-Windows.Foundation
 winrt-Windows.Media
 winrt-Windows.Media.Playback
 winrt-Windows.Storage.Streams
+# tags and covers of the music files in Local files (see senada/localfiles.py)
+mutagen
+# the QR code of the phone remote (see senada/remote.py)
+segno

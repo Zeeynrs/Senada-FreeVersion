@@ -12,12 +12,17 @@ from PySide6.QtQuickControls2 import QQuickStyle
 from . import logs
 from .catalog import Catalog
 from .config import BIN_DIR, FROZEN, IS_WINDOWS, ROOT, Settings
-from .engine import AudioEngine
 from .resolver import AudioResolver
 from .library import Library
 from .downloads import Downloads
 from .discord import DiscordPresence
 from .backup import Backup
+from .crossfade import CrossfadeEngine
+from .localfiles import LocalFiles
+from .plays import PlayTracker
+from .remote import Remote
+from .scrobble import Scrobbler
+from .stats import Stats
 from .effects import AudioEffects
 from .instance import Instance, ask_running_to_show
 from .lyrics import Lyrics
@@ -84,11 +89,14 @@ def main():
     catalog = Catalog(store)
     session = Session(settings, worker)
     instance.showRequested.connect(session.showRequested)
-    audio_engine = AudioEngine()
+    audio_engine = CrossfadeEngine()  # mpv (and a second one only while crossfade is on)
     resolver = AudioResolver()
     downloads = Downloads(resolver)
     catalog.downloads = downloads
     player = Player(worker, audio_engine, resolver, settings, store, catalog, downloads)
+    localfiles = LocalFiles(settings)       # music folders on this computer
+    catalog.localfiles = player.localfiles = localfiles
+    localfiles.toast.connect(session.toast)
     library = Library(store, catalog, worker, session, player, resolver)
     library.toast.connect(session.toast)
     downloads.toast.connect(session.toast)
@@ -101,6 +109,7 @@ def main():
 
     session.languageChanged.connect(on_language)
     lyrics = Lyrics(player, worker, settings, downloads)
+    lyrics.localfiles = localfiles
     effects = AudioEffects(settings, audio_engine)
     discord = DiscordPresence(player, settings, effects)
     visualizer = Visualizer()
@@ -114,6 +123,12 @@ def main():
         session.quit()
 
     updater.restartRequested.connect(request_restart)
+    plays = PlayTracker(player)          # what is heard, and for how long
+    stats = Stats(plays, player)         # Your stats
+    scrobbler = Scrobbler(plays, settings, worker)  # Last.fm / Libre.fm
+    scrobbler.toast.connect(session.toast)
+    remote = Remote(player, settings)    # the phone remote (off until switched on)
+    remote.toast.connect(session.toast)
     backup = Backup(store, settings)
     backup.toast.connect(session.toast)
     backup.restored.connect(library.reload)
@@ -122,6 +137,9 @@ def main():
     media_controls = None
 
     def on_quit():
+        plays.flush()  # the song playing now counts too
+        stats.close()
+        remote.close()
         audio_engine.quit()
         visualizer.stop()
         player.stop()
@@ -136,7 +154,8 @@ def main():
     ctx = engine.rootContext()
     for name, obj in (("session", session), ("player", player), ("library", library),
                       ("lyrics", lyrics), ("visualizer", visualizer), ("downloads", downloads), ("effects", effects), ("discord", discord),
-                      ("updater", updater), ("backup", backup)):
+                      ("updater", updater), ("backup", backup), ("stats", stats), ("scrobbler", scrobbler),
+                      ("localfiles", localfiles), ("remote", remote)):
         ctx.setContextProperty(name, obj)
     engine.load(str(ROOT / "qml" / "Main.qml"))
     if not engine.rootObjects():
@@ -160,6 +179,8 @@ def main():
     library.refreshAll()
     player.start()
     backup.weekly()
+    if localfiles.folders:
+        localfiles.rescan()  # songs added or removed while Senada was closed
 
     ret = app.exec()
     # the interface goes first: torn down after the objects it shows (lyrics, player, …),

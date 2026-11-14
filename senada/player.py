@@ -192,6 +192,10 @@ class Player(QObject):
         """The stream did not open or broke off: play the track through mpv's own yt-dlp hook instead,
         and when that fails too, another upload of the same song (or move on to the next song)."""
         token, video_id = self._started
+        track = self._current_track()
+        if track and track.get("uri", "").startswith("local:file:") and token == self._play_token:
+            self._give_up(track, token, "unplayable")  # a music file: there is no other upload to try
+            return
         if self._fallback_token == self._play_token:
             if token == self._play_token:  # the fallback failed too
                 track = self._current_track()
@@ -232,6 +236,10 @@ class Player(QObject):
         return info, url, problem
 
     def _local_file(self, uri: str) -> str | None:
+        """A file on this computer for the song: from the music folders, or a download."""
+        if uri and uri.startswith("local:file:"):
+            files = getattr(self, "localfiles", None)
+            return files.path_for(uri) if files is not None else None
         return self.downloads.path_for(uri) if self.downloads is not None and uri else None
 
     def _current_track(self) -> dict | None:
@@ -438,7 +446,8 @@ class Player(QObject):
         # (_on_load_failed falls back to the YouTube upload it was downloaded from)
         local = self._local_file(track.get("uri", ""))
         if local:
-            self._started = (token, self.downloads.video_id_for(track["uri"]))
+            video_id = self.downloads.video_id_for(track["uri"]) if self.downloads is not None else ""
+            self._started = (token, video_id)  # a music file of your own has none
             self.engine.play(local)
             return
 

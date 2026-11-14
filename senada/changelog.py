@@ -17,6 +17,16 @@ CHANGELOG = [
                 "library, and Senada keeps a copy of your library first.",
                 "Automatic backups: once a week Senada keeps a copy of your library (the last 5).",
                 "Senada opens maximized, and remembers it if you leave the window at its normal size.",
+                "Your stats (in the sidebar): minutes listened, plays, top songs and artists, and the minutes per "
+                "day or month, for the last 7 or 30 days, this year or all time. Counted on this device only.",
+                "Scrobbling (Settings → Scrobbling): the songs you play are added to your Libre.fm profile (and "
+                "Last.fm, once this version of Senada has a Last.fm key).",
+                "Local files: add your music folders in Settings → Profile & Library and play your own MP3, FLAC "
+                "and other files next to YouTube Music, with their tags, covers and .lrc lyrics.",
+                "Phone remote (Settings → Phone remote): scan a QR code and control Senada from your phone's "
+                "browser on the same Wi-Fi. No app, and off until you switch it on.",
+                "Crossfade (Settings → Audio): the next song fades in over the last 1 to 12 seconds of the one "
+                "playing.",
             ],
             "fixed": [],
         },
@@ -27,6 +37,17 @@ CHANGELOG = [
                 "mengganti library, dan Senada menyalin library-mu dulu.",
                 "Cadangan otomatis: seminggu sekali Senada menyimpan salinan library-mu (5 terakhir).",
                 "Senada terbuka dalam keadaan maximized, dan mengingatnya kalau kamu membiarkan jendela di ukuran biasa.",
+                "Statistikmu (di sidebar): menit mendengarkan, jumlah putar, lagu dan artis teratas, serta menit "
+                "per hari atau per bulan, untuk 7 atau 30 hari terakhir, tahun ini, atau sepanjang waktu. Dihitung "
+                "di perangkat ini saja.",
+                "Scrobbling (Pengaturan → Scrobbling): lagu yang kamu putar ditambahkan ke profil Libre.fm-mu (dan "
+                "Last.fm, setelah versi Senada ini punya kunci Last.fm).",
+                "File lokal: tambahkan folder musikmu di Pengaturan → Profil & Library dan putar file MP3, FLAC, dan "
+                "lainnya bersama YouTube Music, lengkap dengan tag, cover, dan lirik .lrc.",
+                "Remote HP (Pengaturan → Remote HP): scan kode QR dan kontrol Senada dari browser HP di Wi-Fi yang "
+                "sama. Tanpa aplikasi, dan mati sampai kamu nyalakan.",
+                "Crossfade (Pengaturan → Audio): lagu berikutnya masuk perlahan di 1 sampai 12 detik terakhir lagu "
+                "yang sedang diputar.",
             ],
             "fixed": [],
         },

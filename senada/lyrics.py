@@ -34,7 +34,7 @@ HEADERS = {"User-Agent": "Senada/0.1 (desktop music player)"}
 SOURCES = ("auto", "betterlyrics", "lrclib", "kugou", "ytmusic", "netease")
 # word-timed lyrics first, so karaoke can follow the singer where they exist
 AUTO_ORDER = ("betterlyrics", "lrclib", "kugou", "ytmusic", "netease")
-SOURCE_NAMES = {"betterlyrics": "BetterLyrics", "lrclib": "LRCLIB", "kugou": "KuGou", "ytmusic": "YouTube Music",
+SOURCE_NAMES = {"file": "LRC", "betterlyrics": "BetterLyrics", "lrclib": "LRCLIB", "kugou": "KuGou", "ytmusic": "YouTube Music",
                 "netease": "NetEase"}
 
 
@@ -624,6 +624,9 @@ class Lyrics(QObject):
             self._set(key, self._cache[key], "ready")
             return
         saved = self.downloads.lyrics_for(uri) if self.downloads is not None else None
+        files = getattr(self, "localfiles", None)
+        if not saved and files is not None and uri.startswith("local:file:"):
+            saved = files.lyrics_for(uri)  # an .lrc file next to the song
         if saved:
             saved["offline"] = True
         if saved and self._source in ("auto", saved.get("source")):

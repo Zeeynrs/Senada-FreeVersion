@@ -100,6 +100,7 @@ Lyrics that follow the singer word by word, a dynamic island, and a player that 
 - **Offline songs**: download a song, playlist or album and play it without internet, with its cover and lyrics (*right-click → Download for offline*).
 - The next song is prepared in advance, so songs change without a gap.
 - If a song will not play, Senada tries another upload of it, and otherwise moves on: the queue never gets stuck.
+- **Local files**: add your music folders (*Settings → Profile & Library*) and play your own MP3, FLAC, M4A, OGG and other files in the same queue, with their tags, covers and `.lrc` lyrics.
 
 **🎤 Lyrics**
 - **Synced lyrics** from **BetterLyrics, LRCLIB, KuGou, YouTube Music and NetEase**. *Automatic* tries them in turn, word-timed sources first; or pick one in *Settings → Lyrics* or from the button under the lyrics.
@@ -113,6 +114,7 @@ Lyrics that follow the singer word by word, a dynamic island, and a player that 
 - **Even out loudness**: every song plays at about the same volume (−14 LUFS).
 - **Skip silence**: long silences at the start or end of a song go by in a flash, and the lyrics stay in time.
 - **Sleep timer**: the moon in the player bar stops the music after 15 minutes to 2 hours, or at the end of the song, fading out gently.
+- **Crossfade**: the next song fades in over the last 1–12 seconds of the one playing (off: gapless).
 
 **📚 Your library**
 - Liked songs, your own playlists, saved albums / artists / playlists and history.
@@ -135,6 +137,9 @@ Lyrics that follow the singer word by word, a dynamic island, and a player that 
 - **Linux**: MPRIS (`playerctl`, media keys, Hyprlock, Waybar), Wayland / Hyprland and X11.
 - **One Senada at a time**: opening it again brings the running one forward.
 - **Discord Rich Presence** (optional): "Listening to Senada" with the song, cover and a progress bar on your profile.
+- **Scrobbling** to Libre.fm (and Last.fm) from *Settings → Scrobbling*.
+- **Phone remote**: scan a QR code in *Settings → Phone remote* and control Senada from your phone's browser on the same Wi-Fi.
+- **Your stats**: minutes listened, top songs and artists, per day or month, counted on this device only.
 
 </details>
 
@@ -258,9 +263,10 @@ Senada has no account and no server of its own, and it collects nothing. It only
 | **Spotify** | Only when you import a Spotify link | The public playlist or album link |
 | **Google Translate** | Only if you switch on translation with it | The text of the lyrics |
 | **Discord** (the app on your computer) | Only if you switch on Rich Presence | The song you are playing |
+| **Libre.fm / Last.fm** | Only if you connect an account | The songs you play (title, artist, album, length) |
 | **GitHub** | Looking for updates | Nothing but the request |
 
-Your library, settings and offline songs stay on your computer.
+Your library, settings, listening stats and offline songs stay on your computer. The phone remote only answers on your own network, to a link with a random key.
 
 <a id="en-troubleshooting"></a>
 
@@ -422,6 +428,7 @@ Senada stands on great free software and services: [mpv](https://mpv.io), [yt-dl
 - **Lagu offline**: unduh lagu, playlist, atau album lalu putar tanpa internet, lengkap dengan sampul dan liriknya (*klik kanan → Unduh untuk offline*).
 - Lagu berikutnya disiapkan lebih dulu, jadi perpindahan lagu tanpa jeda.
 - Kalau sebuah lagu gagal diputar, Senada mencoba versi unggahan lain, atau melewatinya: antrean tidak pernah macet.
+- **File lokal**: tambahkan folder musikmu (*Pengaturan → Profil & Library*) dan putar file MP3, FLAC, M4A, OGG, dan lainnya di antrean yang sama, lengkap dengan tag, cover, dan lirik `.lrc`.
 
 **🎤 Lirik**
 - **Lirik tersinkron** dari **BetterLyrics, LRCLIB, KuGou, YouTube Music, dan NetEase**. *Otomatis* mencobanya bergantian, sumber yang punya waktu per kata lebih dulu; atau pilih satu di *Pengaturan → Lirik* atau dari tombol di bawah lirik.
@@ -435,6 +442,7 @@ Senada stands on great free software and services: [mpv](https://mpv.io), [yt-dl
 - **Samakan kerasnya suara**: setiap lagu diputar dengan volume yang kurang lebih sama (−14 LUFS).
 - **Lewati hening**: bagian hening yang panjang di awal atau akhir lagu dilewati dalam sekejap, dan lirik tetap sinkron.
 - **Timer tidur**: ikon bulan di player bar menghentikan musik setelah 15 menit sampai 2 jam, atau di akhir lagu, dengan volume yang mengecil perlahan.
+- **Crossfade**: lagu berikutnya masuk perlahan di 1–12 detik terakhir lagu yang sedang diputar (mati: tanpa jeda).
 
 **📚 Library-mu**
 - Lagu disukai, playlist buatan sendiri, album / artis / playlist yang disimpan, dan riwayat putar.
@@ -457,6 +465,9 @@ Senada stands on great free software and services: [mpv](https://mpv.io), [yt-dl
 - **Linux**: MPRIS (`playerctl`, tombol media, Hyprlock, Waybar), Wayland / Hyprland dan X11.
 - **Satu Senada saja**: membukanya lagi memunculkan jendela yang sudah berjalan.
 - **Discord Rich Presence** (opsional): "Listening to Senada" beserta lagu, sampul, dan bilah progres di profilmu.
+- **Scrobbling** ke Libre.fm (dan Last.fm) dari *Pengaturan → Scrobbling*.
+- **Remote HP**: scan kode QR di *Pengaturan → Remote HP* dan kontrol Senada dari browser HP di Wi-Fi yang sama.
+- **Statistikmu**: menit mendengarkan, lagu dan artis teratas, per hari atau per bulan, dihitung di perangkat ini saja.
 
 </details>
 
@@ -580,9 +591,10 @@ Senada tidak punya akun maupun server sendiri, dan tidak mengumpulkan apa pun. S
 | **Spotify** | Hanya saat kamu mengimpor link Spotify | Link playlist atau album publiknya |
 | **Google Translate** | Hanya jika kamu menyalakan terjemahan dengannya | Teks liriknya |
 | **Discord** (aplikasi di komputermu) | Hanya jika kamu menyalakan Rich Presence | Lagu yang sedang diputar |
+| **Libre.fm / Last.fm** | Hanya jika kamu menyambungkan akun | Lagu yang kamu putar (judul, artis, album, durasi) |
 | **GitHub** | Saat mencari pembaruan | Tidak ada selain permintaannya |
 
-Library, pengaturan, dan lagu offline-mu tetap di komputermu.
+Library, pengaturan, statistik dengar, dan lagu offline-mu tetap di komputermu. Remote HP hanya menjawab di jaringanmu sendiri, lewat link dengan kunci acak.
 
 <a id="id-masalah"></a>
 

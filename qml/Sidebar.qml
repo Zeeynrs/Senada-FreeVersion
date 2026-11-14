@@ -109,11 +109,18 @@ Rectangle {
                     current: side.currentKey === "offline:"
                     onClicked: Nav.go("offline")
                 }
+                NavEntry { sub: true; text: I18n.t("Local files"); current: side.currentKey === "local:"; onClicked: Nav.go("local") }
                 NavEntry { sub: true; text: I18n.t("Albums"); current: side.libraryFilter === "album"; onClicked: Nav.go("library", "album") }
                 NavEntry { sub: true; text: I18n.t("Artists"); current: side.libraryFilter === "artist"; onClicked: Nav.go("library", "artist") }
                 NavEntry { sub: true; text: I18n.t("Playlists"); current: side.libraryFilter === "playlist"; onClicked: Nav.go("library", "playlist") }
                 NavEntry { sub: true; text: I18n.t("Imported"); current: side.libraryFilter === "imported"; onClicked: Nav.go("library", "imported") }
             }
+        }
+        NavEntry {
+            text: I18n.t("Your stats")
+            iconName: "stats"
+            current: side.currentKey === "stats"
+            onClicked: Nav.go("stats")
         }
         NavEntry {
             text: I18n.t("Settings")

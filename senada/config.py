@@ -40,6 +40,13 @@ LOG_DIR = CACHE_DIR.parent / "logs" if IS_WINDOWS else CACHE_DIR / "logs"
 # SENADA_DISCORD_APP_ID overrides it. Empty: no Rich Presence.
 DISCORD_APP_ID = (os.environ.get("SENADA_DISCORD_APP_ID") or "1570939212226629734").strip()
 
+# Last.fm answers only apps with their own key (https://www.last.fm/api/account/create);
+# empty: Last.fm is off and Libre.fm still works (see scrobble.py)
+LASTFM_API_KEY = (os.environ.get("SENADA_LASTFM_API_KEY") or "").strip()
+LASTFM_API_SECRET = (os.environ.get("SENADA_LASTFM_API_SECRET") or "").strip()
+# never written to a backup file (see Settings.snapshot)
+PRIVATE_SETTINGS = ("scrobble_session", "remote_key")
+
 DEFAULTS = {
     "language": "en",  # "en" or "id" (see i18n.py)
     "display_name": "",
@@ -71,6 +78,12 @@ DEFAULTS = {
     "discord_presence": False,  # show the song on the user's Discord profile (see discord.py)
     "discord_show_paused": False,  # keep showing it while paused
     "tray": False,  # an icon in the system tray (next to the clock) with play / pause and quit
+    "scrobble_service": "",  # "lastfm" or "librefm" once connected (see scrobble.py)
+    "scrobble_user": "",
+    "scrobble_session": "",  # the service's session key; kept out of backups
+    "remote": False,  # the phone remote (see remote.py)
+    "remote_key": "",  # the random key in its link; kept out of backups
+    "local_folders": [],  # folders of music files on this computer (see localfiles.py)
     "window_maximized": True,  # Senada opens maximized (it remembers how the window was left)
     "close_to_tray": True,  # with the tray icon, closing the window leaves Senada playing there
     "tray_hint_shown": False,  # the one-time "still playing in the tray" message was shown
@@ -105,7 +118,7 @@ class Settings:
 
     def snapshot(self) -> dict:
         """The settings as saved (for a backup)."""
-        return json.loads(json.dumps(self._data))
+        return {k: v for k, v in json.loads(json.dumps(self._data)).items() if k not in PRIVATE_SETTINGS}
 
     def restore(self, data: dict):
         """Take the settings of a backup; the app reads most of them at start, so it restarts after."""

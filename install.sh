@@ -154,7 +154,7 @@ echo ""
 
 install_system_deps() {
     if is_arch; then
-        local deps=(pyside6 mpv python-dbus cava)
+        local deps=(pyside6 mpv python-dbus python-mutagen cava)
         if ! command -v yt-dlp &>/dev/null && [ ! -x "$BIN_DIR/yt-dlp" ]; then
             deps+=(yt-dlp)
         fi
@@ -172,12 +172,13 @@ install_system_deps() {
     elif command -v apt-get &>/dev/null; then
         info "Memeriksa paket untuk Debian/Ubuntu (apt)..."
         sudo apt-get update -qq
-        local apt_pkgs=(python3 python3-venv python3-pip python3-dbus mpv cava)
+        local apt_pkgs=(python3 python3-venv python3-pip python3-dbus python3-mutagen mpv cava)
         for opt_pkg in libxcb-cursor0 yt-dlp \
             python3-pyside6.qtcore python3-pyside6.qtgui python3-pyside6.qtqml \
             python3-pyside6.qtquick python3-pyside6.qtquickcontrols2 \
             qml6-module-qtquick qml6-module-qtquick-controls \
-            qml6-module-qtquick-layouts qml6-module-qtquick-window; do
+            qml6-module-qtquick-layouts qml6-module-qtquick-window \
+            qml6-module-qtquick-dialogs qml6-module-qt-labs-platform; do
             if apt_has_pkg "$opt_pkg"; then
                 apt_pkgs+=("$opt_pkg")
             fi
@@ -187,19 +188,19 @@ install_system_deps() {
 
     elif command -v dnf &>/dev/null; then
         info "Memasang paket untuk Fedora/RHEL (dnf)..."
-        sudo dnf install -y python3 python3-dbus python3-pyside6 mpv cava yt-dlp || true
+        sudo dnf install -y python3 python3-dbus python3-pyside6 python3-mutagen mpv cava yt-dlp || true
 
     elif command -v zypper &>/dev/null; then
         info "Memasang paket untuk openSUSE (zypper)..."
-        sudo zypper install -y python3 python3-dbus-python python3-pyside6 mpv cava yt-dlp || true
+        sudo zypper install -y python3 python3-dbus-python python3-pyside6 python3-mutagen mpv cava yt-dlp || true
 
     elif command -v xbps-install &>/dev/null; then
         info "Memasang paket untuk Void Linux (xbps)..."
-        sudo xbps-install -Sy python3 python3-PySide6 python3-dbus mpv cava yt-dlp || true
+        sudo xbps-install -Sy python3 python3-PySide6 python3-dbus python3-mutagen mpv cava yt-dlp || true
 
     elif command -v apk &>/dev/null; then
         info "Memasang paket untuk Alpine Linux (apk)..."
-        sudo apk add python3 py3-pyside6 py3-dbus mpv cava yt-dlp || true
+        sudo apk add python3 py3-pyside6 py3-dbus py3-mutagen mpv cava yt-dlp || true
     fi
 }
 
@@ -219,7 +220,7 @@ else
     python3 -m venv --system-site-packages "$DIR/.venv"
     "$DIR/.venv/bin/pip" install --upgrade pip --quiet
     info "Mengunduh PySide6-Essentials melalui pip..."
-    "$DIR/.venv/bin/pip" install PySide6-Essentials
+    "$DIR/.venv/bin/pip" install PySide6-Essentials mutagen segno
     PYTHON_CMD="\"$DIR/.venv/bin/python3\""
     ok "PySide6 berhasil dipasang di $DIR/.venv."
 fi

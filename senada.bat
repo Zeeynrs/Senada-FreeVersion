@@ -16,6 +16,8 @@ rem Windows media controls (media keys, the volume flyout); Senada still starts 
 ".venv\Scripts\python.exe" -c "import winrt.windows.media.playback, winrt.windows.storage.streams" 2>nul || (
     ".venv\Scripts\python.exe" -m pip install --quiet winrt-runtime winrt-Windows.Foundation winrt-Windows.Media winrt-Windows.Media.Playback winrt-Windows.Storage.Streams
 )
+rem tags and covers of Local files, and the phone remote's QR code
+".venv\Scripts\python.exe" -c "import mutagen, segno" 2>nul || ".venv\Scripts\python.exe" -m pip install --quiet mutagen segno
 
 if not exist "bin\mpv.exe" (
     where mpv >/dev/null 2>/dev/null || (
