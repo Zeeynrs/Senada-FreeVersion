@@ -336,7 +336,7 @@ Item {
         readonly property real oy: vp.cy - vp.topSpace
         readonly property real r0: vp.discR + Math.max(40, vp.discR * 0.16)   // lines start here
         readonly property real lineWidth: Math.max(200, Math.min(760, vp.width - ox - r0 - 96))   // clear of the volume rail
-        readonly property int textSize: Math.round(Math.max(20, Math.min(30, vp.discR * 0.085)))
+        readonly property int textSize: Math.round(Math.max(20, Math.min(30, vp.discR * 0.085)) * Theme.lyricsScale)
         readonly property real gap: 16
         readonly property real upLimit: 30      // above this the tonearm is in the way
         readonly property real downLimit: 62

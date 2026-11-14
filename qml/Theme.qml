@@ -6,7 +6,8 @@ import QtQuick
 // takes over the primary colour (logo, play buttons, seek bar, switches, active icons) and
 // marks what is current: the playing song, the open page, the sung lyric line, chosen chips.
 // "vivid" strength also lights the top of the pages with it.
-// Album art colours only the immersive player (`accent`).
+// Album art colours the immersive player (`accent`), and the whole app with the "Follow the song"
+// accent ("song"), which takes the colour of the cover that is playing (monochrome until there is one).
 QtObject {
     // "system" | "dark" | "light" (bound to session.themeMode in Main.qml)
     property string mode: "system"
@@ -45,6 +46,7 @@ QtObject {
     property string accentName: "default"
     readonly property var accents: [
         { key: "default", label: "Default", colors: [] },
+        { key: "song", label: "Follow the song", colors: [] },   // see songAccent
         { key: "mint", label: "Mint", colors: ["#1ed760"] },
         { key: "indigo", label: "Indigo", colors: ["#5865f2"] },
         { key: "sky", label: "Sky", colors: ["#2aabee"] },
@@ -58,7 +60,12 @@ QtObject {
         { key: "carbon", label: "Carbon", colors: ["#8a8f98"] },
         { key: "chrome", label: "Chrome", colors: ["#ff6ad5", "#a78bfa", "#38bdf8"] }
     ]
-    readonly property var accentInfo: accents.find(a => a.key === accentName) || accents[0]
+    // the cover's colour (already eased between songs in Main.qml); a grey cover gives none
+    readonly property bool songHasColor: accent.hslSaturation > 0.12
+    readonly property var songAccent: ({ key: "song", label: "Follow the song",
+                                         colors: songHasColor ? [accent.toString()] : [] })
+    readonly property var accentInfo: accentName === "song" ? songAccent
+                                     : (accents.find(a => a.key === accentName) || accents[0])
     readonly property bool accented: accentInfo.colors.length > 0
     function accentColors(a) { return a.colors.length > 0 ? a.colors : [text] }
     function accentMain(a) { return a.colors.length > 0 ? a.colors[Math.floor(a.colors.length / 2)] : text }
@@ -86,7 +93,17 @@ QtObject {
     readonly property color ok: dark ? "#7ddc9a" : "#1f8a4c"
 
     // album-adaptive colour (set by Main.qml from the cover art); used by the immersive player
-    property color accent: primary
+    // and by the "song" accent
+    property color accent: "#d9d9d9"
+
+    // how lyrics look (bound to session in Main.qml; see LyricLine.qml)
+    property string lyricsSize: "medium"        // "small" | "medium" | "large"
+    property string lyricsFont: "sans"          // "sans" | "serif"
+    property string lyricsAlign: "left"         // "left" | "center"
+    property string lyricsHighlight: "bright"   // "bright" | "glow" | "karaoke"
+    readonly property real lyricsScale: lyricsSize === "small" ? 0.85 : lyricsSize === "large" ? 1.2 : 1
+    readonly property bool lyricsSerif: lyricsFont === "serif"
+    readonly property bool lyricsCentered: lyricsAlign === "center"
 
     readonly property int dockSpace: 32      // bottom padding of scrolling pages
     readonly property int sidebarWidth: 232

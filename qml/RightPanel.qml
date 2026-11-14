@@ -95,26 +95,31 @@ Rectangle {
                 Timer { id: userScroll; interval: 3500 }
                 onModelChanged: positionViewAtBeginning()
 
-                delegate: Label {
-                    id: line
+                delegate: LyricLine {
+                    id: lyricRow
                     required property var modelData
                     required property int index
-                    readonly property bool isCurrent: lyrics.synced && index === lyrics.current
                     width: lines.width
                     leftPadding: 18
                     rightPadding: 18
                     topPadding: 4
                     bottomPadding: 4
-                    text: modelData.text || "♪"
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: lyrics.synced ? 20 : 16
+                    line: modelData
+                    nextT: index + 1 < lyrics.lines.length ? lyrics.lines[index + 1].t : -1
+                    synced: lyrics.synced
+                    current: lyrics.synced && index === lyrics.current
+                    past: lyrics.synced && index < lyrics.current
+                    baseSize: lyrics.synced ? 20 : 16
                     font.weight: lyrics.synced ? Font.Bold : Font.Normal
-                    color: !lyrics.synced ? Theme.text
-                         : isCurrent ? Theme.accentInk
-                         : lineHover.hovered ? Theme.dim : Theme.alpha(Theme.text, index < lyrics.current ? 0.32 : 0.42)
+                    activeColor: Theme.accentInk
+                    // on the light theme: the unsung part a pale tint, and a fainter glow
+                    unsungColor: Theme.mix(Theme.accentInk, Theme.bgSolid, Theme.dark ? 0.55 : 0.62)
+                    glowOpacity: Theme.dark ? 0.85 : 0.35
+                    restColor: !lyrics.synced ? Theme.text : lineHover.hovered ? Theme.dim : Theme.alpha(Theme.text, 0.42)
+                    pastColor: lineHover.hovered ? Theme.dim : Theme.alpha(Theme.text, 0.32)
                     Behavior on color { ColorAnimation { duration: 200 } }
                     HoverHandler { id: lineHover; cursorShape: lyrics.synced ? Qt.PointingHandCursor : Qt.ArrowCursor }
-                    TapHandler { onTapped: if (lyrics.synced) player.seek(line.modelData.t) }
+                    TapHandler { onTapped: if (lyrics.synced) player.seek(lyricRow.modelData.t) }
                 }
             }
             // which source the lyrics come from, and a menu to pick another one

@@ -18,6 +18,10 @@ ApplicationWindow {
     Binding { target: Theme; property: "accentStrength"; value: session.accentStrength }
     Binding { target: Theme; property: "glassMode"; value: session.glassMode }
     Binding { target: Theme; property: "glassOpacity"; value: session.glassOpacity }
+    Binding { target: Theme; property: "lyricsSize"; value: session.lyricsSize }
+    Binding { target: Theme; property: "lyricsFont"; value: session.lyricsFont }
+    Binding { target: Theme; property: "lyricsAlign"; value: session.lyricsAlign }
+    Binding { target: Theme; property: "lyricsHighlight"; value: session.lyricsHighlight }
     Binding { target: I18n; property: "table"; value: session.translations }
     Binding { target: I18n; property: "lang"; value: session.language }
 

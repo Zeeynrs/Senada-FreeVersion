@@ -26,6 +26,7 @@ ImmersiveVolume 1.0 ImmersiveVolume.qml
 LibraryPage 1.0 LibraryPage.qml
 LinkLabel 1.0 LinkLabel.qml
 LyricsSourceButton 1.0 LyricsSourceButton.qml
+LyricLine 1.0 LyricLine.qml
 LyricsView 1.0 LyricsView.qml
 Main 1.0 Main.qml
 MatchPicker 1.0 MatchPicker.qml

@@ -215,7 +215,7 @@ Item {
                 verticalAlignment: Text.AlignVCenter
                 text: lowerBar.sub || lowerBar.note
                 color: lowerBar.sub ? "#ffffff" : Qt.rgba(1, 1, 1, 0.5)
-                font.pixelSize: Math.max(15, Math.min(34, Math.round(cp.screenW * 0.024)))
+                font.pixelSize: Math.round(Math.max(15, Math.min(34, cp.screenW * 0.024)) * Theme.lyricsScale)
                 font.weight: lowerBar.sub ? Font.DemiBold : Font.Normal
                 font.italic: !lowerBar.sub
                 style: Text.Outline

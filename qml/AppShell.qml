@@ -9,6 +9,8 @@ Item {
     property bool immersive: false
     property bool sidebarOpen: true
     property string panel: "lyrics"   // right panel: "lyrics" | "queue" | "" (closed)
+    // the player bar as a rounded card floating above the bottom edge (Settings → Appearance)
+    readonly property bool floatingBar: session.playerBarStyle === "floating"
     property var forwardStack: []     // pages left with "back", for "forward"
 
     readonly property string currentKey: stack.currentItem ? stack.currentItem.pageKey : ""
@@ -253,6 +255,7 @@ Item {
         anchors.left: parent.left
         anchors.top: topBar.bottom
         anchors.bottom: playerBar.top
+        anchors.bottomMargin: shell.floatingBar ? 10 : 0
         width: shell.sidebarOpen ? Theme.sidebarWidth : 0
         visible: width > 0
         currentKey: shell.currentKey
@@ -266,6 +269,7 @@ Item {
         anchors.right: parent.right
         anchors.top: topBar.bottom
         anchors.bottom: playerBar.top
+        anchors.bottomMargin: shell.floatingBar ? 10 : 0
         width: shell.panel !== "" ? Math.min(Theme.rightPanelWidth, shell.width * 0.3) : 0
         visible: width > 0
         panel: shell.panel || "lyrics"
@@ -280,6 +284,7 @@ Item {
         anchors.left: sidebar.right
         anchors.right: rightPanel.left
         anchors.bottom: playerBar.top
+        anchors.bottomMargin: shell.floatingBar ? 10 : 0
         clip: true
 
         StackView {
@@ -367,11 +372,23 @@ Item {
         }
     }
 
+    RectangularShadow {
+        anchors.fill: playerBar
+        visible: shell.floatingBar
+        radius: playerBar.radius
+        blur: 28
+        offset.y: 8
+        color: Qt.rgba(0, 0, 0, Theme.dark ? 0.55 : 0.16)
+    }
     PlayerBar {
         id: playerBar
+        floating: shell.floatingBar
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        anchors.leftMargin: floating ? 14 : 0
+        anchors.rightMargin: floating ? 14 : 0
+        anchors.bottomMargin: floating ? 12 : 0
         panel: shell.panel
         onOpenImmersive: shell.immersive = true
         onShowPanel: (name) => shell.togglePanel(name)

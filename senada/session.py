@@ -32,6 +32,15 @@ IMMERSIVE_STYLES = ("visualizer", "vinyl", "poster", "cinema")
 # mini player styles (qml/MiniPlayer.qml); the first is the default
 ISLAND_STYLES = ("classic", "wave", "lyrics", "glass")
 ISLAND_DOCK_MIN, ISLAND_DOCK_MAX, ISLAND_DOCK_DEFAULT = 5, 15, 10
+# settings that are one of a few words; the first of each is the default.
+# lyrics_*: how lyrics look (qml/LyricLine.qml); player_bar: docked along the bottom, or floating
+CHOICES = {
+    "player_bar": ("docked", "floating"),
+    "lyrics_size": ("medium", "small", "large"),
+    "lyrics_font": ("sans", "serif"),
+    "lyrics_align": ("left", "center"),
+    "lyrics_highlight": ("bright", "glow", "karaoke"),
+}
 
 class Session(QObject):
     changed = Signal()
@@ -230,4 +239,22 @@ class Session(QObject):
 
     # seconds before the mini player tucks into the top edge of the screen; 0: never
     islandDock = Property(int, _get_island_dock, _set_island_dock, notify=changed)
-    del _setting
+    def _choice(key):
+        """A setting that is one of CHOICES[key] (anything else reads as the first)."""
+        choices = CHOICES[key]
+
+        def getter(self):
+            value = self.settings[key]
+            return value if value in choices else choices[0]
+
+        def setter(self, value):
+            self.settings[key] = value if value in choices else choices[0]
+            self.changed.emit()
+        return getter, setter
+
+    lyricsSize = Property(str, *_choice("lyrics_size"), notify=changed)
+    lyricsFont = Property(str, *_choice("lyrics_font"), notify=changed)
+    lyricsAlign = Property(str, *_choice("lyrics_align"), notify=changed)
+    lyricsHighlight = Property(str, *_choice("lyrics_highlight"), notify=changed)
+    playerBarStyle = Property(str, *_choice("player_bar"), notify=changed)
+    del _setting, _choice

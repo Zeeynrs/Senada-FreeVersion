@@ -218,7 +218,7 @@ Item {
                             text: modelData.text || "♪"
                             color: pastHover.hovered ? pp.ink : Qt.rgba(1, 1, 1, Math.max(0.1, 0.4 - 0.1 * away))
                             font.family: pp.serif
-                            font.pixelSize: 17
+                            font.pixelSize: Math.round(17 * Theme.lyricsScale)
                             font.italic: true
                             elide: Text.ElideRight
                             HoverHandler { id: pastHover; cursorShape: Qt.PointingHandCursor }
@@ -248,7 +248,7 @@ Item {
                         text: quoteBox.at >= 0 ? (quoteBox.lines[quoteBox.at].text || "♪") : "♪"
                         color: pp.ink
                         font.family: pp.serif
-                        font.pixelSize: Math.round(Math.max(26, Math.min(48, body.width * 0.06)))
+                        font.pixelSize: Math.round(Math.max(26, Math.min(48, body.width * 0.06)) * Theme.lyricsScale)
                         font.italic: true
                         font.weight: Font.Bold
                         wrapMode: Text.WordWrap
@@ -288,7 +288,7 @@ Item {
                             text: modelData.text || "♪"
                             color: lineHover.hovered ? pp.ink : Qt.rgba(1, 1, 1, Math.max(0.12, 0.62 - 0.07 * index))
                             font.family: pp.serif
-                            font.pixelSize: index === 0 ? 21 : 18
+                            font.pixelSize: Math.round((index === 0 ? 21 : 18) * Theme.lyricsScale)
                             wrapMode: Text.WordWrap
                             maximumLineCount: 2
                             elide: Text.ElideRight

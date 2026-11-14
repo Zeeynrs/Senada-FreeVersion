@@ -15,7 +15,13 @@ CHANGELOG = [
                        "Vinyl record, Poster and Cinema full views: the volume is an upright rail on the right edge of the "
                        "screen (drag it, scroll on it, or click the speaker to mute) instead of a bar in the bottom strip.",
                        "The mini player tucks into the top edge of the screen like a notch after a few seconds without the "
-                       "pointer on it (5 to 15, Settings → Appearance → Tuck into the top edge); point at it to bring it back."],
+                       "pointer on it (5 to 15, Settings → Appearance → Tuck into the top edge); point at it to bring it back.",
+                       "\"Follow the song\" accent color: the whole app takes the color of the cover that is playing and "
+                       "changes smoothly with every song.",
+                       "Lyrics appearance (Settings → Lyrics): size, serif or sans, left or centered, and how the sung line "
+                       "stands out: brighter, a soft glow, or karaoke that fills it in letter by letter as it is sung.",
+                       "Floating player bar (Settings → Appearance → Player bar): a rounded card above the bottom of the "
+                       "window with a soft shadow."],
                "fixed": []},
         "id": {"new": ["Tampilan penuh Poster: lirik kini mengisi seluruh kolom, dengan baris yang sudah dinyanyikan memudar "
                        "di atas kutipan dan baris berikutnya di bawahnya seperti badan artikel; klik sebuah baris untuk "
@@ -23,7 +29,13 @@ CHANGELOG = [
                        "Tampilan penuh Piringan hitam, Poster, dan Bioskop: volume kini berupa rel tegak di tepi kanan layar "
                        "(seret, scroll, atau klik ikon speaker untuk membisukan), bukan bilah di strip bawah.",
                        "Pemutar mini menyatu dengan tepi atas layar seperti notch setelah beberapa detik tanpa kursor di atasnya "
-                       "(5 sampai 15 detik, Pengaturan → Tampilan → Menyatu dengan tepi atas); arahkan kursor untuk memunculkannya lagi."],
+                       "(5 sampai 15 detik, Pengaturan → Tampilan → Menyatu dengan tepi atas); arahkan kursor untuk memunculkannya lagi.",
+                       "Warna aksen \"Ikuti lagu\": seluruh aplikasi mengambil warna sampul lagu yang sedang diputar dan "
+                       "berganti halus di setiap lagu.",
+                       "Tampilan lirik (Pengaturan → Lirik): ukuran, huruf serif atau sans, rata kiri atau tengah, dan cara baris "
+                       "yang dinyanyikan menonjol: lebih terang, berpendar lembut, atau karaoke yang terisi huruf demi huruf.",
+                       "Bilah pemutar mengambang (Pengaturan → Tampilan → Bilah pemutar): kartu membulat di atas tepi bawah "
+                       "jendela dengan bayangan halus."],
                "fixed": []},
     },
     {

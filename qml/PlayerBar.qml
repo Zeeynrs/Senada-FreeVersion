@@ -7,6 +7,7 @@ import QtQuick.Layouts
 Rectangle {
     id: bar
     property string panel: ""            // which right panel is open
+    property bool floating: false        // a rounded card above the bottom edge (AppShell draws its shadow)
     signal openImmersive()
     signal openMiniPlayer()
     signal showPanel(string name)        // toggles "lyrics" / "queue"
@@ -17,10 +18,19 @@ Rectangle {
     property int lastVolume: 50
 
     implicitHeight: Theme.playerBarHeight
-    color: Theme.sidebar
+    color: floating ? (Theme.glass ? Theme.sidebar : Theme.surface2) : Theme.sidebar
+    radius: floating ? 20 : 0
+    border.width: floating ? 1 : 0
+    border.color: Theme.line
 
-    Rectangle { width: parent.width; height: 1; color: Theme.line }
-    Rectangle { y: 1; width: parent.width; height: 1; color: Theme.sheen }  // liquid-glass sheen
+    Rectangle { visible: !bar.floating; width: parent.width; height: 1; color: Theme.line }
+    Rectangle {  // liquid-glass sheen along the top
+        x: bar.radius
+        y: 1
+        width: parent.width - 2 * bar.radius
+        height: 1
+        color: Theme.sheen
+    }
 
     // ---- now playing ------------------------------------------------------------------
     RowLayout {

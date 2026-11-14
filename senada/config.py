@@ -55,10 +55,16 @@ DEFAULTS = {
     "seek_style": "line",  # seek bars: "line", "wave", "bars", "dots" (see qml/SeekTrack.qml)
     "mini_player": True,  # small player at the top of the screen while the window is minimized
     "island_style": "classic",  # its look: "classic", "wave", "lyrics", "glass" (see session.py)
+    "player_bar": "docked",  # "docked" along the bottom, or "floating" (a rounded card above it)
     "island_dock": 10,  # seconds before it tucks into the top edge of the screen (5 - 15), 0: never
     "audio_quality": "best",  # 'best', 'high', 'medium'
     "cache_audio": True,
     "lyrics_source": "auto",  # "auto", "lrclib", "ytmusic", "netease" (see lyrics.py)
+    # how lyrics look (see session.py LYRICS_LOOK): size, font, alignment, how the sung line stands out
+    "lyrics_size": "medium",
+    "lyrics_font": "sans",
+    "lyrics_align": "left",
+    "lyrics_highlight": "bright",
     "effects": {},  # equalizer and tempo (see effects.py)
     "discord_presence": False,  # show the song on the user's Discord profile (see discord.py)
     "discord_show_paused": False,  # keep showing it while paused

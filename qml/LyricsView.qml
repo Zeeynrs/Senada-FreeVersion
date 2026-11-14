@@ -46,21 +46,24 @@ Item {
             width: list.width - 20
             height: lineLabel.implicitHeight + lv.lineGap + 2
 
-            Label {
+            LyricLine {
                 id: lineLabel
                 x: 10
-                transformOrigin: Item.Left
+                transformOrigin: Theme.lyricsCentered ? Item.Center : Item.Left
                 scale: row.isCurrent ? 1.04 : 1.0
                 Behavior on scale { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
                 anchors.verticalCenter: parent.verticalCenter
                 width: row.width - 34
-                text: modelData.text || "♪"
-                wrapMode: Text.WordWrap
-                font.pixelSize: lyrics.synced ? lv.textSize : Math.round(lv.textSize * 0.85)
+                line: modelData
+                nextT: index + 1 < lyrics.lines.length ? lyrics.lines[index + 1].t : -1
+                synced: lyrics.synced
+                current: row.isCurrent
+                past: row.past
+                baseSize: lyrics.synced ? lv.textSize : Math.round(lv.textSize * 0.85)
                 font.weight: Font.Bold
-                color: !lyrics.synced ? Qt.rgba(1, 1, 1, 0.85)
-                     : row.isCurrent ? "#ffffff"
-                     : row.past ? Qt.rgba(1, 1, 1, 0.42) : Qt.rgba(1, 1, 1, 0.36)
+                activeColor: "#ffffff"
+                restColor: !lyrics.synced ? Qt.rgba(1, 1, 1, 0.85) : Qt.rgba(1, 1, 1, 0.36)
+                pastColor: Qt.rgba(1, 1, 1, 0.42)
                 Behavior on color { ColorAnimation { duration: 280 } }
             }
 

@@ -12,7 +12,7 @@ Rectangle {
     }
 
     anchors.horizontalCenter: parent.horizontalCenter
-    y: shown ? parent.height - height - Theme.playerBarHeight - 18 : parent.height + 10
+    y: shown ? parent.height - height - Theme.playerBarHeight - 18 - (session && session.playerBarStyle === "floating" ? 22 : 0) : parent.height + 10
     z: 1000
     width: Math.min(label.implicitWidth + 40, parent.width - 48)
     height: 40

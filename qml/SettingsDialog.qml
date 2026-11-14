@@ -39,7 +39,8 @@ Popup {
                   "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer",
                   "Full view style", "Vinyl record", "Turntable", "Full view", "Poster", "Magazine",
                   "Cinema", "Movie", "Subtitles",
-                  "Seek bar", "Progress bar", "Wave", "Waveform", "Dots",
+                  "Seek bar", "Progress bar", "Wave", "Waveform", "Dots", "Player bar", "Docked", "Floating",
+                  "Accent color", "Follow the song",
                   "Mini player", "Dynamic island", "Minimize", "Mini player style", "Classic", "Sound wave",
                   "Running lyrics", "Cover glass", "Tuck into the top edge", "Notch"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
@@ -47,7 +48,8 @@ Popup {
           words: ["Engine status", "Device name", "Audio quality", "MPV", "Audio engine & streaming (MPV)"] },
         { group: "Preferences", key: "lyrics", icon: "lyrics", title: "Lyrics",
           desc: "Where synced lyrics come from.",
-          words: ["Lyrics source", "Automatic", "LRCLIB", "YouTube Music", "NetEase", "Synced lyrics"] },
+          words: ["Lyrics source", "Automatic", "LRCLIB", "YouTube Music", "NetEase", "Synced lyrics",
+                  "Appearance", "Size", "Font", "Alignment", "Sung line", "Karaoke", "Glow", "Serif"] },
         { group: "Preferences", key: "discord", icon: "presence", title: "Discord",
           desc: "Show what you are listening to on your Discord profile.",
           words: ["Rich Presence", "Discord", "Listening to", "Show the song on Discord", "While paused", "Status"] },
@@ -287,7 +289,9 @@ Popup {
                 LogoMark {
                     anchors.verticalCenter: parent.verticalCenter
                     size: 22
-                    colors: Theme.accentColors(ac.accent)
+                    // "Follow the song": the colour of the song playing now (grey without one)
+                    colors: ac.accent.key === "song" ? (Theme.songHasColor ? [Theme.accent] : ["#9aa0a6"])
+                                                     : Theme.accentColors(ac.accent)
                 }
                 Label {
                     anchors.verticalCenter: parent.verticalCenter
@@ -472,6 +476,101 @@ Popup {
                 font.pixelSize: 13
                 font.weight: ic.selected ? Font.Bold : Font.Normal
                 color: ic.selected || ic.hovered ? Theme.text : Theme.dim
+            }
+        }
+    }
+
+    // a label and a row of chips, one of which is picked
+    component ChoiceRow: RowLayout {
+        id: cr
+        property string label
+        property string value
+        property var options: []      // [{ key, label }]
+        signal picked(string key)
+        Layout.fillWidth: true
+        spacing: 14
+        Label {
+            Layout.preferredWidth: 150
+            text: cr.label
+            color: Theme.dim
+            font.pixelSize: 13
+        }
+        Flow {
+            Layout.fillWidth: true
+            spacing: 6
+            Repeater {
+                model: cr.options
+                Chip {
+                    required property var modelData
+                    text: modelData.label
+                    checked: cr.value === modelData.key
+                    onClicked: cr.picked(modelData.key)
+                }
+            }
+        }
+    }
+
+    component BarStyleCard: AbstractButton {
+        id: bc
+        property string barStyle
+        property string label
+        readonly property bool selected: session.playerBarStyle === barStyle
+        readonly property bool floats: barStyle === "floating"
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        implicitHeight: barFrame.height + 28
+        hoverEnabled: true
+        focusPolicy: Qt.NoFocus
+        onClicked: session.playerBarStyle = barStyle
+
+        contentItem: Item {}
+        background: Item {
+            Rectangle {  // a window, with its bar along the bottom
+                id: barFrame
+                width: parent.width
+                height: 74
+                radius: 10
+                clip: true
+                color: Theme.subtle
+                border.width: bc.selected ? 2 : 1
+                border.color: bc.selected ? Theme.primary : bc.hovered ? Theme.lineStrong : Theme.line
+                Column {  // a page of rows above the bar
+                    x: 14; y: 12
+                    spacing: 6
+                    Repeater {
+                        model: [0.5, 0.36, 0.44]
+                        Rectangle { required property var modelData; width: barFrame.width * modelData; height: 4; radius: 2; color: Theme.alpha(Theme.text, 0.18) }
+                    }
+                }
+                Rectangle {
+                    x: bc.floats ? 10 : 1
+                    width: parent.width - 2 * x
+                    height: 22
+                    y: parent.height - height - (bc.floats ? 8 : 1)
+                    radius: bc.floats ? 9 : 0
+                    color: Theme.surface2
+                    border.width: bc.floats ? 1 : 0
+                    border.color: Theme.line
+                    Rectangle { visible: !bc.floats; width: parent.width; height: 1; color: Theme.line }
+                    Rectangle {  // cover, title and the play button
+                        x: 8; anchors.verticalCenter: parent.verticalCenter
+                        width: 12; height: 12; radius: 3
+                        color: Theme.accented ? Theme.primary : Theme.alpha(Theme.text, 0.5)
+                    }
+                    Rectangle { x: 26; anchors.verticalCenter: parent.verticalCenter; width: parent.width * 0.22; height: 3; radius: 1.5; color: Theme.alpha(Theme.text, 0.45) }
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 10; height: 10; radius: 5
+                        color: Theme.text
+                    }
+                }
+            }
+            Label {
+                y: barFrame.height + 8
+                text: bc.label
+                font.pixelSize: 13
+                font.weight: bc.selected ? Font.Bold : Font.Normal
+                color: bc.selected || bc.hovered ? Theme.text : Theme.dim
             }
         }
     }
@@ -784,7 +883,9 @@ Popup {
             Divider {}
             SettingBlock {
                 label: I18n.t("Accent color")
-                hint: I18n.t("Color of the logo, play buttons, seek bar and other details.")
+                hint: Theme.accentName === "song"
+                      ? I18n.t("The color of the cover of the song that is playing, changing with every song: logo, play buttons, seek bar and other details.")
+                      : I18n.t("Color of the logo, play buttons, seek bar and other details.")
                 Flow {
                     Layout.fillWidth: true
                     spacing: 6
@@ -877,6 +978,21 @@ Popup {
                     SeekStyleCard { seekStyle: "wave"; label: I18n.t("Wave") }
                     SeekStyleCard { seekStyle: "bars"; label: I18n.t("Waveform") }
                     SeekStyleCard { seekStyle: "dots"; label: I18n.t("Dots") }
+                }
+            }
+            Divider {}
+            SettingBlock {
+                label: I18n.t("Player bar")
+                hint: session.playerBarStyle === "floating"
+                      ? I18n.t("A rounded card floating above the bottom of the window, with a soft shadow.")
+                      : I18n.t("Along the whole bottom edge of the window.")
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 14
+                    BarStyleCard { barStyle: "docked"; label: I18n.t("Docked") }
+                    BarStyleCard { barStyle: "floating"; label: I18n.t("Floating") }
+                    Item { Layout.fillWidth: true; Layout.preferredWidth: 1 }
+                    Item { Layout.fillWidth: true; Layout.preferredWidth: 1 }
                 }
             }
             SettingRow {
@@ -1007,6 +1123,82 @@ Popup {
                     model: lyrics.sources.map(s => ({ key: s.key, label: s.key === "auto" ? I18n.t("Automatic") : s.name }))
                     value: lyrics.source
                     onPicked: (key) => lyrics.source = key
+                }
+            }
+            Divider {}
+            SettingBlock {
+                label: I18n.t("Appearance")
+                hint: I18n.t("Size applies wherever lyrics are shown; font, alignment and the highlight to the lyric lists (side panel, Visualizer full view and the open mini player).")
+                // a few lines on the dark of the full view, the middle one being sung
+                Rectangle {
+                    id: lyricsPreview
+                    Layout.fillWidth: true
+                    implicitHeight: previewLines.implicitHeight + 36
+                    radius: 12
+                    color: "#16161a"
+                    border.color: Theme.line
+                    property real clock: 0
+                    readonly property var sample: [
+                        { t: 0, text: I18n.t("The night is young and so are we") },
+                        { t: 1000, text: I18n.t("Sing it louder, let the city hear") },
+                        { t: 4200, text: I18n.t("Every word a light across the sky") }
+                    ]
+                    // the sung line fills up over three seconds, then starts again
+                    NumberAnimation on clock {
+                        from: 1000; to: 4200; duration: 3200
+                        loops: Animation.Infinite
+                        running: lyricsPreview.visible
+                    }
+                    Column {
+                        id: previewLines
+                        x: 22
+                        y: 18
+                        width: parent.width - 44
+                        spacing: 8
+                        Repeater {
+                            model: 3
+                            LyricLine {
+                                required property int index
+                                width: previewLines.width
+                                line: lyricsPreview.sample[index]
+                                nextT: index < 2 ? lyricsPreview.sample[index + 1].t : -1
+                                position: lyricsPreview.clock
+                                current: index === 1
+                                past: index === 0
+                                baseSize: 20
+                                font.weight: Font.Bold
+                                activeColor: "#ffffff"
+                                restColor: Qt.rgba(1, 1, 1, 0.36)
+                                pastColor: Qt.rgba(1, 1, 1, 0.42)
+                            }
+                        }
+                    }
+                }
+                ChoiceRow {
+                    label: I18n.t("Size")
+                    value: session.lyricsSize
+                    options: [{ key: "small", label: I18n.t("Small") }, { key: "medium", label: I18n.t("Medium") },
+                              { key: "large", label: I18n.t("Large") }]
+                    onPicked: (key) => session.lyricsSize = key
+                }
+                ChoiceRow {
+                    label: I18n.t("Font")
+                    value: session.lyricsFont
+                    options: [{ key: "sans", label: I18n.t("Sans") }, { key: "serif", label: I18n.t("Serif") }]
+                    onPicked: (key) => session.lyricsFont = key
+                }
+                ChoiceRow {
+                    label: I18n.t("Alignment")
+                    value: session.lyricsAlign
+                    options: [{ key: "left", label: I18n.t("Left") }, { key: "center", label: I18n.t("Center") }]
+                    onPicked: (key) => session.lyricsAlign = key
+                }
+                ChoiceRow {
+                    label: I18n.t("Sung line")
+                    value: session.lyricsHighlight
+                    options: [{ key: "bright", label: I18n.t("Bright") }, { key: "glow", label: I18n.t("Glow") },
+                              { key: "karaoke", label: I18n.t("Karaoke") }]
+                    onPicked: (key) => session.lyricsHighlight = key
                 }
             }
             Divider {}
