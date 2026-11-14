@@ -1,1 +1,1 @@
-__version__ = "1.0.11"  # bump for each Windows installer release (tag v<version>)
+__version__ = "1.0.12"  # bump for each Windows installer release (tag v<version>)
