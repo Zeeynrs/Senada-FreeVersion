@@ -257,7 +257,7 @@ Item {
         anchors.left: parent.left
         anchors.top: topBar.bottom
         anchors.bottom: playerBar.top
-        anchors.bottomMargin: shell.floatingBar ? 10 : 0
+        anchors.bottomMargin: shell.floatingBar ? 12 : 0
         width: shell.sidebarOpen ? Theme.sidebarWidth : 0
         visible: width > 0
         currentKey: shell.currentKey
@@ -271,7 +271,7 @@ Item {
         anchors.right: parent.right
         anchors.top: topBar.bottom
         anchors.bottom: playerBar.top
-        anchors.bottomMargin: shell.floatingBar ? 10 : 0
+        anchors.bottomMargin: shell.floatingBar ? 12 : 0
         width: shell.panel !== "" ? Math.min(Theme.rightPanelWidth, shell.width * 0.3) : 0
         visible: width > 0
         panel: shell.panel || "lyrics"
@@ -286,7 +286,7 @@ Item {
         anchors.left: sidebar.right
         anchors.right: rightPanel.left
         anchors.bottom: playerBar.top
-        anchors.bottomMargin: shell.floatingBar ? 10 : 0
+        anchors.bottomMargin: shell.floatingBar ? 12 : 0
         clip: true
 
         StackView {
@@ -378,9 +378,10 @@ Item {
         anchors.fill: playerBar
         visible: shell.floatingBar
         radius: playerBar.radius
-        blur: 28
-        offset.y: 8
-        color: Qt.rgba(0, 0, 0, Theme.dark ? 0.55 : 0.16)
+        blur: 36
+        offset.y: 10
+        // on the light theme a shadow of the song's colour, which reads softer than grey
+        color: Theme.dark ? Qt.rgba(0, 0, 0, 0.6) : Theme.alpha(Theme.mix(Theme.accent, Qt.rgba(0, 0, 0, 1), 0.55), 0.22)
     }
     PlayerBar {
         id: playerBar
@@ -388,9 +389,9 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.leftMargin: floating ? 14 : 0
-        anchors.rightMargin: floating ? 14 : 0
-        anchors.bottomMargin: floating ? 12 : 0
+        anchors.leftMargin: floating ? 18 : 0
+        anchors.rightMargin: floating ? 18 : 0
+        anchors.bottomMargin: floating ? 14 : 0
         panel: shell.panel
         onOpenImmersive: shell.immersive = true
         onShowPanel: (name) => shell.togglePanel(name)

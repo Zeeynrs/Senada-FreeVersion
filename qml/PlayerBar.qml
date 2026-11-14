@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Effects
 
 // Bottom player: now playing on the left, transport with the seek bar under it in the
 // middle, and lyrics / queue panel toggles, devices, volume and full screen on the right.
@@ -19,9 +20,78 @@ Rectangle {
 
     implicitHeight: Theme.playerBarHeight
     color: floating ? (Theme.glass ? Theme.sidebar : Theme.surface2) : Theme.sidebar
-    radius: floating ? 20 : 0
+    radius: floating ? 24 : 0
     border.width: floating ? 1 : 0
-    border.color: Theme.line
+    border.color: floating ? (Theme.dark ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(0, 0, 0, 0.08)) : Theme.line
+
+    // ---- floating: the cover, blurred into the card, under a veil lit with the song's colour --
+    readonly property string art: floating && hasTrack ? (s.image || s.imageSmall || "") : ""
+    Item {
+        id: glassArt
+        visible: false
+        anchors.fill: parent
+        Image {
+            anchors.fill: parent
+            source: bar.art
+            fillMode: Image.PreserveAspectCrop
+            sourceSize: Qt.size(256, 256)
+            asynchronous: true
+        }
+    }
+    Rectangle {
+        id: glassShape
+        visible: false
+        layer.enabled: true
+        anchors.fill: parent
+        radius: bar.radius
+        color: "black"
+    }
+    MultiEffect {
+        anchors.fill: parent
+        visible: bar.art !== ""
+        source: glassArt
+        autoPaddingEnabled: false   // the blur stays inside the card, so the mask lines up with it
+        blurEnabled: true
+        blur: 1.0
+        blurMax: 64
+        saturation: 0.65
+        brightness: Theme.dark ? -0.1 : 0.12
+        maskEnabled: true
+        maskSource: glassShape
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
+    }
+    // the veil: the song's colour from the left, then the bar's own colour to keep text readable.
+    // Without a colourful cover (nothing playing, a grey cover) it is one even colour: the
+    // neutral accent would draw a grey patch on the left.
+    readonly property bool tinted: hasTrack && Theme.songHasColor
+    readonly property color veilMid: Theme.dark ? Qt.rgba(0.08, 0.08, 0.08, 0.74) : Qt.rgba(1, 1, 1, 0.8)
+    readonly property color veilEnd: Theme.dark ? Qt.rgba(0.08, 0.08, 0.08, 0.84) : Qt.rgba(1, 1, 1, 0.88)
+    Rectangle {
+        anchors.fill: parent
+        visible: bar.floating
+        radius: bar.radius
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop {
+                position: 0
+                color: !bar.tinted ? bar.veilEnd
+                     : Theme.dark ? Theme.alpha(Theme.mix(Theme.accent, Qt.rgba(0, 0, 0, 1), 0.35), 0.62)
+                     : Theme.alpha(Theme.mix(Theme.accent, Qt.rgba(1, 1, 1, 1), 0.6), 0.7)
+            }
+            GradientStop { position: 0.38; color: bar.tinted ? bar.veilMid : bar.veilEnd }
+            GradientStop { position: 1; color: bar.veilEnd }
+        }
+    }
+    Rectangle {  // light from above, so the card reads as raised glass
+        anchors.fill: parent
+        visible: bar.floating
+        radius: bar.radius
+        gradient: Gradient {
+            GradientStop { position: 0; color: Qt.rgba(1, 1, 1, Theme.dark ? 0.07 : 0.35) }
+            GradientStop { position: 0.45; color: Qt.rgba(1, 1, 1, 0) }
+        }
+    }
 
     Rectangle { visible: !bar.floating; width: parent.width; height: 1; color: Theme.line }
     Rectangle {  // liquid-glass sheen along the top
@@ -45,13 +115,13 @@ Rectangle {
             Layout.preferredHeight: 52
             Cover {
                 anchors.fill: parent
-                radius: 6
+                radius: bar.floating ? 12 : 6
                 source: bar.s.imageSmall || bar.s.image || ""
                 fallbackIcon: "music"
             }
             Rectangle {
                 anchors.fill: parent
-                radius: 6
+                radius: bar.floating ? 12 : 6
                 color: Qt.rgba(0, 0, 0, 0.45)
                 visible: coverHover.hovered && bar.hasTrack
                 Icon { anchors.centerIn: parent; glyph: "expand"; size: 18; color: "#ffffff" }

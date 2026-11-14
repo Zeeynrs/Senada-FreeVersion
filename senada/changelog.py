@@ -31,6 +31,8 @@ CHANGELOG = [
                 "letters, English translations from BetterLyrics, and if you switch it on, Google Translate into "
                 "the app's language.",
                 "The mini player tucked into the top edge of the screen is bigger: a larger cover and title.",
+                "The floating player bar takes on the song: its cover, blurred, and its colour from the left, "
+                "with rounder corners and a deeper shadow.",
             ],
             "fixed": [
                 "Starting Senada while it is already running brings the open window forward instead of starting "
@@ -62,6 +64,8 @@ CHANGELOG = [
                 "huruf Latin, terjemahan bahasa Inggris dari BetterLyrics, dan jika dinyalakan, Google Translate "
                 "ke bahasa aplikasi.",
                 "Pemutar mini yang terselip di tepi atas layar lebih besar: cover dan judulnya lebih besar.",
+                "Player bar mengambang ikut berwarna lagu: cover-nya diburamkan dan warnanya mengalir dari kiri, "
+                "dengan sudut lebih bulat dan bayangan lebih dalam.",
             ],
             "fixed": [
                 "Membuka Senada saat sudah berjalan sekarang memunculkan jendela yang sudah terbuka, bukan "
