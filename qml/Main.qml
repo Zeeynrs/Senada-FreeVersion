@@ -7,7 +7,8 @@ ApplicationWindow {
     height: 800
     minimumWidth: 900
     minimumHeight: 600
-    visible: true
+    // shown in Component.onCompleted: maximized from the start (no normal-size flash first),
+    // or at its normal size if that is how it was left
     title: player.state.hasTrack ? player.state.name + " • " + player.state.artists : "Senada"
     // see-through only in the "Transparan" glass mode (the compositor / Windows acrylic shows behind)
     color: Theme.glassMode === "desktop" ? "transparent" : Theme.bgSolid
@@ -54,7 +55,11 @@ ApplicationWindow {
     // the mini player (it shows the ring, the time and the lyrics)
     readonly property bool watched: active || miniMode
     onWatchedChanged: player.setFastPolling(watched)
-    Component.onCompleted: player.setFastPolling(watched)
+    Component.onCompleted: {
+        player.setFastPolling(watched)
+        if (session.windowMaximized) win.showMaximized()
+        else win.show()
+    }
 
     // ---- mini player ("dynamic island") while minimized ----------------------------------
     property bool miniMode: false
@@ -84,6 +89,9 @@ ApplicationWindow {
         } else if (visibility !== Window.Hidden) {
             miniMode = false
             wasMaximized = visibility === Window.Maximized
+            // remembered for the next start (full screen is not a state to open in)
+            if (visibility !== Window.FullScreen && session.windowMaximized !== wasMaximized)
+                session.windowMaximized = wasMaximized
         }
     }
     // with the tray icon, closing the window leaves Senada playing in the tray (Ctrl+Q or the

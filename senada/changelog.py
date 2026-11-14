@@ -16,6 +16,7 @@ CHANGELOG = [
                 "artists, history and settings in one file. Restoring adds what is missing, or replaces the "
                 "library, and Senada keeps a copy of your library first.",
                 "Automatic backups: once a week Senada keeps a copy of your library (the last 5).",
+                "Senada opens maximized, and remembers it if you leave the window at its normal size.",
             ],
             "fixed": [],
         },
@@ -25,6 +26,7 @@ CHANGELOG = [
                 "tersimpan, riwayat, serta pengaturan dalam satu file. Memulihkan menambahkan yang belum ada, atau "
                 "mengganti library, dan Senada menyalin library-mu dulu.",
                 "Cadangan otomatis: seminggu sekali Senada menyimpan salinan library-mu (5 terakhir).",
+                "Senada terbuka dalam keadaan maximized, dan mengingatnya kalau kamu membiarkan jendela di ukuran biasa.",
             ],
             "fixed": [],
         },

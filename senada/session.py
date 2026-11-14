@@ -266,6 +266,7 @@ class Session(QObject):
     seekStyle = Property(str, *_setting("seek_style"), notify=changed)
     miniPlayer = Property(bool, *_setting("mini_player"), notify=changed)
     trayIcon = Property(bool, *_setting("tray"), notify=changed)
+    windowMaximized = Property(bool, *_setting("window_maximized"), notify=changed)
     closeToTray = Property(bool, *_setting("close_to_tray"), notify=changed)
     trayHintShown = Property(bool, *_setting("tray_hint_shown"), notify=changed)
 

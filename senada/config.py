@@ -71,6 +71,7 @@ DEFAULTS = {
     "discord_presence": False,  # show the song on the user's Discord profile (see discord.py)
     "discord_show_paused": False,  # keep showing it while paused
     "tray": False,  # an icon in the system tray (next to the clock) with play / pause and quit
+    "window_maximized": True,  # Senada opens maximized (it remembers how the window was left)
     "close_to_tray": True,  # with the tray icon, closing the window leaves Senada playing there
     "tray_hint_shown": False,  # the one-time "still playing in the tray" message was shown
 }
