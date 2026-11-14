@@ -10,8 +10,10 @@ CHANGELOG = [
     {
         "version": "next",
         "date": "",
-        "en": {"new": [], "fixed": ["Closing Senada no longer fills its log (Settings → About → Logs) with errors."]},
-        "id": {"new": [], "fixed": ["Menutup Senada tidak lagi memenuhi log-nya (Pengaturan → Tentang → Log) dengan pesan error."]},
+        "en": {"new": ["The Search page shows recommendations before you type: songs, artists and albums based on the "
+                       "songs you play and like, or what is popular right now when you are new."], "fixed": ["Closing Senada no longer fills its log (Settings → About → Logs) with errors."]},
+        "id": {"new": ["Halaman Cari langsung menampilkan rekomendasi sebelum mengetik: lagu, artis, dan album berdasarkan "
+                       "lagu yang kamu putar dan sukai, atau yang sedang populer kalau kamu baru mulai."], "fixed": ["Menutup Senada tidak lagi memenuhi log-nya (Pengaturan → Tentang → Log) dengan pesan error."]},
     },
     {
         "version": "1.0.8",

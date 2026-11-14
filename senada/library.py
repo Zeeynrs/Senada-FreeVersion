@@ -5,12 +5,13 @@ saved albums/playlists and history are stored locally.
 """
 
 import re
+import time
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 
 from PySide6.QtCore import Property, QObject, Signal, Slot
 
-from . import matching, spotify_import, ytmusic
+from . import discover, matching, spotify_import, ytmusic
 from .catalog import Catalog
 from .i18n import tr, trn
 from .store import LocalStore
@@ -19,6 +20,7 @@ YT_LINK_RE = re.compile(r"(?:music\.)?youtube\.com/|youtu\.be/")
 YT_IMPORT_LIMIT = 5000  # YouTube's own playlist limit
 # lists that only exist for a signed-in account: Liked Music, Liked videos, Watch later, Episodes
 YT_ACCOUNT_LISTS = ("LM", "LL", "WL", "SE")
+DISCOVER_TTL = 600  # seconds the Search page recommendations stay before they are made again
 
 
 class ImportLinkError(Exception):
@@ -79,6 +81,7 @@ class Library(QObject):
     savedChanged = Signal()
     loaded = Signal(str, "QVariantMap")  # page key, data
     searchFinished = Signal(str, "QVariantMap")  # query, results
+    discoverChanged = Signal()
     playlistCreated = Signal(str)  # new playlist id (e.g. after an import)
     matchCandidatesReady = Signal(str, "QVariantList")  # uri, scored YouTube Music candidates
     toast = Signal(str)
@@ -97,6 +100,9 @@ class Library(QObject):
         self._own = []
         self._liked_rev = 0
         self._saved_rev = 0
+        self._discover = {"tracks": [], "artists": [], "albums": [], "personal": False, "loading": False, "error": ""}
+        self._discover_seeds = None
+        self._discover_at = 0.0
         session.changed.connect(self.meChanged)
         if player is not None:
             player.likedChanged.connect(lambda *_: self._bump_liked())
@@ -127,6 +133,11 @@ class Library(QObject):
     def recent(self):
         """Recently played tracks (kept apart from `home` so a track change doesn't rebuild the shelves)."""
         return self._recent
+
+    @Property("QVariantMap", notify=discoverChanged)
+    def discover(self):
+        """Songs, artists and albums recommended on the Search page (see discover.py)."""
+        return self._discover
 
     @Property(int, constant=True)
     def matchThreshold(self):
@@ -222,6 +233,37 @@ class Library(QObject):
 
         self.worker.run(lambda: self.catalog.load(kind, item_id), on_done,
                         lambda e: self.loaded.emit(key, {"error": str(e)}))
+
+    # ---- recommendations ---------------------------------------------------------
+
+    @Slot(bool)
+    def refreshDiscover(self, force=False):
+        """Make the recommendations, unless the ones there are recent and the listening behind
+        them has not changed (`force`: make them again anyway)."""
+        if self._discover["loading"]:
+            return
+        history, liked = self.store.history(30), self.store.liked()[:30]
+        picked = discover.seeds(history, liked)
+        have = self._discover["tracks"] or self._discover["artists"] or self._discover["albums"]
+        recent = time.monotonic() - self._discover_at < DISCOVER_TTL
+        if not force and have and (recent or picked == self._discover_seeds):
+            return
+        self._discover = {**self._discover, "loading": True, "error": ""}
+        self.discoverChanged.emit()
+        home_sections = list(self._home.get("sections") or [])
+        played = {t["uri"] for t in history[:10] if t.get("uri")}
+
+        def ok(found):
+            self._cache(found["tracks"])
+            self._discover = {**found, "loading": False, "error": ""}
+            self._discover_seeds, self._discover_at = picked, time.monotonic()
+            self.discoverChanged.emit()
+
+        def fail(e):
+            self._discover = {**self._discover, "loading": False, "error": str(e)}
+            self.discoverChanged.emit()
+
+        self.worker.run(lambda: discover.build(picked, home_sections, played), ok, fail)
 
     # ---- search --------------------------------------------------------------
 

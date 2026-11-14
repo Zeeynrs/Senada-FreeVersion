@@ -17,7 +17,11 @@ Item {
         "K-Pop", I18n.t("Sad songs"), I18n.t("Indonesian indie"), I18n.t("Focus music")
     ]
 
-    Component.onCompleted: field.forceActiveFocus()
+    readonly property var disc: library.discover
+    readonly property bool typed: field.text.trim() !== ""
+
+    Component.onCompleted: { field.forceActiveFocus(); library.refreshDiscover(false) }
+    onVisibleChanged: if (visible) library.refreshDiscover(false)
 
     Connections {
         target: library
@@ -103,20 +107,95 @@ Item {
                 }
             }
 
-            // empty state: suggestions
+            Label {
+                visible: page.typed && !page.hasResults && !page.searching
+                text: I18n.t("No results.")
+                color: Theme.dim
+                font.pixelSize: 15
+            }
+
+            // nothing typed: recommendations from what you listen to (or what is popular)
             Column {
                 width: parent.width
-                visible: !page.hasResults && !page.searching
+                visible: !page.typed
+                spacing: 22
+
+                RowLayout {
+                    width: parent.width
+                    spacing: 12
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Label {
+                            text: page.disc.personal ? I18n.t("Recommended for you") : I18n.t("Popular right now")
+                            font.pixelSize: 22
+                            font.weight: Font.Black
+                        }
+                        Label {
+                            Layout.fillWidth: true
+                            text: page.disc.personal ? I18n.t("Based on the songs you play and like.")
+                                                     : I18n.t("Play a few songs and these become your own recommendations.")
+                            color: Theme.dim
+                            font.pixelSize: 13
+                            elide: Text.ElideRight
+                        }
+                    }
+                    BusyIndicator {
+                        running: page.disc.loading
+                        visible: running
+                        implicitWidth: 28; implicitHeight: 28
+                    }
+                    IconButton {
+                        visible: !page.disc.loading
+                        iconName: "refresh"
+                        size: 18
+                        tip: I18n.t("New recommendations")
+                        onClicked: library.refreshDiscover(true)
+                    }
+                }
+                Label {
+                    visible: !!page.disc.error && !page.disc.loading && (page.disc.tracks || []).length === 0
+                    width: parent.width
+                    text: page.disc.error || ""
+                    color: Theme.dim
+                    wrapMode: Text.WordWrap
+                }
+                TrackSection {
+                    width: parent.width
+                    wide: width > 900
+                    title: I18n.t("Songs for you")
+                    tracks: page.disc.tracks || []
+                }
+                Carousel {
+                    width: parent.width
+                    title: I18n.t("Artists you might like")
+                    items: page.disc.artists || []
+                }
+                Carousel {
+                    width: parent.width
+                    title: I18n.t("Albums for you")
+                    items: page.disc.albums || []
+                }
+            }
+
+            // nothing typed: a few searches to start from
+            Column {
+                width: parent.width
+                visible: !page.typed
                 spacing: 14
                 Label {
-                    text: field.text.trim() ? I18n.t("No results.") : I18n.t("Try one of these, or paste a Spotify or YouTube Music playlist link.")
+                    text: I18n.t("Browse")
+                    font.pixelSize: 18
+                    font.weight: Font.Bold
+                }
+                Label {
+                    text: I18n.t("Try one of these, or paste a Spotify or YouTube Music playlist link.")
                     color: Theme.dim
-                    font.pixelSize: 15
+                    font.pixelSize: 13
                 }
                 Flow {
                     width: parent.width
                     spacing: 10
-                    visible: !field.text.trim()
                     Repeater {
                         model: page.suggestions
                         AbstractButton {

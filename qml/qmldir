@@ -59,6 +59,7 @@ Toast 1.0 Toast.qml
 TopBar 1.0 TopBar.qml
 TracklistPaper 1.0 TracklistPaper.qml
 TrackRow 1.0 TrackRow.qml
+TrackSection 1.0 TrackSection.qml
 TrackTableHeader 1.0 TrackTableHeader.qml
 TransportControls 1.0 TransportControls.qml
 VinylEqualizer 1.0 VinylEqualizer.qml
