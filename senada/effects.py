@@ -1,10 +1,11 @@
-"""Equalizer and tempo settings shared by every full view style.
+"""Equalizer, tempo, loudness and silence settings shared by every full view style.
 
 The full view draws these controls in several ways (the classic panel, the turntable's
 spokes, the poster's fine sliders); they all read and change this one object, so a change
 in one style shows in the others and survives a restart. Saving waits a moment so that
 dragging a slider does not write the settings file on every step. Every change also goes
 straight to the audio engine (mpv): the bands as an equalizer filter, the tempo as its speed.
+Even loudness and skipping silence are switched in Settings → Audio and kept here as well.
 """
 
 from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
@@ -21,7 +22,8 @@ PRESETS = {
 MAX_DB = 12
 TEMPO_MIN, TEMPO_MAX = 0.5, 2.0
 # flat by default: the sound is left as it is until the user changes it
-DEFAULTS = {"enabled": True, "preset": "Flat", "bands": PRESETS["Flat"], "tempo": 1.0, "keepPitch": False}
+DEFAULTS = {"enabled": True, "preset": "Flat", "bands": PRESETS["Flat"], "tempo": 1.0, "keepPitch": False,
+            "normalize": False, "skipSilence": False}
 
 
 def gains_db(state: dict) -> list[float] | None:
@@ -55,6 +57,8 @@ class AudioEffects(QObject):
             return
         self.engine.set_tempo(self._state["tempo"], self._state["keepPitch"])
         self.engine.set_equalizer(gains_db(self._state))
+        self.engine.set_normalize(bool(self._state["normalize"]))
+        self.engine.set_skip_silence(bool(self._state["skipSilence"]))
 
     def _save(self):
         self.settings["effects"] = dict(self._state)
@@ -128,3 +132,19 @@ class AudioEffects(QObject):
     @Slot(bool)
     def setKeepPitch(self, on):
         self._update(keepPitch=bool(on))
+
+    @Property(bool, notify=changed)
+    def normalize(self):
+        return bool(self._state["normalize"])
+
+    @Slot(bool)
+    def setNormalize(self, on):
+        self._update(normalize=bool(on))
+
+    @Property(bool, notify=changed)
+    def skipSilence(self):
+        return bool(self._state["skipSilence"])
+
+    @Slot(bool)
+    def setSkipSilence(self, on):
+        self._update(skipSilence=bool(on))

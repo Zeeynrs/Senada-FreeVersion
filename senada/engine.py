@@ -59,6 +59,33 @@ def eq_commands(gains_db) -> list[tuple[str, str, str]]:
             + [(f"{kind}@b{i}", "g", f"{g:g}") for i, ((kind, _f, _x), g) in enumerate(zip(EQ_BANDS, gains_db))])
 
 
+# ---- loudness and silence ------------------------------------------------------------------
+# EBU R128 loudness to -14 LUFS (the level YouTube and most streaming services play at), true
+# peaks under -1.5 dBFS, so a song mastered loud no longer jumps out after a quiet one.
+# loudnorm works at 192 kHz; the audio goes back to 48 kHz right after it.
+NORM_LABEL = "senada-norm"
+NORM_GRAPH = "loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000"
+# silencedetect only reports a stretch below -50 dB that lasted 1.5 s; the audio passes untouched.
+# Senada then plays through the silence fast (see _on_silence) instead of cutting it out:
+# cutting it would leave mpv's position behind the song's own clock, and the lyrics with it.
+SILENCE_LABEL = "senada-silence"
+SILENCE_GRAPH = "silencedetect=n=-50dB:d=1.5"
+SKIP_SPEED = 8.0  # mpv's time stretcher mutes above 8x anyway
+
+
+def filter_chain(normalize: bool, skip_silence: bool, eq_gains) -> str:
+    """mpv's audio filter list for these effects ("" for none). Silence is looked for in the
+    song as it is, before loudness is evened out (that could lift a near-silence above the line)."""
+    chain = []
+    if skip_silence:
+        chain.append(f"@{SILENCE_LABEL}:lavfi=[{SILENCE_GRAPH}]")
+    if normalize:
+        chain.append(f"@{NORM_LABEL}:lavfi=[{NORM_GRAPH}]")
+    if eq_gains is not None:
+        chain.append(f"@{EQ_LABEL}:lavfi=[{eq_graph(eq_gains)}]")
+    return ",".join(chain)
+
+
 def find_tool(name: str) -> str | None:
     """A helper program (mpv, yt-dlp): bundled copy first, then PATH, then usual install places."""
     exe = name + (".exe" if IS_WINDOWS else "")
@@ -112,6 +139,10 @@ class AudioEngine(QObject):
         self._eq: list[float] | None = None  # equalizer band gains in dB (see effects.py), None: no equalizer
         self._eq_built = False   # mpv has the equalizer filter
         self._eq_stale = False   # gains changed by filter commands since the filter was built
+        self._af_built = False   # mpv has a filter list (equalizer, loudness, silence)
+        self._normalize = False  # even out loudness between songs
+        self._skip_silence = False
+        self._skipping = False   # playing through a silence at SKIP_SPEED
         self._speed = 1.0
         self._keep_pitch = True
 
@@ -234,12 +265,17 @@ class AudioEngine(QObject):
         for cmd in (["observe_property", 1, "time-pos"],
                     ["observe_property", 2, "pause"],
                     ["observe_property", 3, "duration"],
-                    ["observe_property", 4, "idle-active"]):
+                    ["observe_property", 4, "idle-active"],
+                    ["observe_property", 5, f"af-metadata/{SILENCE_LABEL}"],
+                    # mpv 0.39+ would add itself to the Windows media controls next to Senada
+                    # (smtc.py), and media keys could reach mpv instead of Senada's queue
+                    # (an older mpv answers with an error, which is ignored)
+                    ["set_property", "media-controls", False]):
             self._send_command(cmd)
         # a new mpv (first start, or started again) has none of the effects yet
-        self._eq_built = False
+        self._eq_built = self._af_built = False
         self._apply_tempo()
-        self._apply_eq()
+        self._apply_filters()
         pending, self._pending = self._pending, []
         for line in pending:
             self.sock.write(line)
@@ -308,8 +344,11 @@ class AudioEngine(QObject):
                 d_ms = int(data * 1000)
                 self._duration_ms = d_ms
                 self.durationChanged.emit(d_ms)
+            elif name == f"af-metadata/{SILENCE_LABEL}":
+                self._on_silence(data)
 
         elif event == "end-file":
+            self._end_skip()  # a silence at the end of a song is no reason to rush the next one
             reason = msg.get("reason")
             if reason == "eof" and self._queued:
                 # mpv is already starting the queued file: playback goes on without a gap
@@ -328,6 +367,7 @@ class AudioEngine(QObject):
 
         elif event == "playback-restart":  # a file started (or a seek finished)
             self._idle = False
+            self._end_skip()
             self._update_playing()
             if self._eq_stale:
                 # a gapless next file in another sample rate rebuilds the filter from its
@@ -340,7 +380,28 @@ class AudioEngine(QObject):
             self._is_playing = playing
             self.stateChanged.emit(playing)
 
+    def _on_silence(self, meta):
+        """silencedetect's latest report: a silence began (start only) or ended (start and end).
+        It comes about half a second before that audio is heard, so the speed changes in time."""
+        meta = meta if isinstance(meta, dict) else {}
+        silent = "lavfi.silence_start" in meta and "lavfi.silence_end" not in meta
+        if silent and self._skip_silence and not self._skipping:
+            self._skipping = True
+            self._send_command(["set_property", "speed", SKIP_SPEED])
+        elif not silent:
+            self._end_skip()
+
+    def _end_skip(self):
+        if self._skipping:
+            self._skipping = False
+            self._send_command(["set_property", "speed", self._speed])
+
     # ---- public API -------------------------------------------------------------------
+
+    @property
+    def idle(self) -> bool:
+        """Nothing loaded: stopped at the end of the queue, or before the first song."""
+        return self._idle
 
     def play(self, url: str):
         if url and url == self._advanced:  # mpv moved on to this queued file by itself: it is playing
@@ -353,7 +414,7 @@ class AudioEngine(QObject):
         self._duration_ms = 0
         self._last_pos_ms = 0
         if self._eq_stale:
-            self._apply_eq()  # between songs a rebuilt filter is not heard
+            self._apply_filters()  # between songs a rebuilt filter is not heard
         # not the stream address itself: it is long and carries this network's IP address
         logger.info("play %s", "direct stream" if "googlevideo.com/" in url else url)
         self._send_command(["loadfile", url, "replace"])
@@ -394,8 +455,23 @@ class AudioEngine(QObject):
             self._apply_tempo()
 
     def _apply_tempo(self):
+        self._skipping = False  # the chosen speed also ends a skip through a silence
         self._send_command(["set_property", "audio-pitch-correction", self._keep_pitch])
         self._send_command(["set_property", "speed", self._speed])
+
+    def set_normalize(self, on: bool):
+        """Even out loudness between songs (see NORM_GRAPH)."""
+        if bool(on) != self._normalize:
+            self._normalize = bool(on)
+            self._apply_filters()
+
+    def set_skip_silence(self, on: bool):
+        """Play through long silences fast (see SILENCE_GRAPH)."""
+        if bool(on) != self._skip_silence:
+            self._skip_silence = bool(on)
+            if not on:
+                self._end_skip()
+            self._apply_filters()
 
     def set_equalizer(self, gains_db: list[float] | None):
         """Band gains in dB (one per EQ_BANDS entry), or None to take the equalizer out.
@@ -411,17 +487,20 @@ class AudioEngine(QObject):
             self._send_eq_gains()
             self._eq_stale = True
         else:
-            self._apply_eq()
+            self._apply_filters()
 
-    def _apply_eq(self):
+    def _apply_filters(self):
+        """Give mpv the whole filter list for the current effects (it replaces the old one)."""
         self._eq_stale = False
-        if self._eq is None:
-            if self._eq_built:
+        chain = filter_chain(self._normalize, self._skip_silence, self._eq)
+        if not chain:
+            if self._af_built:
                 self._send_command(["af", "clr", ""])
-            self._eq_built = False
+            self._af_built = self._eq_built = False
             return
-        self._send_command(["af", "set", f"@{EQ_LABEL}:lavfi=[{eq_graph(self._eq)}]"])
-        self._eq_built = True
+        self._send_command(["af", "set", chain])
+        self._af_built = True
+        self._eq_built = self._eq is not None
 
     def _send_eq_gains(self):
         for target, command, arg in eq_commands(self._eq):

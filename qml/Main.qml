@@ -86,7 +86,43 @@ ApplicationWindow {
             wasMaximized = visibility === Window.Maximized
         }
     }
-    onClosing: miniMode = false
+    // with the tray icon, closing the window leaves Senada playing in the tray (Ctrl+Q or the
+    // tray menu quit); a desktop without a tray keeps the usual close
+    onClosing: (close) => {
+        miniMode = false
+        if (tray.shown && session.closeToTray && !session.quitting) {
+            close.accepted = false
+            win.hide()
+            if (!session.trayHintShown) {
+                session.trayHintShown = true
+                tray.item.showMessage("Senada", I18n.t("Senada keeps playing in the tray. Right-click the icon to quit."))
+            }
+        }
+    }
+    function showFromTray() {
+        if (win.visible && win.visibility !== Window.Minimized && !miniMode) {
+            win.raise()
+            win.requestActivate()
+        } else {
+            leaveMiniPlayer()
+        }
+    }
+    Connections {
+        target: session
+        function onShowRequested() { win.showFromTray() }
+    }
+
+    // ---- system tray (qml/TrayIcon.qml) -------------------------------------------------------
+    Loader {
+        id: tray
+        source: "TrayIcon.qml"
+        readonly property bool shown: status === Loader.Ready && item.shown
+    }
+    Connections {
+        target: tray.item
+        ignoreUnknownSignals: true
+        function onShowWindow() { win.showFromTray() }
+    }
     onMiniModeChanged: {
         if (miniMode) {
             mini.place(win.screen)

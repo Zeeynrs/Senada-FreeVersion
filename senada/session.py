@@ -6,7 +6,7 @@ Senada needs no account: there is no login state here any more.
 import getpass
 import os
 
-from PySide6.QtCore import Property, QObject, Qt, QUrl, Signal, Slot
+from PySide6.QtCore import Property, QCoreApplication, QObject, Qt, QUrl, Signal, Slot
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QRegion, QWindow
 
 from . import i18n, island
@@ -46,11 +46,13 @@ class Session(QObject):
     changed = Signal()
     languageChanged = Signal()
     toast = Signal(str)
+    showRequested = Signal()  # bring the main window back (a second Senada was started)
 
     def __init__(self, settings, worker, parent=None):
         super().__init__(parent)
         self.settings = settings
         self.worker = worker
+        self._quitting = False
         worker.error.connect(self.toast)
         i18n.set_language(settings["language"])
         self._apply_theme()
@@ -173,6 +175,19 @@ class Session(QObject):
         LOG_DIR.mkdir(parents=True, exist_ok=True)
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(LOG_DIR)))
 
+    # ---- quitting and the tray -----------------------------------------------------
+
+    @Property(bool)
+    def quitting(self):
+        """Senada is quitting: the main window closes for real instead of going to the tray."""
+        return self._quitting
+
+    @Slot()
+    def quit(self):
+        """Quit Senada (Ctrl+Q, the tray menu, an update), also while closing goes to the tray."""
+        self._quitting = True
+        QCoreApplication.quit()
+
     # ---- mini player ("dynamic island") -------------------------------------------
 
     @Slot()
@@ -214,6 +229,9 @@ class Session(QObject):
     immersiveStyle = Property(str, _get_immersive_style, _set_immersive_style, notify=changed)
     seekStyle = Property(str, *_setting("seek_style"), notify=changed)
     miniPlayer = Property(bool, *_setting("mini_player"), notify=changed)
+    trayIcon = Property(bool, *_setting("tray"), notify=changed)
+    closeToTray = Property(bool, *_setting("close_to_tray"), notify=changed)
+    trayHintShown = Property(bool, *_setting("tray_hint_shown"), notify=changed)
 
     def _get_island_style(self):
         style = self.settings["island_style"]

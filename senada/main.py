@@ -18,6 +18,7 @@ from .library import Library
 from .downloads import Downloads
 from .discord import DiscordPresence
 from .effects import AudioEffects
+from .instance import Instance, ask_running_to_show
 from .lyrics import Lyrics
 from .player import Player
 from .session import Session
@@ -62,11 +63,16 @@ def main():
     app.setFont(QFont(["Google Sans Flex", "Google Sans", "Segoe UI Variable Text", "Segoe UI",
                        "Noto Sans", "sans-serif"], 10))
     QQuickStyle.setStyle("Basic")
+    # one Senada at a time: a second start brings the running one forward (it may be in the tray)
+    if ask_running_to_show():
+        sys.exit(0)
+    instance = Instance()
     # Ctrl+C, and the system asking Senada to close (logout, `kill`, closed terminal):
     # quit the normal way so mpv and the visualizer are stopped too
+    # (through session.quit, so closing the window does not just send it to the tray)
     for sig in ("SIGINT", "SIGTERM", "SIGHUP"):
         if hasattr(signal, sig) and not (IS_WINDOWS and sig != "SIGINT"):
-            signal.signal(getattr(signal, sig), lambda *_: app.quit())
+            signal.signal(getattr(signal, sig), lambda *_: session.quit())
     keepalive = QTimer()  # lets Python handle Ctrl+C while Qt's loop runs
     keepalive.timeout.connect(lambda: None)
     keepalive.start(500)
@@ -76,6 +82,7 @@ def main():
     store = LocalStore()
     catalog = Catalog(store)
     session = Session(settings, worker)
+    instance.showRequested.connect(session.showRequested)
     audio_engine = AudioEngine()
     resolver = AudioResolver()
     downloads = Downloads(resolver)
@@ -102,15 +109,19 @@ def main():
     def request_restart():
         nonlocal restarting
         restarting = True
-        app.quit()
+        session.quit()
 
     updater.restartRequested.connect(request_restart)
-    updater.quitRequested.connect(app.quit)
+    updater.quitRequested.connect(session.quit)
+    media_controls = None
 
     def on_quit():
         audio_engine.quit()
         visualizer.stop()
         player.stop()
+        if media_controls is not None:
+            media_controls.close()
+        instance.close()  # before a restart starts the new Senada, which would find this one
 
     app.aboutToQuit.connect(on_quit)
 
@@ -129,10 +140,16 @@ def main():
     session.set_window(window)
     try:
         from .mpris import Mpris
-        mpris = Mpris(player, lambda: (window.show(), window.raise_(), window.requestActivate()), app.quit)
+        mpris = Mpris(player, session.showRequested.emit, session.quit)
     except Exception as e:  # MPRIS is optional: no dbus-python or no session bus
         print(f"MPRIS is off: {e}", file=sys.stderr)
         mpris = None
+    if IS_WINDOWS:
+        try:
+            from .smtc import MediaControls
+            media_controls = MediaControls(player)
+        except Exception as e:  # optional too: the winrt packages are missing, or Windows says no
+            print(f"Windows media controls are off: {e}", file=sys.stderr)
 
     library.refreshAll()
     player.start()

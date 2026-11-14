@@ -10,8 +10,43 @@ CHANGELOG = [
     {
         "version": "next",
         "date": "",
-        "en": {"new": [], "fixed": []},
-        "id": {"new": [], "fixed": []},
+        "en": {
+            "new": [
+                "Windows media controls: the media keys, the volume flyout, the lock screen and headset buttons "
+                "now show and control Senada, with the song and its cover.",
+                "Icon in the system tray, to switch on in Settings → Appearance: play, pause, skip and quit "
+                "from next to the clock, and closing the window can leave Senada playing there.",
+                "Sleep timer: the moon in the player bar stops the music after 15 minutes to 2 hours, or at the "
+                "end of the song, fading out gently.",
+                "Even out loudness: every song plays at about the same volume (Settings → Audio).",
+                "Skip silence: long silences at the start or end of a song go by in a flash, with the lyrics "
+                "still in time (Settings → Audio).",
+            ],
+            "fixed": [
+                "Starting Senada while it is already running brings the open window forward instead of starting "
+                "a second one.",
+                "Play after the last song of the queue starts it again instead of doing nothing.",
+            ],
+        },
+        "id": {
+            "new": [
+                "Kontrol media Windows: tombol media, flyout volume, layar kunci, dan tombol headset sekarang "
+                "menampilkan dan mengontrol Senada, lengkap dengan lagu dan cover-nya.",
+                "Ikon di tray sistem, bisa dinyalakan di Pengaturan → Tampilan: putar, jeda, lewati lagu, dan "
+                "keluar dari samping jam, dan menutup jendela bisa membiarkan Senada tetap memutar di sana.",
+                "Timer tidur: ikon bulan di player bar menghentikan musik setelah 15 menit sampai 2 jam, atau di "
+                "akhir lagu, dengan volume yang mengecil perlahan.",
+                "Samakan kerasnya suara: setiap lagu diputar dengan volume yang kurang lebih sama "
+                "(Pengaturan → Audio).",
+                "Lewati hening: bagian hening yang panjang di awal atau akhir lagu dilewati dalam sekejap, dan "
+                "lirik tetap sinkron (Pengaturan → Audio).",
+            ],
+            "fixed": [
+                "Membuka Senada saat sudah berjalan sekarang memunculkan jendela yang sudah terbuka, bukan "
+                "menjalankan Senada kedua.",
+                "Menekan putar setelah lagu terakhir di antrean selesai sekarang memutarnya lagi, bukan diam saja.",
+            ],
+        },
     },
     {
         "version": "1.0.10",

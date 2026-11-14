@@ -279,6 +279,10 @@ Rectangle {
             tip: I18n.t("Queue")
             onClicked: bar.showPanel("queue")
         }
+        SleepTimerButton {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: bar.roomy || running  // a running timer stays in sight on a narrow window
+        }
         IconButton {
             id: devButton
             anchors.verticalCenter: parent.verticalCenter

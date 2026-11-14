@@ -12,6 +12,7 @@ from . import net, ytmusic
 from .i18n import tr
 from .engine import AudioEngine
 from .resolver import AudioResolver
+from .sleep import SleepTimer
 from .streams import StreamError, StreamResolver, is_blocked, watch_url
 
 logger = logging.getLogger("senada.player")
@@ -102,6 +103,10 @@ class Player(QObject):
         self._fallback_token = -1  # play token whose direct stream failed: mpv's yt-dlp hook plays it
         self._recovering = -1  # play token for which another upload is being (or was) tried
         self._fail_streak = 0  # songs in a row that could not be played
+        self._resume_next = False  # stopped by the sleep timer at a song's end: play resumes with the next one
+        self._sleep = SleepTimer(engine, lambda: self._state.get("volume", 80),
+                                 lambda: bool(self._state.get("isPlaying")), self)
+        self._sleep.changed.connect(self._prefetch_next)  # "after this song" takes the queued song back out
         self._devices = [{
             "id": "local",
             "name": "Senada (Lokal)",
@@ -148,6 +153,10 @@ class Player(QObject):
     def accent(self):
         return self._accent
 
+    @Property(QObject, constant=True)
+    def sleep(self):
+        return self._sleep
+
     # ---- playback engine callbacks --------------------------------------
 
     def _on_engine_pos(self, pos_ms: int):
@@ -168,6 +177,12 @@ class Player(QObject):
             self.stateChanged.emit()
 
     def _on_track_ended(self):
+        if self._sleep.stops_after_track:  # nothing was queued: mpv stopped at the song's end
+            self._sleep.track_ended()
+            self._resume_next = True
+            self._state["isPlaying"] = False
+            self.stateChanged.emit()
+            return
         if self._state.get("repeat") == "track":
             self._play_index(self._queue_index)
         else:
@@ -192,7 +207,7 @@ class Player(QObject):
 
     def _next_track(self) -> dict | None:
         """The track that plays by itself when the current one ends."""
-        if not 0 <= self._queue_index < len(self._queue):
+        if not 0 <= self._queue_index < len(self._queue) or self._sleep.stops_after_track:
             return None
         if self._state.get("repeat") == "track":
             return self._queue[self._queue_index]
@@ -324,6 +339,12 @@ class Player(QObject):
             if self._queue:
                 self._play_index(max(0, self._queue_index))
             return
+        if self.engine.idle is True and not self._state.get("isPlaying") and self._queue:
+            # mpv has nothing loaded (stopped at the end of the queue, or by the sleep timer):
+            # pausing would do nothing, so the song starts again (or the next one after the timer)
+            index = self._queue_index + 1 if self._resume_next else self._queue_index
+            self._play_index(index if 0 <= index < len(self._queue) else max(0, self._queue_index))
+            return
         self.engine.toggle()
 
     @Slot()
@@ -393,6 +414,7 @@ class Player(QObject):
     def _play_index(self, index: int):
         if index < 0 or index >= len(self._queue):
             return
+        self._resume_next = False
         self._queue_index = index
         track = self._queue[index]
         self._position = 0

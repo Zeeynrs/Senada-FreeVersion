@@ -42,10 +42,12 @@ Popup {
                   "Seek bar", "Progress bar", "Wave", "Waveform", "Dots", "Player bar", "Docked", "Floating",
                   "Accent color", "Follow the song",
                   "Mini player", "Dynamic island", "Minimize", "Mini player style", "Classic", "Sound wave",
-                  "Running lyrics", "Cover glass", "Tuck into the top edge", "Notch"] },
+                  "Running lyrics", "Cover glass", "Tuck into the top edge", "Notch",
+                  "System tray", "Tray", "Icon in the system tray", "Keep playing when closed"] },
         { group: "Preferences", key: "audio", icon: "speaker", title: "Audio",
           desc: "Audio engine and streaming quality.",
-          words: ["Engine status", "Device name", "Audio quality", "MPV", "Audio engine & streaming (MPV)"] },
+          words: ["Engine status", "Device name", "Audio quality", "MPV", "Audio engine & streaming (MPV)",
+                  "Even out loudness", "Normalize", "Loudness", "Volume", "Skip silence", "Silence"] },
         { group: "Preferences", key: "lyrics", icon: "lyrics", title: "Lyrics",
           desc: "Where synced lyrics come from.",
           words: ["Lyrics source", "Automatic", "LRCLIB", "YouTube Music", "NetEase", "Synced lyrics",
@@ -1064,6 +1066,26 @@ Popup {
                     onToggled: session.islandDock = checked ? Math.round(dockSlider.value) : 0
                 }
             }
+            Divider {}
+            SettingRow {
+                label: I18n.t("Icon in the system tray")
+                hint: I18n.t("Play, pause, skip and quit from the icon next to the clock. Click it to bring Senada back.")
+                NSwitch {
+                    checked: session.trayIcon
+                    onToggled: session.trayIcon = checked
+                }
+            }
+            SettingRow {
+                Layout.topMargin: 0
+                opacity: session.trayIcon ? 1 : 0.5
+                enabled: session.trayIcon
+                label: I18n.t("Keep playing when closed")
+                hint: I18n.t("Closing the window leaves Senada playing in the tray. Quit with Ctrl+Q or from the tray icon.")
+                NSwitch {
+                    checked: session.closeToTray
+                    onToggled: session.closeToTray = checked
+                }
+            }
         }
     }
 
@@ -1100,6 +1122,24 @@ Popup {
                         { key: "medium", label: I18n.t("Medium (128 kbps)") }
                     ]
                     value: "auto"
+                }
+            }
+            Divider {}
+            SettingRow {
+                label: I18n.t("Even out loudness")
+                hint: I18n.t("Plays every song at about the same loudness, so a loud song does not jump out after a quiet one.")
+                NSwitch {
+                    checked: effects.normalize
+                    onToggled: effects.setNormalize(checked)
+                }
+            }
+            SettingRow {
+                Layout.topMargin: 0
+                label: I18n.t("Skip silence")
+                hint: I18n.t("Long silences (at the start or end of a song, or before a hidden track) go by in a flash. The lyrics stay in time.")
+                NSwitch {
+                    checked: effects.skipSilence
+                    onToggled: effects.setSkipSilence(checked)
                 }
             }
             Divider {}

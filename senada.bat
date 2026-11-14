@@ -12,6 +12,11 @@ if not exist ".venv\Scripts\pythonw.exe" (
     ".venv\Scripts\python.exe" -m pip install PySide6 || goto :nopip
 )
 
+rem Windows media controls (media keys, the volume flyout); Senada still starts without them
+".venv\Scripts\python.exe" -c "import winrt.windows.media.playback, winrt.windows.storage.streams" 2>nul || (
+    ".venv\Scripts\python.exe" -m pip install --quiet winrt-runtime winrt-Windows.Foundation winrt-Windows.Media winrt-Windows.Media.Playback winrt-Windows.Storage.Streams
+)
+
 if not exist "bin\mpv.exe" (
     where mpv >/dev/null 2>/dev/null || (
         echo mpv.exe tidak ditemukan. Taruh mpv.exe dan yt-dlp.exe di folder "bin" Senada,

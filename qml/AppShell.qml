@@ -439,7 +439,7 @@ Item {
     Shortcut { sequence: "Ctrl+F"; onActivated: Nav.go("search") }
     Shortcut { sequence: "Ctrl+L"; onActivated: shell.immersive = !shell.immersive }
     Shortcut { sequence: "Ctrl+,"; onActivated: Nav.go("settings") }
-    Shortcut { sequence: "Ctrl+Q"; onActivated: Qt.quit() }
+    Shortcut { sequence: "Ctrl+Q"; onActivated: session.quit() }
     Shortcut { sequence: "Alt+Left"; onActivated: shell.goBack() }
     Shortcut { sequence: "Alt+Right"; onActivated: shell.goForward() }
     Shortcut { sequence: "Ctrl+B"; onActivated: shell.sidebarOpen = !shell.sidebarOpen }

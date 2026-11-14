@@ -3,3 +3,9 @@ PySide6-Essentials>=6.8
 pyinstaller>=6.11
 # root certificates Windows may not have installed yet (see senada/net.py)
 certifi
+# Windows media controls: media keys, the volume flyout, the lock screen (see senada/smtc.py)
+winrt-runtime
+winrt-Windows.Foundation
+winrt-Windows.Media
+winrt-Windows.Media.Playback
+winrt-Windows.Storage.Streams
