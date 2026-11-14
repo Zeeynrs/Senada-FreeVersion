@@ -10,6 +10,12 @@ CHANGELOG = [
     {
         "version": "next",
         "date": "",
+        "en": {"new": [], "fixed": []},
+        "id": {"new": [], "fixed": []},
+    },
+    {
+        "version": "1.0.11",
+        "date": "2026-11-14",
         "en": {
             "new": [
                 "Windows media controls: the media keys, the volume flyout, the lock screen and headset buttons "
