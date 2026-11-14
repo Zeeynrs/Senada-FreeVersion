@@ -35,6 +35,9 @@ OutputBaseFilename=Senada-Setup-{#AppVersion}
 SetupIconFile=build\senada.ico
 UninstallDisplayIcon={app}\{#AppExe}
 UninstallDisplayName={#AppName}
+; tell Windows to refresh its icons when the install ends: an update keeps the shortcut's path,
+; so Start and Windows Search would otherwise keep showing an old icon from their cache
+ChangesAssociations=yes
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
