@@ -104,9 +104,11 @@ Item {
     Connections {
         target: Nav
         function onMatchPicker(track) { matchPicker.openFor(track) }
+        function onShareLyrics(index) { shareLyricsDialog.openAt(index) }
         function onImmersive(on) { shell.immersive = on }
     }
     MatchPicker { id: matchPicker }
+    ShareLyricsDialog { id: shareLyricsDialog }
     SettingsDialog { id: settingsDialog }
 
     // create / rename / delete an own playlist

@@ -50,7 +50,8 @@ Popup {
                   "Even out loudness", "Normalize", "Loudness", "Volume", "Skip silence", "Silence"] },
         { group: "Preferences", key: "lyrics", icon: "lyrics", title: "Lyrics",
           desc: "Where synced lyrics come from.",
-          words: ["Lyrics source", "Automatic", "LRCLIB", "YouTube Music", "NetEase", "Synced lyrics",
+          words: ["Lyrics source", "Automatic", "BetterLyrics", "LRCLIB", "KuGou", "YouTube Music", "NetEase", "Synced lyrics",
+                  "Under each line", "Romanization", "Translation", "Translate with Google Translate", "Romaji",
                   "Appearance", "Size", "Font", "Alignment", "Sung line", "Karaoke", "Glow", "Serif"] },
         { group: "Preferences", key: "discord", icon: "presence", title: "Discord",
           desc: "Show what you are listening to on your Discord profile.",
@@ -1156,7 +1157,7 @@ Popup {
             SettingRow {
                 label: I18n.t("Lyrics source")
                 hint: lyrics.source === "auto"
-                      ? I18n.t("Tries LRCLIB, YouTube Music and NetEase in turn and shows the first synced lyrics found.")
+                      ? I18n.t("Tries BetterLyrics, LRCLIB, KuGou, YouTube Music and NetEase in turn and shows the first synced lyrics found, word by word where the source has it.")
                       : I18n.t("Only this source is used. If a song has no lyrics there, pick another one here or under the lyrics.")
                 NCombo {
                     Layout.preferredWidth: 220
@@ -1240,10 +1241,30 @@ Popup {
                               { key: "karaoke", label: I18n.t("Karaoke") }]
                     onPicked: (key) => session.lyricsHighlight = key
                 }
+                ChoiceRow {
+                    label: I18n.t("Under each line")
+                    value: lyrics.extra
+                    options: [{ key: "off", label: I18n.t("Nothing") }, { key: "roman", label: I18n.t("Romanization") },
+                              { key: "trans", label: I18n.t("Translation") }]
+                    onPicked: (key) => lyrics.extra = key
+                }
+            }
+            SettingRow {
+                visible: lyrics.extra !== "off"
+                Layout.topMargin: 0
+                label: lyrics.extra === "roman" ? I18n.t("Romanization") : I18n.t("Translate with Google Translate")
+                hint: lyrics.extra === "roman"
+                      ? I18n.t("Japanese, Korean and Chinese lines in Latin letters where the lyrics come with them (often from BetterLyrics). Korean is also romanized by Senada itself.")
+                      : I18n.t("BetterLyrics comes with English translations for many songs. Switched on, Google Translate translates the lyrics into the interface language: the text of the lyrics is sent to Google.")
+                NSwitch {
+                    visible: lyrics.extra === "trans"
+                    checked: lyrics.onlineTranslation
+                    onToggled: lyrics.onlineTranslation = checked
+                }
             }
             Divider {}
             Note {
-                text: I18n.t("LRCLIB is a free, open lyrics database. YouTube Music shows the lyrics of the exact song being played. NetEase Cloud Music has many synced lyrics, also for Asian songs. You can also switch the source for the song that is playing with the button under the lyrics.")
+                text: I18n.t("BetterLyrics times many songs word by word, often with a romanization and an English translation. LRCLIB is a free, open lyrics database. KuGou and NetEase Cloud Music have many synced lyrics, also for Asian songs. YouTube Music shows the lyrics of the exact song being played. You can also switch the source for the song that is playing with the button under the lyrics.")
             }
         }
     }

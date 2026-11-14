@@ -21,6 +21,15 @@ CHANGELOG = [
                 "Even out loudness: every song plays at about the same volume (Settings → Audio).",
                 "Skip silence: long silences at the start or end of a song go by in a flash, with the lyrics "
                 "still in time (Settings → Audio).",
+                "More lyrics: BetterLyrics and KuGou join LRCLIB, YouTube Music and NetEase, so fewer songs go "
+                "without lyrics.",
+                "Karaoke word by word: where the lyrics are timed per word, the sung line fills in with the singer "
+                "instead of evenly.",
+                "Share lyrics: pick up to 8 lines and turn them into a picture with the cover, to copy or save "
+                "(the share button under the lyrics).",
+                "Romanization or translation under each line (Settings → Lyrics): Japanese and Korean in Latin "
+                "letters, English translations from BetterLyrics, and if you switch it on, Google Translate into "
+                "the app's language.",
             ],
             "fixed": [
                 "Starting Senada while it is already running brings the open window forward instead of starting "
@@ -40,6 +49,15 @@ CHANGELOG = [
                 "(Pengaturan → Audio).",
                 "Lewati hening: bagian hening yang panjang di awal atau akhir lagu dilewati dalam sekejap, dan "
                 "lirik tetap sinkron (Pengaturan → Audio).",
+                "Lebih banyak lirik: BetterLyrics dan KuGou bergabung dengan LRCLIB, YouTube Music, dan NetEase, "
+                "jadi makin sedikit lagu tanpa lirik.",
+                "Karaoke per kata: jika liriknya punya waktu per kata, baris yang dinyanyikan terisi mengikuti "
+                "penyanyinya, bukan rata.",
+                "Bagikan lirik: pilih hingga 8 baris dan jadikan gambar dengan cover lagunya, untuk disalin atau "
+                "disimpan (tombol bagikan di bawah lirik).",
+                "Romanisasi atau terjemahan di bawah tiap baris (Pengaturan → Lirik): lirik Jepang dan Korea dalam "
+                "huruf Latin, terjemahan bahasa Inggris dari BetterLyrics, dan jika dinyalakan, Google Translate "
+                "ke bahasa aplikasi.",
             ],
             "fixed": [
                 "Membuka Senada saat sudah berjalan sekarang memunculkan jendela yang sudah terbuka, bukan "

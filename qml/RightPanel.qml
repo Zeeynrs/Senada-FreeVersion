@@ -93,33 +93,56 @@ Rectangle {
                 SmoothScroll { flickable: lines }
                 onMovementStarted: userScroll.restart()
                 Timer { id: userScroll; interval: 3500 }
-                onModelChanged: positionViewAtBeginning()
+                // a new song starts at the top; new lines for the same song (a translation that
+                // came in) keep the sung line in view
+                onModelChanged: lyrics.synced && lyrics.current >= 0 ? positionViewAtIndex(lyrics.current, ListView.Center)
+                                                                     : positionViewAtBeginning()
 
-                delegate: LyricLine {
-                    id: lyricRow
+                delegate: Column {
+                    id: lyricItem
                     required property var modelData
                     required property int index
                     width: lines.width
-                    leftPadding: 18
-                    rightPadding: 18
-                    topPadding: 4
-                    bottomPadding: 4
-                    line: modelData
-                    nextT: index + 1 < lyrics.lines.length ? lyrics.lines[index + 1].t : -1
-                    synced: lyrics.synced
-                    current: lyrics.synced && index === lyrics.current
-                    past: lyrics.synced && index < lyrics.current
-                    baseSize: lyrics.synced ? 20 : 16
-                    font.weight: lyrics.synced ? Font.Bold : Font.Normal
-                    activeColor: Theme.accentInk
-                    // on the light theme: the unsung part a pale tint, and a fainter glow
-                    unsungColor: Theme.mix(Theme.accentInk, Theme.bgSolid, Theme.dark ? 0.55 : 0.62)
-                    glowOpacity: Theme.dark ? 0.85 : 0.35
-                    restColor: !lyrics.synced ? Theme.text : lineHover.hovered ? Theme.dim : Theme.alpha(Theme.text, 0.42)
-                    pastColor: lineHover.hovered ? Theme.dim : Theme.alpha(Theme.text, 0.32)
-                    Behavior on color { ColorAnimation { duration: 200 } }
-                    HoverHandler { id: lineHover; cursorShape: lyrics.synced ? Qt.PointingHandCursor : Qt.ArrowCursor }
-                    TapHandler { onTapped: if (lyrics.synced) player.seek(lyricRow.modelData.t) }
+                    spacing: 0
+                    LyricLine {
+                        id: lyricRow
+                        readonly property var modelData: lyricItem.modelData
+                        readonly property int index: lyricItem.index
+                        width: lines.width
+                        leftPadding: 18
+                        rightPadding: 18
+                        topPadding: 4
+                        bottomPadding: lyricItem.modelData.sub ? 0 : 4
+                        line: modelData
+                        nextT: index + 1 < lyrics.lines.length ? lyrics.lines[index + 1].t : -1
+                        synced: lyrics.synced
+                        current: lyrics.synced && index === lyrics.current
+                        past: lyrics.synced && index < lyrics.current
+                        baseSize: lyrics.synced ? 20 : 16
+                        font.weight: lyrics.synced ? Font.Bold : Font.Normal
+                        activeColor: Theme.accentInk
+                        // on the light theme: the unsung part a pale tint, and a fainter glow
+                        unsungColor: Theme.mix(Theme.accentInk, Theme.bgSolid, Theme.dark ? 0.55 : 0.62)
+                        glowOpacity: Theme.dark ? 0.85 : 0.35
+                        restColor: !lyrics.synced ? Theme.text : lineHover.hovered ? Theme.dim : Theme.alpha(Theme.text, 0.42)
+                        pastColor: lineHover.hovered ? Theme.dim : Theme.alpha(Theme.text, 0.32)
+                        Behavior on color { ColorAnimation { duration: 200 } }
+                        HoverHandler { id: lineHover; cursorShape: lyrics.synced ? Qt.PointingHandCursor : Qt.ArrowCursor }
+                        TapHandler { onTapped: if (lyrics.synced) player.seek(lyricRow.modelData.t) }
+                    }
+                    // its romanization or translation (Settings → Lyrics → Under each line)
+                    Label {
+                        visible: !!lyricItem.modelData.sub
+                        width: lines.width
+                        leftPadding: 18
+                        rightPadding: 18
+                        bottomPadding: 6
+                        text: lyricItem.modelData.sub || ""
+                        wrapMode: Text.WordWrap
+                        horizontalAlignment: lyricRow.horizontalAlignment
+                        font.pixelSize: Math.round(lyricRow.font.pixelSize * 0.66)
+                        color: lyricRow.current ? Theme.dim : Theme.alpha(Theme.text, 0.32)
+                    }
                 }
             }
             // which source the lyrics come from, and a menu to pick another one
@@ -135,6 +158,15 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.leftMargin: 18
                     anchors.verticalCenter: parent.verticalCenter
+                }
+                IconButton {
+                    anchors.right: parent.right
+                    anchors.rightMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: lyrics.status === "ready"
+                    iconName: "share"; size: 16; tint: Theme.dim
+                    tip: I18n.t("Share lyrics as a picture")
+                    onClicked: Nav.shareLyrics(-1)
                 }
             }
         }

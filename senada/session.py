@@ -5,9 +5,11 @@ Senada needs no account: there is no login state here any more.
 
 import getpass
 import os
+import re
+from pathlib import Path
 
-from PySide6.QtCore import Property, QCoreApplication, QObject, Qt, QUrl, Signal, Slot
-from PySide6.QtGui import QDesktopServices, QGuiApplication, QRegion, QWindow
+from PySide6.QtCore import Property, QCoreApplication, QObject, QStandardPaths, Qt, QUrl, Signal, Slot
+from PySide6.QtGui import QDesktopServices, QGuiApplication, QImage, QRegion, QWindow
 
 from . import i18n, island
 from .config import LIBRARY_FILE, LOG_DIR
@@ -165,6 +167,31 @@ class Session(QObject):
     @Slot(str)
     def openUrl(self, url):
         QDesktopServices.openUrl(QUrl(url))
+
+    # ---- pictures (shared lyrics) ------------------------------------------------------
+
+    @Slot("QVariant")
+    def copyImage(self, image):
+        if isinstance(image, QImage) and not image.isNull():
+            QGuiApplication.clipboard().setImage(image)
+            self.toast.emit(i18n.tr("Picture copied: paste it in a chat or a story"))
+
+    @Slot(str, result=str)
+    def picturePath(self, name):
+        """A file in Pictures/Senada named after `name` that does not exist yet."""
+        pictures = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.PicturesLocation)
+        folder = Path(pictures or Path.home()) / "Senada"
+        folder.mkdir(parents=True, exist_ok=True)
+        stem = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", name or "").strip(" .")[:120] or "Senada"
+        path, n = folder / f"{stem}.png", 2
+        while path.exists():
+            path, n = folder / f"{stem} ({n}).png", n + 1
+        return str(path)
+
+    @Slot(str)
+    def showFile(self, path):
+        """Open the folder a file is in."""
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(Path(path).parent)))
 
     @Property(str, constant=True)
     def logPath(self):

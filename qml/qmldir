@@ -64,3 +64,4 @@ VinylQueueFan 1.0 VinylQueueFan.qml
 VolumeControl 1.0 VolumeControl.qml
 VolumeRail 1.0 VolumeRail.qml
 SleepTimerButton 1.0 SleepTimerButton.qml
+ShareLyricsDialog 1.0 ShareLyricsDialog.qml

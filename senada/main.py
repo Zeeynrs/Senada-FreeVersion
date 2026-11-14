@@ -96,6 +96,7 @@ def main():
         catalog.clear()
         library.refreshAll()
         updater.changed.emit()
+        lyrics.refreshExtra()
 
     session.languageChanged.connect(on_language)
     lyrics = Lyrics(player, worker, settings, downloads)

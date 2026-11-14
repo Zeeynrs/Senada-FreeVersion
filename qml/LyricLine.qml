@@ -4,12 +4,12 @@ import QtQuick.Effects
 
 // One line of lyrics drawn the way Settings → Lyrics → Appearance says (Theme.lyrics*): its
 // size, font and alignment, and how the sung line stands out: "bright" (only brighter),
-// "glow" (a soft light around it) or "karaoke" (filled in letter by letter while it is sung,
-// up to where the next line starts). Used by the lyric lists: the side panel, the visualizer
-// full view and the open mini player.
+// "glow" (a soft light around it) or "karaoke" (filled in while it is sung: word by word with
+// the singer when the lyrics are timed per word, otherwise evenly up to where the next line
+// starts). Used by the lyric lists: the side panel, the visualizer full view and the open mini player.
 Label {
     id: ll
-    property var line: ({})          // { t: start in ms, text }
+    property var line: ({})          // { t: start in ms, text, words?: [{ t, d, text }] } (senada/lyrics.py)
     property real nextT: -1          // when the next line starts (karaoke fills up until then)
     property bool current: false
     property bool past: false
@@ -26,12 +26,29 @@ Label {
 
     readonly property string plain: (line && line.text) || "♪"
     readonly property bool karaoke: Theme.lyricsHighlight === "karaoke" && current && synced
-    readonly property real filled: {
+    readonly property var words: (line && line.words) || []
+    // how many letters of the line are sung: the words already over, and the one being sung
+    // so far; without word timing, an even share of the time until the next line
+    readonly property int sungLetters: {
         if (!karaoke)
             return 0
+        if (words.length > 0) {
+            let n = 0
+            for (let i = 0; i < words.length; i++) {
+                const w = words[i]
+                if (position >= w.t + w.d) {
+                    n += w.text.length
+                    continue
+                }
+                if (position > w.t && w.d > 0)
+                    n += Math.round(w.text.replace(/\s+$/, "").length * (position - w.t) / w.d)
+                break
+            }
+            return n
+        }
         const start = line.t || 0
         const end = nextT > start ? nextT : start + 4000
-        return Math.max(0, Math.min(1, (position - start) / (end - start)))
+        return Math.round(plain.length * Math.max(0, Math.min(1, (position - start) / (end - start))))
     }
     function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") }
     function hex(c) {   // #rrggbb for rich text (an alpha would be read as part of the colour)
@@ -40,7 +57,7 @@ Label {
     }
     // karaoke: the part already sung in full colour, the rest a dim version of the same colour
     readonly property string sungSoFar: {
-        const n = Math.round(plain.length * filled)
+        const n = sungLetters
         return '<font color="' + hex(activeColor) + '">' + esc(plain.slice(0, n)) + '</font>'
              + '<font color="' + hex(unsungColor) + '">' + esc(plain.slice(n)) + '</font>'
     }

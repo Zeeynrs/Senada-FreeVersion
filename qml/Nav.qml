@@ -8,6 +8,7 @@ QtObject {
     // playlist dialogs live in the shell so every page can use them
     signal playlistDialog(string mode, string playlistId, string currentName, var tracks)
     signal matchPicker(var track)  // "Pilih versi lain…" for an imported track
+    signal shareLyrics(int index)  // lyrics as a picture, from line `index` (-1: the sung line)
     signal findArtist(string names)  // AppShell looks the artist up by name (library.findArtist)
 
     function go(kind, itemId) {

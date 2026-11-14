@@ -44,7 +44,7 @@ Item {
             readonly property bool isCurrent: lyrics.synced && index === lyrics.current
             readonly property bool past: lyrics.synced && index < lyrics.current
             width: list.width - 20
-            height: lineLabel.implicitHeight + lv.lineGap + 2
+            height: lineLabel.implicitHeight + (subLabel.visible ? subLabel.implicitHeight + 6 : 0) + lv.lineGap + 2
 
             LyricLine {
                 id: lineLabel
@@ -53,6 +53,7 @@ Item {
                 scale: row.isCurrent ? 1.04 : 1.0
                 Behavior on scale { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
                 anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: subLabel.visible ? -(subLabel.implicitHeight + 6) / 2 : 0
                 width: row.width - 34
                 line: modelData
                 nextT: index + 1 < lyrics.lines.length ? lyrics.lines[index + 1].t : -1
@@ -64,6 +65,21 @@ Item {
                 activeColor: "#ffffff"
                 restColor: !lyrics.synced ? Qt.rgba(1, 1, 1, 0.85) : Qt.rgba(1, 1, 1, 0.36)
                 pastColor: Qt.rgba(1, 1, 1, 0.42)
+                Behavior on color { ColorAnimation { duration: 280 } }
+            }
+            // its romanization or translation (Settings → Lyrics → Under each line)
+            Label {
+                id: subLabel
+                x: 10
+                anchors.top: lineLabel.bottom
+                anchors.topMargin: 6
+                width: row.width - 34
+                visible: !!modelData.sub
+                text: modelData.sub || ""
+                wrapMode: Text.WordWrap
+                horizontalAlignment: lineLabel.horizontalAlignment
+                font.pixelSize: Math.round(lineLabel.font.pixelSize * 0.6)
+                color: row.isCurrent ? Qt.rgba(1, 1, 1, 0.8) : Qt.rgba(1, 1, 1, 0.34)
                 Behavior on color { ColorAnimation { duration: 280 } }
             }
 
@@ -104,5 +120,14 @@ Item {
         tint: Qt.rgba(1, 1, 1, 0.55)
         hoverTint: "#ffffff"
         fontSize: 13
+    }
+    IconButton {
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        anchors.verticalCenter: sourceButton.verticalCenter
+        visible: lv.showSource && lyrics.status === "ready"
+        iconName: "share"; size: 16; tint: Qt.rgba(1, 1, 1, 0.55)
+        tip: I18n.t("Share lyrics as a picture")
+        onClicked: Nav.shareLyrics(-1)
     }
 }

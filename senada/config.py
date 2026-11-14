@@ -65,6 +65,8 @@ DEFAULTS = {
     "lyrics_font": "sans",
     "lyrics_align": "left",
     "lyrics_highlight": "bright",
+    "lyrics_extra": "off",  # under each line: "off", "roman" (romanization) or "trans" (translation)
+    "lyrics_translate_online": False,  # translate with Google Translate (sends it the lyrics' text)
     "effects": {},  # equalizer and tempo (see effects.py)
     "discord_presence": False,  # show the song on the user's Discord profile (see discord.py)
     "discord_show_paused": False,  # keep showing it while paused
