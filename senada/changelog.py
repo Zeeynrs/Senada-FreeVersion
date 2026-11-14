@@ -11,11 +11,15 @@ CHANGELOG = [
         "version": "next",
         "date": "",
         "en": {"new": ["Poster full view: the lyrics fill the whole column, with the lines already sung fading out above "
-                       "the pull quote and the lines to come below it, like the body of an article; click a line to go to it."],
+                       "the pull quote and the lines to come below it, like the body of an article; click a line to go to it.",
+                       "Vinyl record, Poster and Cinema full views: the volume is an upright rail on the right edge of the "
+                       "screen (drag it, scroll on it, or click the speaker to mute) instead of a bar in the bottom strip."],
                "fixed": []},
         "id": {"new": ["Tampilan penuh Poster: lirik kini mengisi seluruh kolom, dengan baris yang sudah dinyanyikan memudar "
                        "di atas kutipan dan baris berikutnya di bawahnya seperti badan artikel; klik sebuah baris untuk "
-                       "melompat ke sana."],
+                       "melompat ke sana.",
+                       "Tampilan penuh Piringan hitam, Poster, dan Bioskop: volume kini berupa rel tegak di tepi kanan layar "
+                       "(seret, scroll, atau klik ikon speaker untuk membisukan), bukan bilah di strip bawah."],
                "fixed": []},
     },
     {

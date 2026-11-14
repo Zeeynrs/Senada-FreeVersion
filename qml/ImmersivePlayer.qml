@@ -95,6 +95,14 @@ Item {
         active: im.staged && im.shown
         sourceComponent: im.fullStyle === "poster" ? posterComp : im.fullStyle === "cinema" ? cinemaComp : vinylComp
     }
+    // their volume: upright along the right edge, in the middle of the space between the bars
+    VolumeRail {
+        visible: im.staged && im.shown
+        anchors.right: parent.right
+        anchors.rightMargin: 22
+        y: 68 + (parent.height - 68 - 116 - height) / 2
+        height: Math.min(300, Math.max(160, parent.height * 0.32))
+    }
     Component {
         id: vinylComp
         VinylPlayer {

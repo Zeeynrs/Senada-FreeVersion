@@ -3,7 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // Strip along the bottom of the turntable, poster and cinema full views: title, artist and like
-// on the left, transport and seek bar in the middle, volume on the right.
+// on the left, transport and seek bar in the middle (the volume is the upright VolumeRail on the
+// right edge, see ImmersivePlayer.qml).
 Item {
     id: bar
     signal closeRequested()   // a link leads out of the full view
@@ -77,9 +78,8 @@ Item {
             }
         }
 
-        ImmersiveVolume {
-            Layout.preferredWidth: Math.min(200, parent.width * 0.18)
-            Layout.alignment: Qt.AlignVCenter
+        Item {  // as wide as the title column, so the transport stays in the middle
+            Layout.preferredWidth: parent.width * 0.27
         }
     }
 }

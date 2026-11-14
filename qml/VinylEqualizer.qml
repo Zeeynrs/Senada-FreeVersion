@@ -16,7 +16,7 @@ Item {
     readonly property var bands: effects.bands
     readonly property bool on: effects.enabled
     readonly property real pitchW: 120
-    readonly property real pitchX: width - pitchW - 40
+    readonly property real pitchX: width - pitchW - 80   // clear of the volume rail
     readonly property real spokeLen: Math.max(160, Math.min(460, pitchX - 120 - (ox + r0)))
     // the outer spokes open as far as the labels at their ends stay clear of the top and the controls
     readonly property real spread: {
@@ -31,7 +31,7 @@ Item {
 
     // ---- heading: name, preset, on/off (top right, clear of the spokes) -------------------------
     Row {
-        x: veq.width - width - 40
+        x: veq.width - width - 80
         y: 8
         spacing: 12
         Label {

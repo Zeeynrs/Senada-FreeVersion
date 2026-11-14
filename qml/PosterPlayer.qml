@@ -121,7 +121,7 @@ Item {
         id: column
         x: spine.x + spine.width + 48
         y: pp.topSpace + 8
-        width: pp.width - x - 56
+        width: pp.width - x - 96   // the volume rail is on the right edge
         height: pp.areaH - 16
 
         ColumnLayout {

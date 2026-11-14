@@ -335,7 +335,7 @@ Item {
         readonly property real ox: vp.cx                       // record centre, in wheel coordinates
         readonly property real oy: vp.cy - vp.topSpace
         readonly property real r0: vp.discR + Math.max(40, vp.discR * 0.16)   // lines start here
-        readonly property real lineWidth: Math.max(200, Math.min(760, vp.width - ox - r0 - 56))
+        readonly property real lineWidth: Math.max(200, Math.min(760, vp.width - ox - r0 - 96))   // clear of the volume rail
         readonly property int textSize: Math.round(Math.max(20, Math.min(30, vp.discR * 0.085)))
         readonly property real gap: 16
         readonly property real upLimit: 30      // above this the tonearm is in the way
@@ -511,7 +511,7 @@ Item {
     Item {
         id: spotlight
         readonly property real areaLeft: vp.cx + vp.discR * 1.3
-        readonly property real areaRight: vp.width - 48
+        readonly property real areaRight: vp.width - 96   // the volume rail is on the right edge
         x: areaLeft
         width: Math.max(0, areaRight - areaLeft)
         y: vp.topSpace
@@ -602,12 +602,6 @@ Item {
                 Layout.topMargin: 6
                 playSize: 66
                 spacing: 26
-            }
-            ImmersiveVolume {
-                Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 10
-                Layout.fillWidth: false
-                Layout.preferredWidth: Math.min(280, spotlight.width * 0.5)
             }
 
             // what comes after this song

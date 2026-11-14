@@ -35,11 +35,11 @@ Item {
     }
 
     // ---- the screen ------------------------------------------------------------------------------
-    readonly property real availW: (side ? width * 0.6 : width) - 2 * 48
+    readonly property real availW: (side ? width * 0.6 : width) - 2 * 88   // clear of the volume rail
     readonly property real screenW: Math.max(320, Math.min(availW, (areaH - 24) * 16 / 9))
     Item {
         id: screen
-        x: cp.side ? 48 : (cp.width - width) / 2
+        x: cp.side ? 56 : (cp.width - width) / 2
         y: cp.topSpace + (cp.areaH - height) / 2
         width: cp.screenW
         height: width * 9 / 16
@@ -285,7 +285,7 @@ Item {
         id: sidePanel
         x: screen.x + screen.width + 44
         y: cp.topSpace + 8
-        width: cp.width - x - 48
+        width: cp.width - x - 92   // the volume rail is on the right edge
         height: cp.areaH - 16
         visible: cp.side
         opacity: cp.side ? 1 : 0
