@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-// Strip along the bottom of the turntable and poster full views: title, artist and like
+// Strip along the bottom of the turntable, poster and cinema full views: title, artist and like
 // on the left, transport and seek bar in the middle, volume on the right.
 Item {
     id: bar

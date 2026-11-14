@@ -16,7 +16,10 @@ CHANGELOG = [
                        "is back to Visualizer. Vinyl record and Poster stay.",
                        "Mini player styles (Settings → Appearance → Mini player style): Classic, Sound wave (bars in the "
                        "song's colour that move with the music), Running lyrics (the sung line slides in under the title) "
-                       "and Cover glass (the blurred cover behind the island)."], "fixed": [
+                       "and Cover glass (the blurred cover behind the island).",
+                       "Cinema full view: the cover is a wide film still on a screen in a dark room, panned from top to bottom "
+                       "as the song plays; each song opens with its title credits, the lyrics are the subtitles and the queue "
+                       "is a board of showtimes with the time each song starts."], "fixed": [
                        "Clicking the artist of a song imported from Spotify now opens the artist page (found by name on "
                        "YouTube Music); before, nothing happened.","Closing Senada no longer fills its log (Settings → About → Logs) with errors."]},
         "id": {"new": ["Halaman Cari langsung menampilkan rekomendasi sebelum mengetik: lagu, artis, dan album berdasarkan "
@@ -25,7 +28,10 @@ CHANGELOG = [
                        "kembali ke Visualizer. Piringan hitam dan Poster tetap ada.",
                        "Gaya pemutar mini (Pengaturan → Tampilan → Gaya pemutar mini): Klasik, Gelombang suara (batang "
                        "berwarna lagu yang bergerak mengikuti musik), Lirik berjalan (baris yang dinyanyikan bergeser masuk "
-                       "di bawah judul), dan Kaca sampul (sampul yang diburamkan di belakang island)."], "fixed": [
+                       "di bawah judul), dan Kaca sampul (sampul yang diburamkan di belakang island).",
+                       "Tampilan penuh Bioskop: sampul menjadi gambar film lebar di layar dalam ruangan gelap, disapu dari atas "
+                       "ke bawah mengikuti lagu; tiap lagu dibuka dengan kredit judul, liriknya menjadi subtitle, dan antrean "
+                       "menjadi papan jadwal tayang dengan jam mulai tiap lagu."], "fixed": [
                        "Mengklik nama artis pada lagu yang diimpor dari Spotify kini membuka halaman artisnya (dicari "
                        "berdasarkan nama di YouTube Music); sebelumnya tidak terjadi apa-apa.","Menutup Senada tidak lagi memenuhi log-nya (Pengaturan → Tentang → Log) dengan pesan error."]},
     },

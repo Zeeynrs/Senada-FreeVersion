@@ -5,6 +5,7 @@ import QtQuick.Controls
 //   visualizer  round cover in a ring of spectrum bars, the lyrics as lines beside it
 //   vinyl       a record on the left edge with its tonearm, the lyrics fanned out around it
 //   poster      the cover large, the title upright beside it, a headline and a pull quote
+//   cinema      a screen in a dark room, a wide still between black bars, a subtitle under it
 // Always dark, like the full view itself (it sits on the blurred cover art).
 Item {
     id: pv
@@ -36,7 +37,7 @@ Item {
     // ---- visualizer ---------------------------------------------------------------------
     Item {
         anchors.fill: parent
-        visible: ["vinyl", "poster"].indexOf(pv.style) < 0
+        visible: ["vinyl", "poster", "cinema"].indexOf(pv.style) < 0
         readonly property real cx: pv.w * 0.3
         readonly property real cy: pv.h * 0.4
         readonly property real r: pv.h * 0.19
@@ -272,6 +273,56 @@ Item {
                     Rectangle { width: pv.w * 0.22; height: 5; radius: 2; color: "#ffffff" }
                     Rectangle { width: pv.w * 0.26; height: 3; radius: 1.5; color: Qt.rgba(1, 1, 1, 0.45) }
                 }
+            }
+        }
+        BottomStrip { w: pv.w; h: pv.h }
+    }
+
+    // ---- cinema ---------------------------------------------------------------------------
+    Item {
+        anchors.fill: parent
+        visible: pv.style === "cinema"
+        Rectangle { anchors.fill: parent; color: "#060607" }
+        Rectangle {  // light from the screen on the room
+            x: pv.w * 0.08; y: pv.h * 0.04
+            width: pv.w * 0.84; height: pv.h * 0.74
+            radius: height * 0.3
+            opacity: 0.35
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.rgba(1, 0.55, 0.36, 0.0) }
+                GradientStop { position: 0.5; color: Qt.rgba(1, 0.55, 0.36, 0.35) }
+                GradientStop { position: 1; color: Qt.rgba(1, 0.55, 0.36, 0.0) }
+            }
+        }
+        Rectangle {  // the 16:9 screen
+            id: cinemaScreen
+            width: pv.w * 0.7
+            height: width * 9 / 16
+            x: (pv.w - width) / 2
+            y: pv.h * 0.08
+            color: "#020203"
+            border.width: 1
+            border.color: Qt.rgba(1, 1, 1, 0.08)
+            Rectangle {  // the wide still between the bars
+                anchors.centerIn: parent
+                width: parent.width
+                height: width / 2.39
+                gradient: Gradient {
+                    GradientStop { position: 0; color: pv.warm1 }
+                    GradientStop { position: 1; color: pv.warm2 }
+                }
+                Column {  // the opening credits
+                    anchors.centerIn: parent
+                    spacing: 3
+                    Rectangle { anchors.horizontalCenter: parent.horizontalCenter; width: cinemaScreen.width * 0.36; height: 5; radius: 1; color: "#ffffff" }
+                    Rectangle { anchors.horizontalCenter: parent.horizontalCenter; width: cinemaScreen.width * 0.2; height: 3; radius: 1; color: Qt.rgba(1, 1, 1, 0.7) }
+                }
+            }
+            Rectangle {  // a subtitle in the lower bar
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: parent.height - (parent.height - parent.width / 2.39) / 4 - 2
+                width: parent.width * 0.46; height: 4; radius: 1
+                color: "#ffffff"
             }
         }
         BottomStrip { w: pv.w; h: pv.h }

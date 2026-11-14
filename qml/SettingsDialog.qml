@@ -38,6 +38,7 @@ Popup {
                   "Accent color", "Accent strength", "Color", "Logo",
                   "Glass effect", "Glass thickness", "Transparent", "Album cover", "Visualizer",
                   "Full view style", "Vinyl record", "Turntable", "Full view", "Poster", "Magazine",
+                  "Cinema", "Movie", "Subtitles",
                   "Seek bar", "Progress bar", "Wave", "Waveform", "Dots",
                   "Mini player", "Dynamic island", "Minimize", "Mini player style", "Classic", "Sound wave",
                   "Running lyrics", "Cover glass"] },
@@ -851,16 +852,18 @@ Popup {
                 label: I18n.t("Full view style")
                 hint: ({
                     "vinyl": I18n.t("A spinning record on the left edge with a tonearm that follows the song (drag it to seek); the lyrics fan out around the record."),
-                    "poster": I18n.t("A magazine poster: the cover large and sharp, the title huge and upright beside it, the sung line as a pull quote.")
+                    "poster": I18n.t("A magazine poster: the cover large and sharp, the title huge and upright beside it, the sung line as a pull quote."),
+                    "cinema": I18n.t("A cinema screen: the cover is a wide film still the camera pans down as the song plays, the title rolls as opening credits and the lyrics are the subtitles; the queue is a board of showtimes.")
                 })[session.immersiveStyle] || I18n.t("The round cover in the middle of a circular visualizer, the lyrics next to it.")
                 GridLayout {
                     Layout.fillWidth: true
-                    columns: 3
+                    columns: 4
                     rowSpacing: 10
                     columnSpacing: 14
                     ViewStyleCard { viewStyle: "visualizer"; label: I18n.t("Visualizer") }
                     ViewStyleCard { viewStyle: "vinyl"; label: I18n.t("Vinyl record") }
                     ViewStyleCard { viewStyle: "poster"; label: I18n.t("Poster") }
+                    ViewStyleCard { viewStyle: "cinema"; label: I18n.t("Cinema") }
                 }
             }
             Divider {}

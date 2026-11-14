@@ -28,7 +28,7 @@ def _os_user_name() -> str:
 
 
 # full view styles (qml/ImmersivePlayer.qml); the first is the default
-IMMERSIVE_STYLES = ("visualizer", "vinyl", "poster")
+IMMERSIVE_STYLES = ("visualizer", "vinyl", "poster", "cinema")
 # mini player styles (qml/MiniPlayer.qml); the first is the default
 ISLAND_STYLES = ("classic", "wave", "lyrics", "glass")
 

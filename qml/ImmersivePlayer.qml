@@ -5,8 +5,8 @@ import QtQuick.Layouts
 
 // Full-window "now playing": round cover inside a circular visualizer (bars & wave),
 // seek and volume bars, synced lyrics, queue and equalizer, on the blurred cover art.
-// With the vinyl or poster full view style (wide windows) its own player (VinylPlayer,
-// PosterPlayer) takes the place of the cover and lyrics columns.
+// With the vinyl, poster or cinema full view style (wide windows) its own player (VinylPlayer,
+// PosterPlayer, CinemaPlayer) takes the place of the cover and lyrics columns.
 Item {
     id: im
     objectName: "immersive"
@@ -19,7 +19,7 @@ Item {
     readonly property bool shown: y < height
     readonly property string fullStyle: session ? session.immersiveStyle : "visualizer"
     // a style with its own layout replaces the columns below
-    readonly property var stagedStyles: ["vinyl", "poster"]
+    readonly property var stagedStyles: ["vinyl", "poster", "cinema"]
     readonly property bool staged: wide && stagedStyles.indexOf(fullStyle) >= 0
     signal close()
 
@@ -93,11 +93,20 @@ Item {
     Loader {
         anchors.fill: parent
         active: im.staged && im.shown
-        sourceComponent: im.fullStyle === "poster" ? posterComp : vinylComp
+        sourceComponent: im.fullStyle === "poster" ? posterComp : im.fullStyle === "cinema" ? cinemaComp : vinylComp
     }
     Component {
         id: vinylComp
         VinylPlayer {
+            active: im.shown
+            panel: im.panel
+            showPanel: im.showPanel
+            onCloseRequested: im.close()
+        }
+    }
+    Component {
+        id: cinemaComp
+        CinemaPlayer {
             active: im.shown
             panel: im.panel
             showPanel: im.showPanel
